@@ -121,6 +121,7 @@ func (r *ReplicationResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"source_datasets": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: true,
 				Optional: false,
 			},
@@ -133,6 +134,7 @@ func (r *ReplicationResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: false,
 			},
 			"exclude": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -141,10 +143,7 @@ func (r *ReplicationResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"properties_exclude": schema.ListAttribute{
-				Required: false,
-				Optional: true,
-			},
-			"properties_override": schema.ObjectAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -173,14 +172,17 @@ func (r *ReplicationResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"periodic_snapshot_tasks": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"naming_schema": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"also_include_naming_schema": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -229,6 +231,7 @@ func (r *ReplicationResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"lifetimes": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -411,7 +414,14 @@ func (r *ReplicationResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	_, err := r.client.Call("replication.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("replication.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -560,7 +570,14 @@ func (r *ReplicationResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, err := r.client.Call("replication.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("replication.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

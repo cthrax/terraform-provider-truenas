@@ -50,10 +50,12 @@ func (r *GroupResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				Optional: false,
 			},
 			"sudo_commands": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"sudo_commands_nopasswd": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -66,6 +68,7 @@ func (r *GroupResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				Optional: true,
 			},
 			"users": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -126,7 +129,14 @@ func (r *GroupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	_, err := r.client.Call("group.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("group.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -185,7 +195,14 @@ func (r *GroupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	_, err := r.client.Call("group.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("group.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

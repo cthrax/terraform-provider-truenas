@@ -158,11 +158,28 @@ def generate_action_resource(base_resource_name, action_name, action_info, spec)
     for prop_name, prop_spec in properties.items():
         if prop_name in ['uuid', 'id']:
             continue
-        go_name = ''.join(w.capitalize() for w in prop_name.replace('-', '_').split('_'))
-        go_type = TYPE_MAP.get(prop_spec.get('type', 'string'), 'String')
         
-        fields.append(f'\t{go_name} types.{go_type} `tfsdk:"{prop_name}"`')
-        schema_attrs.append(f'\t\t\t"{prop_name}": schema.{go_type}Attribute{{\n\t\t\t\tOptional: true,\n\t\t\t}},')
+        # Skip reserved names
+        if prop_name == 'provider':
+            continue
+        
+        # Normalize names to lowercase with underscores
+        normalized_name = prop_name.lower().replace('-', '_')
+        
+        go_name = ''.join(w.capitalize() for w in normalized_name.split('_'))
+        prop_type = prop_spec.get('type', 'string')
+        go_type = TYPE_MAP.get(prop_type, 'String')
+        
+        fields.append(f'\t{go_name} types.{go_type} `tfsdk:"{normalized_name}"`')
+        
+        # Generate schema attribute with proper types
+        if go_type == 'List':
+            schema_attrs.append(f'\t\t\t"{normalized_name}": schema.ListAttribute{{\n\t\t\t\tElementType: types.StringType,\n\t\t\t\tOptional: true,\n\t\t\t}},')
+        elif go_type == 'Object':
+            # Skip complex objects
+            continue
+        else:
+            schema_attrs.append(f'\t\t\t"{normalized_name}": schema.{go_type}Attribute{{\n\t\t\t\tOptional: true,\n\t\t\t}},')
         
         if go_type in ['String', 'Int64', 'Bool']:
             method = {'String': 'ValueString', 'Int64': 'ValueInt64', 'Bool': 'ValueBool'}[go_type]
@@ -209,12 +226,29 @@ def generate_resource(name, path, schema, spec):
         if prop_name in ['uuid', 'id']:
             continue
         
-        go_name = ''.join(w.capitalize() for w in prop_name.replace('-', '_').split('_'))
-        go_type = TYPE_MAP.get(prop_spec.get('type', 'string'), 'String')
+        # Skip reserved names
+        if prop_name == 'provider':
+            continue
+        
+        # Normalize names to lowercase with underscores
+        normalized_name = prop_name.lower().replace('-', '_')
+        
+        go_name = ''.join(w.capitalize() for w in normalized_name.split('_'))
+        prop_type = prop_spec.get('type', 'string')
+        go_type = TYPE_MAP.get(prop_type, 'String')
         required = prop_name in required_fields
         
-        fields.append(f'\t{go_name} types.{go_type} `tfsdk:"{prop_name}"`')
-        schema_attrs.append(f'\t\t\t"{prop_name}": schema.{go_type}Attribute{{\n\t\t\t\tRequired: {str(required).lower()},\n\t\t\t\tOptional: {str(not required).lower()},\n\t\t\t}},')
+        fields.append(f'\t{go_name} types.{go_type} `tfsdk:"{normalized_name}"`')
+        
+        # Generate schema attribute with proper types
+        if go_type == 'List':
+            # Lists need ElementType
+            schema_attrs.append(f'\t\t\t"{normalized_name}": schema.ListAttribute{{\n\t\t\t\tElementType: types.StringType,\n\t\t\t\tRequired: {str(required).lower()},\n\t\t\t\tOptional: {str(not required).lower()},\n\t\t\t}},')
+        elif go_type == 'Object':
+            # Skip complex objects for now - they need AttributeTypes map
+            continue
+        else:
+            schema_attrs.append(f'\t\t\t"{normalized_name}": schema.{go_type}Attribute{{\n\t\t\t\tRequired: {str(required).lower()},\n\t\t\t\tOptional: {str(not required).lower()},\n\t\t\t}},')
         
         # Build params conditionally
         if go_type in ['String', 'Int64', 'Bool']:

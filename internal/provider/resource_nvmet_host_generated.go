@@ -119,7 +119,14 @@ func (r *NvmetHostResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	_, err := r.client.Call("nvmet/host.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("nvmet/host.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -181,7 +188,14 @@ func (r *NvmetHostResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	_, err := r.client.Call("nvmet/host.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("nvmet/host.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

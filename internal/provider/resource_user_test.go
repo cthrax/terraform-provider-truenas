@@ -164,6 +164,8 @@ resource "truenas_user" "test" {
   username  = %[1]q
   full_name = %[2]q
   email     = %[3]q
+  password  = "TestPassword123!"
+  group_create = true
 }
 `, username, fullName, email)
 }
@@ -173,6 +175,8 @@ func testAccUserResourceConfigLocked(username, fullName string, locked bool) str
 resource "truenas_user" "test" {
   username  = %[1]q
   full_name = %[2]q
+  password  = "TestPassword123!"
+  group_create = true
   locked    = %[3]t
 }
 `, username, fullName, locked)

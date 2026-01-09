@@ -68,14 +68,6 @@ func (r *CloudsyncResource) Schema(ctx context.Context, req resource.SchemaReque
 				Required: true,
 				Optional: false,
 			},
-			"attributes": schema.ObjectAttribute{
-				Required: true,
-				Optional: false,
-			},
-			"schedule": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
 			"pre_script": schema.StringAttribute{
 				Required: false,
 				Optional: true,
@@ -89,10 +81,12 @@ func (r *CloudsyncResource) Schema(ctx context.Context, req resource.SchemaReque
 				Optional: true,
 			},
 			"include": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"exclude": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -105,6 +99,7 @@ func (r *CloudsyncResource) Schema(ctx context.Context, req resource.SchemaReque
 				Optional: true,
 			},
 			"bwlimit": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -234,7 +229,14 @@ func (r *CloudsyncResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	_, err := r.client.Call("cloudsync.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("cloudsync.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -326,7 +328,14 @@ func (r *CloudsyncResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	_, err := r.client.Call("cloudsync.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("cloudsync.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

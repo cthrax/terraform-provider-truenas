@@ -82,7 +82,14 @@ func (r *KeychaincredentialResource) Read(ctx context.Context, req resource.Read
 		return
 	}
 
-	_, err := r.client.Call("keychaincredential.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("keychaincredential.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -132,7 +139,14 @@ func (r *KeychaincredentialResource) Delete(ctx context.Context, req resource.De
 		return
 	}
 
-	_, err := r.client.Call("keychaincredential.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("keychaincredential.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

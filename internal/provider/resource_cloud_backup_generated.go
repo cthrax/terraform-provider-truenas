@@ -64,14 +64,6 @@ func (r *CloudBackupResource) Schema(ctx context.Context, req resource.SchemaReq
 				Required: true,
 				Optional: false,
 			},
-			"attributes": schema.ObjectAttribute{
-				Required: true,
-				Optional: false,
-			},
-			"schedule": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
 			"pre_script": schema.StringAttribute{
 				Required: false,
 				Optional: true,
@@ -85,10 +77,12 @@ func (r *CloudBackupResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"include": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"exclude": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -205,7 +199,14 @@ func (r *CloudBackupResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	_, err := r.client.Call("cloud_backup.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("cloud_backup.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -288,7 +289,14 @@ func (r *CloudBackupResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, err := r.client.Call("cloud_backup.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("cloud_backup.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

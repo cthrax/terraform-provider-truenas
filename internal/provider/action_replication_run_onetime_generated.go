@@ -111,6 +111,7 @@ func (r *ReplicationRunOnetimeActionResource) Schema(ctx context.Context, req re
 				Optional: true,
 			},
 			"source_datasets": schema.ListAttribute{
+				ElementType: types.StringType,
 				Optional: true,
 			},
 			"target_dataset": schema.StringAttribute{
@@ -120,15 +121,14 @@ func (r *ReplicationRunOnetimeActionResource) Schema(ctx context.Context, req re
 				Optional: true,
 			},
 			"exclude": schema.ListAttribute{
+				ElementType: types.StringType,
 				Optional: true,
 			},
 			"properties": schema.BoolAttribute{
 				Optional: true,
 			},
 			"properties_exclude": schema.ListAttribute{
-				Optional: true,
-			},
-			"properties_override": schema.ObjectAttribute{
+				ElementType: types.StringType,
 				Optional: true,
 			},
 			"replicate": schema.BoolAttribute{
@@ -150,12 +150,15 @@ func (r *ReplicationRunOnetimeActionResource) Schema(ctx context.Context, req re
 				Optional: true,
 			},
 			"periodic_snapshot_tasks": schema.ListAttribute{
+				ElementType: types.StringType,
 				Optional: true,
 			},
 			"naming_schema": schema.ListAttribute{
+				ElementType: types.StringType,
 				Optional: true,
 			},
 			"also_include_naming_schema": schema.ListAttribute{
+				ElementType: types.StringType,
 				Optional: true,
 			},
 			"name_regex": schema.StringAttribute{
@@ -183,6 +186,7 @@ func (r *ReplicationRunOnetimeActionResource) Schema(ctx context.Context, req re
 				Optional: true,
 			},
 			"lifetimes": schema.ListAttribute{
+				ElementType: types.StringType,
 				Optional: true,
 			},
 			"compression": schema.StringAttribute{

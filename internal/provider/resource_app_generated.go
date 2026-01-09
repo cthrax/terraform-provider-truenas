@@ -51,14 +51,6 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 				Required: false,
 				Optional: true,
 			},
-			"values": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
-			"custom_compose_config": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
 			"custom_compose_config_string": schema.StringAttribute{
 				Required: false,
 				Optional: true,
@@ -159,7 +151,14 @@ func (r *AppResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		return
 	}
 
-	_, err := r.client.Call("app.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("app.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -224,7 +223,14 @@ func (r *AppResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 		return
 	}
 
-	_, err := r.client.Call("app.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("app.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

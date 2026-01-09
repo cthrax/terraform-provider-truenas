@@ -64,6 +64,7 @@ func (r *PoolSnapshottaskResource) Schema(ctx context.Context, req resource.Sche
 				Optional: true,
 			},
 			"exclude": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -72,10 +73,6 @@ func (r *PoolSnapshottaskResource) Schema(ctx context.Context, req resource.Sche
 				Optional: true,
 			},
 			"allow_empty": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
-			},
-			"schedule": schema.ObjectAttribute{
 				Required: false,
 				Optional: true,
 			},
@@ -145,7 +142,14 @@ func (r *PoolSnapshottaskResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	_, err := r.client.Call("pool/snapshottask.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("pool/snapshottask.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -213,7 +217,14 @@ func (r *PoolSnapshottaskResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	_, err := r.client.Call("pool/snapshottask.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("pool/snapshottask.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

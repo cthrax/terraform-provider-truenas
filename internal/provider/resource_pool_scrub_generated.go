@@ -51,10 +51,6 @@ func (r *PoolScrubResource) Schema(ctx context.Context, req resource.SchemaReque
 				Required: false,
 				Optional: true,
 			},
-			"schedule": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
 			"enabled": schema.BoolAttribute{
 				Required: false,
 				Optional: true,
@@ -116,7 +112,14 @@ func (r *PoolScrubResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	_, err := r.client.Call("pool/scrub.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("pool/scrub.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -175,7 +178,14 @@ func (r *PoolScrubResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	_, err := r.client.Call("pool/scrub.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("pool/scrub.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

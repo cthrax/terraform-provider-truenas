@@ -37,6 +37,7 @@ func (r *IscsiInitiatorResource) Schema(ctx context.Context, req resource.Schema
 				Computed: true,
 			},
 			"initiators": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -94,7 +95,14 @@ func (r *IscsiInitiatorResource) Read(ctx context.Context, req resource.ReadRequ
 		return
 	}
 
-	_, err := r.client.Call("iscsi/initiator.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("iscsi/initiator.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -146,7 +154,14 @@ func (r *IscsiInitiatorResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	_, err := r.client.Call("iscsi/initiator.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("iscsi/initiator.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

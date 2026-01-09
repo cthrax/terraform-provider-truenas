@@ -93,7 +93,14 @@ func (r *AcmeDnsAuthenticatorResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	_, err := r.client.Call("acme/dns/authenticator.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("acme/dns/authenticator.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -144,7 +151,14 @@ func (r *AcmeDnsAuthenticatorResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
-	_, err := r.client.Call("acme/dns/authenticator.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("acme/dns/authenticator.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

@@ -76,10 +76,6 @@ func (r *SharingSmbResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Required: false,
 				Optional: true,
 			},
-			"audit": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
 			"options": schema.StringAttribute{
 				Required: false,
 				Optional: true,
@@ -154,7 +150,14 @@ func (r *SharingSmbResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	_, err := r.client.Call("sharing/smb.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("sharing/smb.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -226,7 +229,14 @@ func (r *SharingSmbResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	_, err := r.client.Call("sharing/smb.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("sharing/smb.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

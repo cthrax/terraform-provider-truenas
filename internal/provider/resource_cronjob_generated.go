@@ -53,10 +53,6 @@ func (r *CronjobResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Required: false,
 				Optional: true,
 			},
-			"schedule": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
 			"command": schema.StringAttribute{
 				Required: true,
 				Optional: false,
@@ -130,7 +126,14 @@ func (r *CronjobResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	_, err := r.client.Call("cronjob.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("cronjob.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -193,7 +196,14 @@ func (r *CronjobResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	_, err := r.client.Call("cronjob.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("cronjob.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

@@ -77,6 +77,7 @@ func (r *InterfaceResource) Schema(ctx context.Context, req resource.SchemaReque
 				Optional: true,
 			},
 			"aliases": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -93,14 +94,17 @@ func (r *InterfaceResource) Schema(ctx context.Context, req resource.SchemaReque
 				Optional: true,
 			},
 			"failover_aliases": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"failover_virtual_aliases": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"bridge_members": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -125,6 +129,7 @@ func (r *InterfaceResource) Schema(ctx context.Context, req resource.SchemaReque
 				Optional: true,
 			},
 			"lag_ports": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -240,7 +245,14 @@ func (r *InterfaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	_, err := r.client.Call("interface.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("interface.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -338,7 +350,14 @@ func (r *InterfaceResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	_, err := r.client.Call("interface.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("interface.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

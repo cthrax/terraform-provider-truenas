@@ -101,7 +101,14 @@ func (r *IscsiTargetextentResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
-	_, err := r.client.Call("iscsi/targetextent.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("iscsi/targetextent.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -155,7 +162,14 @@ func (r *IscsiTargetextentResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	_, err := r.client.Call("iscsi/targetextent.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("iscsi/targetextent.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

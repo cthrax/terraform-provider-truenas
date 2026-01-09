@@ -48,14 +48,17 @@ func (r *KerberosRealmResource) Schema(ctx context.Context, req resource.SchemaR
 				Optional: true,
 			},
 			"kdc": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"admin_server": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"kpasswd_server": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -110,7 +113,14 @@ func (r *KerberosRealmResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 
-	_, err := r.client.Call("kerberos/realm.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("kerberos/realm.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -163,7 +173,14 @@ func (r *KerberosRealmResource) Delete(ctx context.Context, req resource.DeleteR
 		return
 	}
 
-	_, err := r.client.Call("kerberos/realm.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("kerberos/realm.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

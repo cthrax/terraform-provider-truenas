@@ -22,7 +22,7 @@ type CertificateResourceModel struct {
 	AddToTrustedStore types.Bool `tfsdk:"add_to_trusted_store"`
 	Certificate types.String `tfsdk:"certificate"`
 	Privatekey types.String `tfsdk:"privatekey"`
-	Csr types.String `tfsdk:"CSR"`
+	Csr types.String `tfsdk:"csr"`
 	KeyLength types.String `tfsdk:"key_length"`
 	KeyType types.String `tfsdk:"key_type"`
 	EcCurve types.String `tfsdk:"ec_curve"`
@@ -79,7 +79,7 @@ func (r *CertificateResource) Schema(ctx context.Context, req resource.SchemaReq
 				Required: false,
 				Optional: true,
 			},
-			"CSR": schema.StringAttribute{
+			"csr": schema.StringAttribute{
 				Required: false,
 				Optional: true,
 			},
@@ -132,10 +132,7 @@ func (r *CertificateResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"san": schema.ListAttribute{
-				Required: false,
-				Optional: true,
-			},
-			"cert_extensions": schema.ObjectAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -148,10 +145,6 @@ func (r *CertificateResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"tos": schema.StringAttribute{
-				Required: false,
-				Optional: true,
-			},
-			"dns_mapping": schema.ObjectAttribute{
 				Required: false,
 				Optional: true,
 			},
@@ -268,7 +261,14 @@ func (r *CertificateResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	_, err := r.client.Call("certificate.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("certificate.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -379,7 +379,14 @@ func (r *CertificateResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, err := r.client.Call("certificate.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("certificate.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

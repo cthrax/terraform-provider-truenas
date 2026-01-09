@@ -52,6 +52,7 @@ func (r *SharingNfsResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Optional: false,
 			},
 			"aliases": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -60,10 +61,12 @@ func (r *SharingNfsResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Optional: true,
 			},
 			"networks": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"hosts": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -88,6 +91,7 @@ func (r *SharingNfsResource) Schema(ctx context.Context, req resource.SchemaRequ
 				Optional: true,
 			},
 			"security": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -171,7 +175,14 @@ func (r *SharingNfsResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	_, err := r.client.Call("sharing/nfs.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("sharing/nfs.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -245,7 +256,14 @@ func (r *SharingNfsResource) Delete(ctx context.Context, req resource.DeleteRequ
 		return
 	}
 
-	_, err := r.client.Call("sharing/nfs.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("sharing/nfs.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

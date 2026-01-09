@@ -53,10 +53,12 @@ func (r *IscsiTargetResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 			},
 			"groups": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
 			"auth_networks": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -121,7 +123,14 @@ func (r *IscsiTargetResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	_, err := r.client.Call("iscsi/target.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("iscsi/target.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -180,7 +189,14 @@ func (r *IscsiTargetResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	_, err := r.client.Call("iscsi/target.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("iscsi/target.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return

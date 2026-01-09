@@ -98,10 +98,6 @@ func (r *RsynctaskResource) Schema(ctx context.Context, req resource.SchemaReque
 				Required: false,
 				Optional: true,
 			},
-			"schedule": schema.ObjectAttribute{
-				Required: false,
-				Optional: true,
-			},
 			"recursive": schema.BoolAttribute{
 				Required: false,
 				Optional: true,
@@ -139,6 +135,7 @@ func (r *RsynctaskResource) Schema(ctx context.Context, req resource.SchemaReque
 				Optional: true,
 			},
 			"extra": schema.ListAttribute{
+				ElementType: types.StringType,
 				Required: false,
 				Optional: true,
 			},
@@ -263,7 +260,14 @@ func (r *RsynctaskResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	_, err := r.client.Call("rsynctask.get_instance", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("rsynctask.get_instance", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
@@ -374,7 +378,14 @@ func (r *RsynctaskResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	_, err := r.client.Call("rsynctask.delete", data.ID.ValueString())
+	// Convert string ID to integer for TrueNAS API
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
+		return
+	}
+
+	_, err = r.client.Call("rsynctask.delete", resourceID)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
