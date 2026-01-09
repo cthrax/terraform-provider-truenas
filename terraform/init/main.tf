@@ -12,9 +12,10 @@ resource "truenas_vm_device" "boot_disk" {
   vm = truenas_vm.test_truenas.id
   attributes = jsonencode({
     dtype = "DISK"
-    path = "/dev/zvol/${var.pool_name}/vm-testtruenas-boot"
+    create_zvol = true
+    zvol_name = "${var.pool_name}/vm-testtruenas-boot"
+    zvol_volsize = 32212254720  # 30GB in bytes
     type = "VIRTIO"
-    size = 32212254720  # 30GB in bytes
   })
   order = 1000
 }
@@ -24,9 +25,10 @@ resource "truenas_vm_device" "data_disk_1" {
   vm = truenas_vm.test_truenas.id
   attributes = jsonencode({
     dtype = "DISK"
-    path = "/dev/zvol/${var.pool_name}/vm-testtruenas-data1"
+    create_zvol = true
+    zvol_name = "${var.pool_name}/vm-testtruenas-data1"
+    zvol_volsize = 137438953472  # 128GB in bytes
     type = "VIRTIO"
-    size = 137438953472  # 128GB in bytes
   })
   order = 1001
 }
@@ -36,9 +38,10 @@ resource "truenas_vm_device" "data_disk_2" {
   vm = truenas_vm.test_truenas.id
   attributes = jsonencode({
     dtype = "DISK"
-    path = "/dev/zvol/${var.pool_name}/vm-testtruenas-data2"
+    create_zvol = true
+    zvol_name = "${var.pool_name}/vm-testtruenas-data2"
+    zvol_volsize = 137438953472
     type = "VIRTIO"
-    size = 137438953472
   })
   order = 1002
 }
@@ -48,9 +51,10 @@ resource "truenas_vm_device" "data_disk_3" {
   vm = truenas_vm.test_truenas.id
   attributes = jsonencode({
     dtype = "DISK"
-    path = "/dev/zvol/${var.pool_name}/vm-testtruenas-data3"
+    create_zvol = true
+    zvol_name = "${var.pool_name}/vm-testtruenas-data3"
+    zvol_volsize = 137438953472
     type = "VIRTIO"
-    size = 137438953472
   })
   order = 1003
 }
@@ -60,9 +64,10 @@ resource "truenas_vm_device" "data_disk_4" {
   vm = truenas_vm.test_truenas.id
   attributes = jsonencode({
     dtype = "DISK"
-    path = "/dev/zvol/${var.pool_name}/vm-testtruenas-data4"
+    create_zvol = true
+    zvol_name = "${var.pool_name}/vm-testtruenas-data4"
+    zvol_volsize = 137438953472
     type = "VIRTIO"
-    size = 137438953472
   })
   order = 1004
 }
