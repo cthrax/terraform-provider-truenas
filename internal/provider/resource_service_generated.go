@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -134,10 +135,15 @@ func (r *ServiceResource) Update(ctx context.Context, req resource.UpdateRequest
 	params := map[string]interface{}{}
 	params["enable"] = data.Enable.ValueBool()
 
-	_, err = r.client.Call("service.update", []interface{}{id, params})
+	result, err := r.client.Call("service.update", []interface{}{id, params})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
+	}
+
+	// Update may return new ID
+	if result != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", result))
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

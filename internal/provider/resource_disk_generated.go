@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -211,10 +212,15 @@ func (r *DiskResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		params["passwd"] = data.Passwd.ValueString()
 	}
 
-	_, err = r.client.Call("disk.update", []interface{}{id, params})
+	result, err := r.client.Call("disk.update", []interface{}{id, params})
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
+	}
+
+	// Update may return new ID
+	if result != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", result))
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
