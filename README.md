@@ -82,11 +82,15 @@ This provider uses a two-tier testing strategy:
 
 ### Unit Tests (CI/CD)
 
+**Purpose:** Validate the code generator logic, not the TrueNAS API itself.
+
 Unit tests run automatically in CI and test core logic without requiring a TrueNAS instance:
-- Schema validation
-- Parameter building
-- Optional field handling
-- Business logic
+- Schema validation (generator creates valid Terraform schemas)
+- Parameter building (optional fields are omitted when null)
+- Optional field handling (generator correctly checks IsNull())
+- Business logic (start_on_create defaults, ID conversion)
+
+**Important:** These tests validate the **generator's behavior**. If TrueNAS changes its API schema, resources are regenerated from the OpenAPI spec. Tests ensure the generator produces correct code patterns.
 
 ```bash
 # Run unit tests locally

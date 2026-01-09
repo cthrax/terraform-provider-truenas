@@ -511,8 +511,36 @@ def main():
     print(f"\nGenerated {len(resources)} resources (including action resources)")
     print(f"Generated {len(datasources)} data sources")
     
-    funcs = '\n'.join(f'\t\tNew{r.replace("_action", "Action").title().replace("_", "")}Resource,' for r in resources)
-    print(f"\nAdd to provider.go Resources method:\nfunc (p *TrueNASProvider) Resources(ctx context.Context) []func() resource.Resource {{\n\treturn []func() resource.Resource{{\n{funcs}\n\t}}\n}}")
+    # Auto-update provider.go with resource registrations
+    provider_file = Path('internal/provider/provider.go')
+    provider_content = provider_file.read_text()
+    
+    # Convert resource names to function names (handle _action suffix specially)
+    def to_func_name(r):
+        if r.endswith('_action'):
+            # Remove _action, convert to title case, add Action suffix
+            base = r[:-7]  # Remove '_action'
+            return 'New' + ''.join(w.capitalize() for w in base.split('_')) + 'ActionResource,'
+        else:
+            return 'New' + ''.join(w.capitalize() for w in r.split('_')) + 'Resource,'
+    
+    funcs = '\n'.join(f'\t\t{to_func_name(r)}' for r in resources)
+    new_resources_block = f'''func (p *TrueNASProvider) Resources(ctx context.Context) []func() resource.Resource {{
+\treturn []func() resource.Resource{{
+{funcs}
+\t}}
+}}'''
+    
+    # Replace Resources method
+    import re
+    pattern = r'func \(p \*TrueNASProvider\) Resources\(ctx context\.Context\) \[\]func\(\) resource\.Resource \{[^}]+\}[^}]+\}'
+    if re.search(pattern, provider_content):
+        provider_content = re.sub(pattern, new_resources_block, provider_content)
+        provider_file.write_text(provider_content)
+        print(f"\n✓ Updated provider.go with {len(resources)} resource registrations")
+    else:
+        print(f"\n⚠ Could not auto-update provider.go - please add manually:")
+        print(new_resources_block)
 
 
 
