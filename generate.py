@@ -10,6 +10,7 @@ TEMPLATE_DIR = Path(__file__).parent / 'templates'
 
 # Load templates from files
 GO_RESOURCE_TEMPLATE = (TEMPLATE_DIR / 'resource.go.tmpl').read_text()
+GO_RESOURCE_UPDATE_ONLY_TEMPLATE = (TEMPLATE_DIR / 'resource_update_only.go.tmpl').read_text()
 ACTION_RESOURCE_TEMPLATE = (TEMPLATE_DIR / 'action_resource.go.tmpl').read_text()
 RESOURCE_DOC_TEMPLATE = (TEMPLATE_DIR / 'resource_doc.md.tmpl').read_text()
 DATASOURCE_DOC_TEMPLATE = (TEMPLATE_DIR / 'datasource_doc.md.tmpl').read_text()
@@ -63,6 +64,21 @@ def find_crud_resources(spec):
             base = path.replace('/id/{id_}', '')
             if 'delete' in spec['paths'][path] and 'post' in spec['paths'].get(base, {}):
                 resources.add(base)
+    return resources
+
+
+def find_update_only_resources(spec):
+    """Find update-only resources - have GET and PUT on /id/{id_} but no POST/DELETE."""
+    resources = set()
+    for path in spec['paths']:
+        if path.endswith('/id/{id_}'):
+            base = path.replace('/id/{id_}', '')
+            path_methods = spec['paths'][path]
+            base_methods = spec['paths'].get(base, {})
+            # Has PUT but no DELETE, and base has GET but no POST
+            if 'put' in path_methods and 'delete' not in path_methods:
+                if 'get' in base_methods and 'post' not in base_methods:
+                    resources.add(base)
     return resources
 
 
@@ -205,7 +221,7 @@ def generate_action_resource(base_resource_name, action_name, action_info, spec)
     )
 
 
-def generate_resource(name, path, schema, spec):
+def generate_resource(name, path, schema, spec, update_only=False):
     """Generate Go resource code."""
     properties = schema.get('properties', {})
     required_fields = schema.get('required', [])
@@ -284,15 +300,27 @@ def generate_resource(name, path, schema, spec):
 \t\t}}
 \t}}'''
     
-    return GO_RESOURCE_TEMPLATE.format(
-        resource_name=resource_name,
-        name=name.replace('/', '_').replace('-', '_'),
-        api_name=api_name,
-        fields=chr(10).join(fields),
-        schema_attrs=chr(10).join(schema_attrs),
-        create_params=chr(10).join(create_params),
-        lifecycle_code=lifecycle_code
-    )
+    if update_only:
+        return GO_RESOURCE_UPDATE_ONLY_TEMPLATE.format(
+            ResourceType=resource_name,
+            ResourceName=name.replace('/', '_').replace('-', '_'),
+            APIPath=api_name,
+            Fields=chr(10).join(fields),
+            SchemaAttributes=chr(10).join(schema_attrs),
+            CreateParams=chr(10).join(create_params),
+            UpdateParams=chr(10).join(create_params),
+            ReadMapping=''
+        )
+    else:
+        return GO_RESOURCE_TEMPLATE.format(
+            resource_name=resource_name,
+            name=name.replace('/', '_').replace('-', '_'),
+            api_name=api_name,
+            fields=chr(10).join(fields),
+            schema_attrs=chr(10).join(schema_attrs),
+            create_params=chr(10).join(create_params),
+            lifecycle_code=lifecycle_code
+        )
 
 
 def generate_resource_docs(name, schema, spec, path):
@@ -459,8 +487,9 @@ def main():
     
     Path('docs/index.md').write_text(PROVIDER_DOC)
     
-    # Find true CRUD resources
+    # Find true CRUD resources and update-only resources
     crud_resources = find_crud_resources(spec)
+    update_only_resources = find_update_only_resources(spec)
     
     resources, datasources = [], []
     
@@ -506,6 +535,28 @@ def main():
                 Path(f'docs/resources/{resource_name.lower()}_{action_name.lower()}_action.md').write_text(action_doc)
                 
                 resources.append(f'{resource_name}_{action_name}_action')
+    
+    # Generate update-only resources (like service)
+    for update_path in update_only_resources:
+        resource_name = extract_resource_name(update_path)
+        print(f"Generating update-only resource for {update_path} -> {resource_name}")
+        
+        # Get schema from PUT operation on /id/{id_}
+        id_path = f"{update_path}/id/{{id_}}"
+        put_spec = spec['paths'][id_path].get('put', {})
+        schema_ref = put_spec.get('requestBody', {}).get('content', {}).get('application/json', {}).get('schema', {}).get('$ref', '')
+        schema_name = schema_ref.split('/')[-1] if schema_ref else None
+        
+        if schema_name:
+            schema = get_schema(spec, schema_name)
+            if schema:
+                code = generate_resource(resource_name, update_path, schema, spec, update_only=True)
+                Path(f'internal/provider/resource_{resource_name.lower()}_generated.go').write_text(code)
+                
+                doc = generate_resource_docs(resource_name, schema, spec, update_path)
+                Path(f'docs/resources/{resource_name.lower()}.md').write_text(doc)
+                
+                resources.append(resource_name)
     
     # Output summary
     print(f"\nGenerated {len(resources)} resources (including action resources)")

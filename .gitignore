@@ -77,3 +77,5 @@ terraform-provider-truenas
 test_*.py
 __pycache__/
 *.pyc
+secrets.auto.tfvars.json
+*.auto.tfvars.json

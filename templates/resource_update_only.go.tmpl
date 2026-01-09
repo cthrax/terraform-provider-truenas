@@ -1,0 +1,134 @@
+package provider
+
+import (
+	"context"
+	"fmt"
+	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
+)
+
+type {ResourceType}Resource struct {{
+	client *client.Client
+}}
+
+type {ResourceType}ResourceModel struct {{
+{Fields}
+}}
+
+func New{ResourceType}Resource() resource.Resource {{
+	return &{ResourceType}Resource{{}}
+}}
+
+func (r *{ResourceType}Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {{
+	resp.TypeName = req.ProviderTypeName + "_{ResourceName}"
+}}
+
+func (r *{ResourceType}Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {{
+	resp.Schema = schema.Schema{{
+		MarkdownDescription: "TrueNAS {ResourceName} resource (update-only)",
+		Attributes: map[string]schema.Attribute{{
+{SchemaAttributes}
+		}},
+	}}
+}}
+
+func (r *{ResourceType}Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {{
+	if req.ProviderData == nil {{
+		return
+	}}
+	client, ok := req.ProviderData.(*client.Client)
+	if !ok {{
+		resp.Diagnostics.AddError("Unexpected Resource Configure Type", "Expected *client.Client")
+		return
+	}}
+	r.client = client
+}}
+
+func (r *{ResourceType}Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {{
+	var data {ResourceType}ResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {{
+		return
+	}}
+
+	// Update-only resource: ID must be provided
+	if data.ID.IsNull() || data.ID.ValueString() == "" {{
+		resp.Diagnostics.AddError("Missing ID", "ID is required for update-only resources. Use terraform import to manage existing resources.")
+		return
+	}}
+
+	// Perform update with provided configuration
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {{
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("ID must be a valid integer: %s", err.Error()))
+		return
+	}}
+
+	params := map[string]interface{{}}{{}}
+{CreateParams}
+
+	_, err = r.client.Call("{APIPath}.update", []interface{{}}{{resourceID, params}})
+	if err != nil {{
+		resp.Diagnostics.AddError("Client Error", err.Error())
+		return
+	}}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}}
+
+func (r *{ResourceType}Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {{
+	var data {ResourceType}ResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {{
+		return
+	}}
+
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {{
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("ID must be a valid integer: %s", err.Error()))
+		return
+	}}
+
+	result, err := r.client.Call("{APIPath}.get_instance", []interface{{}}{{resourceID}})
+	if err != nil {{
+		resp.Diagnostics.AddError("Client Error", err.Error())
+		return
+	}}
+
+	_ = result // TODO: Map result to data fields
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}}
+
+func (r *{ResourceType}Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {{
+	var data {ResourceType}ResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {{
+		return
+	}}
+
+	resourceID, err := strconv.Atoi(data.ID.ValueString())
+	if err != nil {{
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("ID must be a valid integer: %s", err.Error()))
+		return
+	}}
+
+	params := map[string]interface{{}}{{}}
+{UpdateParams}
+
+	_, err = r.client.Call("{APIPath}.update", []interface{{}}{{resourceID, params}})
+	if err != nil {{
+		resp.Diagnostics.AddError("Client Error", err.Error())
+		return
+	}}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}}
+
+func (r *{ResourceType}Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {{
+	// Update-only resource: just remove from state, don't delete on server
+}}
