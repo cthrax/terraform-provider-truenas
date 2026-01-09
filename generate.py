@@ -206,9 +206,14 @@ def generate_resource(name, path, schema, spec):
         fields.append(f'\t{go_name} types.{go_type} `tfsdk:"{prop_name}"`')
         schema_attrs.append(f'\t\t\t"{prop_name}": schema.{go_type}Attribute{{\n\t\t\t\tRequired: {str(required).lower()},\n\t\t\t\tOptional: {str(not required).lower()},\n\t\t\t}},')
         
+        # Build params conditionally
         if go_type in ['String', 'Int64', 'Bool']:
             method = {'String': 'ValueString', 'Int64': 'ValueInt64', 'Bool': 'ValueBool'}[go_type]
-            create_params.append(f'\t\t"{prop_name}": data.{go_name}.{method}(),')
+            if required:
+                create_params.append(f'\tparams["{prop_name}"] = data.{go_name}.{method}()')
+            else:
+                # Optional fields - only include if not null
+                create_params.append(f'\tif !data.{go_name}.IsNull() {{\n\t\tparams["{prop_name}"] = data.{go_name}.{method}()\n\t}}')
     
     resource_name = name.replace('/', '_').replace('-', '_').title().replace('_', '')
     api_name = path.strip('/')
@@ -521,9 +526,8 @@ func (r *{resource_name}Resource) Create(ctx context.Context, req resource.Creat
 \t\treturn
 \t}}
 
-\tparams := map[string]interface{{}}{{
+\tparams := map[string]interface{{}}{{}}
 {create_params}
-\t}}
 
 \tresult, err := r.client.Call("{api_name}.create", params)
 \tif err != nil {{
@@ -562,9 +566,8 @@ func (r *{resource_name}Resource) Update(ctx context.Context, req resource.Updat
 \t\treturn
 \t}}
 
-\tparams := map[string]interface{{}}{{
+\tparams := map[string]interface{{}}{{}}
 {create_params}
-\t}}
 
 \t_, err := r.client.Call("{api_name}.update", []interface{{}}{{data.ID.ValueString(), params}})
 \tif err != nil {{

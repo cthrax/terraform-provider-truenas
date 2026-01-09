@@ -146,21 +146,40 @@ func (r *CloudBackupResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"description": data.Description.ValueString(),
-		"path": data.Path.ValueString(),
-		"credentials": data.Credentials.ValueInt64(),
-		"pre_script": data.PreScript.ValueString(),
-		"post_script": data.PostScript.ValueString(),
-		"snapshot": data.Snapshot.ValueBool(),
-		"args": data.Args.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"password": data.Password.ValueString(),
-		"keep_last": data.KeepLast.ValueInt64(),
-		"transfer_setting": data.TransferSetting.ValueString(),
-		"absolute_paths": data.AbsolutePaths.ValueBool(),
-		"cache_path": data.CachePath.ValueString(),
-		"rate_limit": data.RateLimit.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["path"] = data.Path.ValueString()
+	params["credentials"] = data.Credentials.ValueInt64()
+	if !data.PreScript.IsNull() {
+		params["pre_script"] = data.PreScript.ValueString()
+	}
+	if !data.PostScript.IsNull() {
+		params["post_script"] = data.PostScript.ValueString()
+	}
+	if !data.Snapshot.IsNull() {
+		params["snapshot"] = data.Snapshot.ValueBool()
+	}
+	if !data.Args.IsNull() {
+		params["args"] = data.Args.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	params["password"] = data.Password.ValueString()
+	params["keep_last"] = data.KeepLast.ValueInt64()
+	if !data.TransferSetting.IsNull() {
+		params["transfer_setting"] = data.TransferSetting.ValueString()
+	}
+	if !data.AbsolutePaths.IsNull() {
+		params["absolute_paths"] = data.AbsolutePaths.ValueBool()
+	}
+	if !data.CachePath.IsNull() {
+		params["cache_path"] = data.CachePath.ValueString()
+	}
+	if !data.RateLimit.IsNull() {
+		params["rate_limit"] = data.RateLimit.ValueString()
 	}
 
 	result, err := r.client.Call("cloud_backup.create", params)
@@ -200,21 +219,40 @@ func (r *CloudBackupResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"description": data.Description.ValueString(),
-		"path": data.Path.ValueString(),
-		"credentials": data.Credentials.ValueInt64(),
-		"pre_script": data.PreScript.ValueString(),
-		"post_script": data.PostScript.ValueString(),
-		"snapshot": data.Snapshot.ValueBool(),
-		"args": data.Args.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"password": data.Password.ValueString(),
-		"keep_last": data.KeepLast.ValueInt64(),
-		"transfer_setting": data.TransferSetting.ValueString(),
-		"absolute_paths": data.AbsolutePaths.ValueBool(),
-		"cache_path": data.CachePath.ValueString(),
-		"rate_limit": data.RateLimit.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["path"] = data.Path.ValueString()
+	params["credentials"] = data.Credentials.ValueInt64()
+	if !data.PreScript.IsNull() {
+		params["pre_script"] = data.PreScript.ValueString()
+	}
+	if !data.PostScript.IsNull() {
+		params["post_script"] = data.PostScript.ValueString()
+	}
+	if !data.Snapshot.IsNull() {
+		params["snapshot"] = data.Snapshot.ValueBool()
+	}
+	if !data.Args.IsNull() {
+		params["args"] = data.Args.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	params["password"] = data.Password.ValueString()
+	params["keep_last"] = data.KeepLast.ValueInt64()
+	if !data.TransferSetting.IsNull() {
+		params["transfer_setting"] = data.TransferSetting.ValueString()
+	}
+	if !data.AbsolutePaths.IsNull() {
+		params["absolute_paths"] = data.AbsolutePaths.ValueBool()
+	}
+	if !data.CachePath.IsNull() {
+		params["cache_path"] = data.CachePath.ValueString()
+	}
+	if !data.RateLimit.IsNull() {
+		params["rate_limit"] = data.RateLimit.ValueString()
 	}
 
 	_, err := r.client.Call("cloud_backup.update", []interface{}{data.ID.ValueString(), params})

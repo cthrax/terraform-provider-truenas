@@ -91,11 +91,16 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	params := map[string]interface{}{
-		"gid": data.Gid.ValueString(),
-		"name": data.Name.ValueString(),
-		"smb": data.Smb.ValueBool(),
-		"userns_idmap": data.UsernsIdmap.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Gid.IsNull() {
+		params["gid"] = data.Gid.ValueString()
+	}
+	params["name"] = data.Name.ValueString()
+	if !data.Smb.IsNull() {
+		params["smb"] = data.Smb.ValueBool()
+	}
+	if !data.UsernsIdmap.IsNull() {
+		params["userns_idmap"] = data.UsernsIdmap.ValueString()
 	}
 
 	result, err := r.client.Call("group.create", params)
@@ -135,11 +140,16 @@ func (r *GroupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	params := map[string]interface{}{
-		"gid": data.Gid.ValueString(),
-		"name": data.Name.ValueString(),
-		"smb": data.Smb.ValueBool(),
-		"userns_idmap": data.UsernsIdmap.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Gid.IsNull() {
+		params["gid"] = data.Gid.ValueString()
+	}
+	params["name"] = data.Name.ValueString()
+	if !data.Smb.IsNull() {
+		params["smb"] = data.Smb.ValueBool()
+	}
+	if !data.UsernsIdmap.IsNull() {
+		params["userns_idmap"] = data.UsernsIdmap.ValueString()
 	}
 
 	_, err := r.client.Call("group.update", []interface{}{data.ID.ValueString(), params})

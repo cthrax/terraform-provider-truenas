@@ -81,13 +81,16 @@ func (r *JbofResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	params := map[string]interface{}{
-		"description": data.Description.ValueString(),
-		"mgmt_ip1": data.MgmtIp1.ValueString(),
-		"mgmt_ip2": data.MgmtIp2.ValueString(),
-		"mgmt_username": data.MgmtUsername.ValueString(),
-		"mgmt_password": data.MgmtPassword.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
 	}
+	params["mgmt_ip1"] = data.MgmtIp1.ValueString()
+	if !data.MgmtIp2.IsNull() {
+		params["mgmt_ip2"] = data.MgmtIp2.ValueString()
+	}
+	params["mgmt_username"] = data.MgmtUsername.ValueString()
+	params["mgmt_password"] = data.MgmtPassword.ValueString()
 
 	result, err := r.client.Call("jbof.create", params)
 	if err != nil {
@@ -126,13 +129,16 @@ func (r *JbofResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	params := map[string]interface{}{
-		"description": data.Description.ValueString(),
-		"mgmt_ip1": data.MgmtIp1.ValueString(),
-		"mgmt_ip2": data.MgmtIp2.ValueString(),
-		"mgmt_username": data.MgmtUsername.ValueString(),
-		"mgmt_password": data.MgmtPassword.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
 	}
+	params["mgmt_ip1"] = data.MgmtIp1.ValueString()
+	if !data.MgmtIp2.IsNull() {
+		params["mgmt_ip2"] = data.MgmtIp2.ValueString()
+	}
+	params["mgmt_username"] = data.MgmtUsername.ValueString()
+	params["mgmt_password"] = data.MgmtPassword.ValueString()
 
 	_, err := r.client.Call("jbof.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

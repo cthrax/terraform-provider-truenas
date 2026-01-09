@@ -71,10 +71,13 @@ func (r *ApiKeyResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"username": data.Username.ValueString(),
-		"expires_at": data.ExpiresAt.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Name.IsNull() {
+		params["name"] = data.Name.ValueString()
+	}
+	params["username"] = data.Username.ValueString()
+	if !data.ExpiresAt.IsNull() {
+		params["expires_at"] = data.ExpiresAt.ValueString()
 	}
 
 	result, err := r.client.Call("api_key.create", params)
@@ -114,10 +117,13 @@ func (r *ApiKeyResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"username": data.Username.ValueString(),
-		"expires_at": data.ExpiresAt.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Name.IsNull() {
+		params["name"] = data.Name.ValueString()
+	}
+	params["username"] = data.Username.ValueString()
+	if !data.ExpiresAt.IsNull() {
+		params["expires_at"] = data.ExpiresAt.ValueString()
 	}
 
 	_, err := r.client.Call("api_key.update", []interface{}{data.ID.ValueString(), params})

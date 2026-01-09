@@ -81,9 +81,10 @@ func (r *KerberosRealmResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 
-	params := map[string]interface{}{
-		"realm": data.Realm.ValueString(),
-		"primary_kdc": data.PrimaryKdc.ValueString(),
+	params := map[string]interface{}{}
+	params["realm"] = data.Realm.ValueString()
+	if !data.PrimaryKdc.IsNull() {
+		params["primary_kdc"] = data.PrimaryKdc.ValueString()
 	}
 
 	result, err := r.client.Call("kerberos/realm.create", params)
@@ -123,9 +124,10 @@ func (r *KerberosRealmResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	params := map[string]interface{}{
-		"realm": data.Realm.ValueString(),
-		"primary_kdc": data.PrimaryKdc.ValueString(),
+	params := map[string]interface{}{}
+	params["realm"] = data.Realm.ValueString()
+	if !data.PrimaryKdc.IsNull() {
+		params["primary_kdc"] = data.PrimaryKdc.ValueString()
 	}
 
 	_, err := r.client.Call("kerberos/realm.update", []interface{}{data.ID.ValueString(), params})

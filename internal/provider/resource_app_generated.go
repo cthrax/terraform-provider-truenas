@@ -102,13 +102,22 @@ func (r *AppResource) Create(ctx context.Context, req resource.CreateRequest, re
 		return
 	}
 
-	params := map[string]interface{}{
-		"custom_app": data.CustomApp.ValueBool(),
-		"custom_compose_config_string": data.CustomComposeConfigString.ValueString(),
-		"catalog_app": data.CatalogApp.ValueString(),
-		"app_name": data.AppName.ValueString(),
-		"train": data.Train.ValueString(),
-		"version": data.Version.ValueString(),
+	params := map[string]interface{}{}
+	if !data.CustomApp.IsNull() {
+		params["custom_app"] = data.CustomApp.ValueBool()
+	}
+	if !data.CustomComposeConfigString.IsNull() {
+		params["custom_compose_config_string"] = data.CustomComposeConfigString.ValueString()
+	}
+	if !data.CatalogApp.IsNull() {
+		params["catalog_app"] = data.CatalogApp.ValueString()
+	}
+	params["app_name"] = data.AppName.ValueString()
+	if !data.Train.IsNull() {
+		params["train"] = data.Train.ValueString()
+	}
+	if !data.Version.IsNull() {
+		params["version"] = data.Version.ValueString()
 	}
 
 	result, err := r.client.Call("app.create", params)
@@ -163,13 +172,22 @@ func (r *AppResource) Update(ctx context.Context, req resource.UpdateRequest, re
 		return
 	}
 
-	params := map[string]interface{}{
-		"custom_app": data.CustomApp.ValueBool(),
-		"custom_compose_config_string": data.CustomComposeConfigString.ValueString(),
-		"catalog_app": data.CatalogApp.ValueString(),
-		"app_name": data.AppName.ValueString(),
-		"train": data.Train.ValueString(),
-		"version": data.Version.ValueString(),
+	params := map[string]interface{}{}
+	if !data.CustomApp.IsNull() {
+		params["custom_app"] = data.CustomApp.ValueBool()
+	}
+	if !data.CustomComposeConfigString.IsNull() {
+		params["custom_compose_config_string"] = data.CustomComposeConfigString.ValueString()
+	}
+	if !data.CatalogApp.IsNull() {
+		params["catalog_app"] = data.CatalogApp.ValueString()
+	}
+	params["app_name"] = data.AppName.ValueString()
+	if !data.Train.IsNull() {
+		params["train"] = data.Train.ValueString()
+	}
+	if !data.Version.IsNull() {
+		params["version"] = data.Version.ValueString()
 	}
 
 	_, err := r.client.Call("app.update", []interface{}{data.ID.ValueString(), params})

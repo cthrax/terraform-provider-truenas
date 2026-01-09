@@ -66,8 +66,9 @@ func (r *IscsiPortalResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	result, err := r.client.Call("iscsi/portal.create", params)
@@ -107,8 +108,9 @@ func (r *IscsiPortalResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	_, err := r.client.Call("iscsi/portal.update", []interface{}{data.ID.ValueString(), params})

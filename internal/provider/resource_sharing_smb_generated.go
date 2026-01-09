@@ -106,16 +106,29 @@ func (r *SharingSmbResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	params := map[string]interface{}{
-		"purpose": data.Purpose.ValueString(),
-		"name": data.Name.ValueString(),
-		"path": data.Path.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"comment": data.Comment.ValueString(),
-		"readonly": data.Readonly.ValueBool(),
-		"browsable": data.Browsable.ValueBool(),
-		"access_based_share_enumeration": data.AccessBasedShareEnumeration.ValueBool(),
-		"options": data.Options.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Purpose.IsNull() {
+		params["purpose"] = data.Purpose.ValueString()
+	}
+	params["name"] = data.Name.ValueString()
+	params["path"] = data.Path.ValueString()
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.Readonly.IsNull() {
+		params["readonly"] = data.Readonly.ValueBool()
+	}
+	if !data.Browsable.IsNull() {
+		params["browsable"] = data.Browsable.ValueBool()
+	}
+	if !data.AccessBasedShareEnumeration.IsNull() {
+		params["access_based_share_enumeration"] = data.AccessBasedShareEnumeration.ValueBool()
+	}
+	if !data.Options.IsNull() {
+		params["options"] = data.Options.ValueString()
 	}
 
 	result, err := r.client.Call("sharing/smb.create", params)
@@ -155,16 +168,29 @@ func (r *SharingSmbResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	params := map[string]interface{}{
-		"purpose": data.Purpose.ValueString(),
-		"name": data.Name.ValueString(),
-		"path": data.Path.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"comment": data.Comment.ValueString(),
-		"readonly": data.Readonly.ValueBool(),
-		"browsable": data.Browsable.ValueBool(),
-		"access_based_share_enumeration": data.AccessBasedShareEnumeration.ValueBool(),
-		"options": data.Options.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Purpose.IsNull() {
+		params["purpose"] = data.Purpose.ValueString()
+	}
+	params["name"] = data.Name.ValueString()
+	params["path"] = data.Path.ValueString()
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.Readonly.IsNull() {
+		params["readonly"] = data.Readonly.ValueBool()
+	}
+	if !data.Browsable.IsNull() {
+		params["browsable"] = data.Browsable.ValueBool()
+	}
+	if !data.AccessBasedShareEnumeration.IsNull() {
+		params["access_based_share_enumeration"] = data.AccessBasedShareEnumeration.ValueBool()
+	}
+	if !data.Options.IsNull() {
+		params["options"] = data.Options.ValueString()
 	}
 
 	_, err := r.client.Call("sharing/smb.update", []interface{}{data.ID.ValueString(), params})

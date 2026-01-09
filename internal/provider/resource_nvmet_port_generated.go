@@ -56,9 +56,8 @@ func (r *NvmetPortResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	result, err := r.client.Call("nvmet/port.create", params)
 	if err != nil {
@@ -97,9 +96,8 @@ func (r *NvmetPortResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	_, err := r.client.Call("nvmet/port.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

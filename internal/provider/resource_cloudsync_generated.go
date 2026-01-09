@@ -166,24 +166,49 @@ func (r *CloudsyncResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"description": data.Description.ValueString(),
-		"path": data.Path.ValueString(),
-		"credentials": data.Credentials.ValueInt64(),
-		"pre_script": data.PreScript.ValueString(),
-		"post_script": data.PostScript.ValueString(),
-		"snapshot": data.Snapshot.ValueBool(),
-		"args": data.Args.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"transfers": data.Transfers.ValueString(),
-		"direction": data.Direction.ValueString(),
-		"transfer_mode": data.TransferMode.ValueString(),
-		"encryption": data.Encryption.ValueBool(),
-		"filename_encryption": data.FilenameEncryption.ValueBool(),
-		"encryption_password": data.EncryptionPassword.ValueString(),
-		"encryption_salt": data.EncryptionSalt.ValueString(),
-		"create_empty_src_dirs": data.CreateEmptySrcDirs.ValueBool(),
-		"follow_symlinks": data.FollowSymlinks.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["path"] = data.Path.ValueString()
+	params["credentials"] = data.Credentials.ValueInt64()
+	if !data.PreScript.IsNull() {
+		params["pre_script"] = data.PreScript.ValueString()
+	}
+	if !data.PostScript.IsNull() {
+		params["post_script"] = data.PostScript.ValueString()
+	}
+	if !data.Snapshot.IsNull() {
+		params["snapshot"] = data.Snapshot.ValueBool()
+	}
+	if !data.Args.IsNull() {
+		params["args"] = data.Args.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.Transfers.IsNull() {
+		params["transfers"] = data.Transfers.ValueString()
+	}
+	params["direction"] = data.Direction.ValueString()
+	params["transfer_mode"] = data.TransferMode.ValueString()
+	if !data.Encryption.IsNull() {
+		params["encryption"] = data.Encryption.ValueBool()
+	}
+	if !data.FilenameEncryption.IsNull() {
+		params["filename_encryption"] = data.FilenameEncryption.ValueBool()
+	}
+	if !data.EncryptionPassword.IsNull() {
+		params["encryption_password"] = data.EncryptionPassword.ValueString()
+	}
+	if !data.EncryptionSalt.IsNull() {
+		params["encryption_salt"] = data.EncryptionSalt.ValueString()
+	}
+	if !data.CreateEmptySrcDirs.IsNull() {
+		params["create_empty_src_dirs"] = data.CreateEmptySrcDirs.ValueBool()
+	}
+	if !data.FollowSymlinks.IsNull() {
+		params["follow_symlinks"] = data.FollowSymlinks.ValueBool()
 	}
 
 	result, err := r.client.Call("cloudsync.create", params)
@@ -223,24 +248,49 @@ func (r *CloudsyncResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"description": data.Description.ValueString(),
-		"path": data.Path.ValueString(),
-		"credentials": data.Credentials.ValueInt64(),
-		"pre_script": data.PreScript.ValueString(),
-		"post_script": data.PostScript.ValueString(),
-		"snapshot": data.Snapshot.ValueBool(),
-		"args": data.Args.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"transfers": data.Transfers.ValueString(),
-		"direction": data.Direction.ValueString(),
-		"transfer_mode": data.TransferMode.ValueString(),
-		"encryption": data.Encryption.ValueBool(),
-		"filename_encryption": data.FilenameEncryption.ValueBool(),
-		"encryption_password": data.EncryptionPassword.ValueString(),
-		"encryption_salt": data.EncryptionSalt.ValueString(),
-		"create_empty_src_dirs": data.CreateEmptySrcDirs.ValueBool(),
-		"follow_symlinks": data.FollowSymlinks.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["path"] = data.Path.ValueString()
+	params["credentials"] = data.Credentials.ValueInt64()
+	if !data.PreScript.IsNull() {
+		params["pre_script"] = data.PreScript.ValueString()
+	}
+	if !data.PostScript.IsNull() {
+		params["post_script"] = data.PostScript.ValueString()
+	}
+	if !data.Snapshot.IsNull() {
+		params["snapshot"] = data.Snapshot.ValueBool()
+	}
+	if !data.Args.IsNull() {
+		params["args"] = data.Args.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.Transfers.IsNull() {
+		params["transfers"] = data.Transfers.ValueString()
+	}
+	params["direction"] = data.Direction.ValueString()
+	params["transfer_mode"] = data.TransferMode.ValueString()
+	if !data.Encryption.IsNull() {
+		params["encryption"] = data.Encryption.ValueBool()
+	}
+	if !data.FilenameEncryption.IsNull() {
+		params["filename_encryption"] = data.FilenameEncryption.ValueBool()
+	}
+	if !data.EncryptionPassword.IsNull() {
+		params["encryption_password"] = data.EncryptionPassword.ValueString()
+	}
+	if !data.EncryptionSalt.IsNull() {
+		params["encryption_salt"] = data.EncryptionSalt.ValueString()
+	}
+	if !data.CreateEmptySrcDirs.IsNull() {
+		params["create_empty_src_dirs"] = data.CreateEmptySrcDirs.ValueBool()
+	}
+	if !data.FollowSymlinks.IsNull() {
+		params["follow_symlinks"] = data.FollowSymlinks.ValueBool()
 	}
 
 	_, err := r.client.Call("cloudsync.update", []interface{}{data.ID.ValueString(), params})

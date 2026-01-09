@@ -71,10 +71,11 @@ func (r *VmDeviceResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	params := map[string]interface{}{
-		"attributes": data.Attributes.ValueString(),
-		"vm": data.Vm.ValueInt64(),
-		"order": data.Order.ValueString(),
+	params := map[string]interface{}{}
+	params["attributes"] = data.Attributes.ValueString()
+	params["vm"] = data.Vm.ValueInt64()
+	if !data.Order.IsNull() {
+		params["order"] = data.Order.ValueString()
 	}
 
 	result, err := r.client.Call("vm/device.create", params)
@@ -114,10 +115,11 @@ func (r *VmDeviceResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	params := map[string]interface{}{
-		"attributes": data.Attributes.ValueString(),
-		"vm": data.Vm.ValueInt64(),
-		"order": data.Order.ValueString(),
+	params := map[string]interface{}{}
+	params["attributes"] = data.Attributes.ValueString()
+	params["vm"] = data.Vm.ValueInt64()
+	if !data.Order.IsNull() {
+		params["order"] = data.Order.ValueString()
 	}
 
 	_, err := r.client.Call("vm/device.update", []interface{}{data.ID.ValueString(), params})

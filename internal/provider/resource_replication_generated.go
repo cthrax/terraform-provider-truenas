@@ -286,45 +286,106 @@ func (r *ReplicationResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"direction": data.Direction.ValueString(),
-		"transport": data.Transport.ValueString(),
-		"ssh_credentials": data.SshCredentials.ValueString(),
-		"netcat_active_side": data.NetcatActiveSide.ValueString(),
-		"netcat_active_side_listen_address": data.NetcatActiveSideListenAddress.ValueString(),
-		"netcat_active_side_port_min": data.NetcatActiveSidePortMin.ValueString(),
-		"netcat_active_side_port_max": data.NetcatActiveSidePortMax.ValueString(),
-		"netcat_passive_side_connect_address": data.NetcatPassiveSideConnectAddress.ValueString(),
-		"sudo": data.Sudo.ValueBool(),
-		"target_dataset": data.TargetDataset.ValueString(),
-		"recursive": data.Recursive.ValueBool(),
-		"properties": data.Properties.ValueBool(),
-		"replicate": data.Replicate.ValueBool(),
-		"encryption": data.Encryption.ValueBool(),
-		"encryption_inherit": data.EncryptionInherit.ValueString(),
-		"encryption_key": data.EncryptionKey.ValueString(),
-		"encryption_key_format": data.EncryptionKeyFormat.ValueString(),
-		"encryption_key_location": data.EncryptionKeyLocation.ValueString(),
-		"name_regex": data.NameRegex.ValueString(),
-		"auto": data.Auto.ValueBool(),
-		"schedule": data.Schedule.ValueString(),
-		"restrict_schedule": data.RestrictSchedule.ValueString(),
-		"only_matching_schedule": data.OnlyMatchingSchedule.ValueBool(),
-		"allow_from_scratch": data.AllowFromScratch.ValueBool(),
-		"readonly": data.Readonly.ValueString(),
-		"hold_pending_snapshots": data.HoldPendingSnapshots.ValueBool(),
-		"retention_policy": data.RetentionPolicy.ValueString(),
-		"lifetime_value": data.LifetimeValue.ValueString(),
-		"lifetime_unit": data.LifetimeUnit.ValueString(),
-		"compression": data.Compression.ValueString(),
-		"speed_limit": data.SpeedLimit.ValueString(),
-		"large_block": data.LargeBlock.ValueBool(),
-		"embed": data.Embed.ValueBool(),
-		"compressed": data.Compressed.ValueBool(),
-		"retries": data.Retries.ValueInt64(),
-		"logging_level": data.LoggingLevel.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["direction"] = data.Direction.ValueString()
+	params["transport"] = data.Transport.ValueString()
+	if !data.SshCredentials.IsNull() {
+		params["ssh_credentials"] = data.SshCredentials.ValueString()
+	}
+	if !data.NetcatActiveSide.IsNull() {
+		params["netcat_active_side"] = data.NetcatActiveSide.ValueString()
+	}
+	if !data.NetcatActiveSideListenAddress.IsNull() {
+		params["netcat_active_side_listen_address"] = data.NetcatActiveSideListenAddress.ValueString()
+	}
+	if !data.NetcatActiveSidePortMin.IsNull() {
+		params["netcat_active_side_port_min"] = data.NetcatActiveSidePortMin.ValueString()
+	}
+	if !data.NetcatActiveSidePortMax.IsNull() {
+		params["netcat_active_side_port_max"] = data.NetcatActiveSidePortMax.ValueString()
+	}
+	if !data.NetcatPassiveSideConnectAddress.IsNull() {
+		params["netcat_passive_side_connect_address"] = data.NetcatPassiveSideConnectAddress.ValueString()
+	}
+	if !data.Sudo.IsNull() {
+		params["sudo"] = data.Sudo.ValueBool()
+	}
+	params["target_dataset"] = data.TargetDataset.ValueString()
+	params["recursive"] = data.Recursive.ValueBool()
+	if !data.Properties.IsNull() {
+		params["properties"] = data.Properties.ValueBool()
+	}
+	if !data.Replicate.IsNull() {
+		params["replicate"] = data.Replicate.ValueBool()
+	}
+	if !data.Encryption.IsNull() {
+		params["encryption"] = data.Encryption.ValueBool()
+	}
+	if !data.EncryptionInherit.IsNull() {
+		params["encryption_inherit"] = data.EncryptionInherit.ValueString()
+	}
+	if !data.EncryptionKey.IsNull() {
+		params["encryption_key"] = data.EncryptionKey.ValueString()
+	}
+	if !data.EncryptionKeyFormat.IsNull() {
+		params["encryption_key_format"] = data.EncryptionKeyFormat.ValueString()
+	}
+	if !data.EncryptionKeyLocation.IsNull() {
+		params["encryption_key_location"] = data.EncryptionKeyLocation.ValueString()
+	}
+	if !data.NameRegex.IsNull() {
+		params["name_regex"] = data.NameRegex.ValueString()
+	}
+	params["auto"] = data.Auto.ValueBool()
+	if !data.Schedule.IsNull() {
+		params["schedule"] = data.Schedule.ValueString()
+	}
+	if !data.RestrictSchedule.IsNull() {
+		params["restrict_schedule"] = data.RestrictSchedule.ValueString()
+	}
+	if !data.OnlyMatchingSchedule.IsNull() {
+		params["only_matching_schedule"] = data.OnlyMatchingSchedule.ValueBool()
+	}
+	if !data.AllowFromScratch.IsNull() {
+		params["allow_from_scratch"] = data.AllowFromScratch.ValueBool()
+	}
+	if !data.Readonly.IsNull() {
+		params["readonly"] = data.Readonly.ValueString()
+	}
+	if !data.HoldPendingSnapshots.IsNull() {
+		params["hold_pending_snapshots"] = data.HoldPendingSnapshots.ValueBool()
+	}
+	params["retention_policy"] = data.RetentionPolicy.ValueString()
+	if !data.LifetimeValue.IsNull() {
+		params["lifetime_value"] = data.LifetimeValue.ValueString()
+	}
+	if !data.LifetimeUnit.IsNull() {
+		params["lifetime_unit"] = data.LifetimeUnit.ValueString()
+	}
+	if !data.Compression.IsNull() {
+		params["compression"] = data.Compression.ValueString()
+	}
+	if !data.SpeedLimit.IsNull() {
+		params["speed_limit"] = data.SpeedLimit.ValueString()
+	}
+	if !data.LargeBlock.IsNull() {
+		params["large_block"] = data.LargeBlock.ValueBool()
+	}
+	if !data.Embed.IsNull() {
+		params["embed"] = data.Embed.ValueBool()
+	}
+	if !data.Compressed.IsNull() {
+		params["compressed"] = data.Compressed.ValueBool()
+	}
+	if !data.Retries.IsNull() {
+		params["retries"] = data.Retries.ValueInt64()
+	}
+	if !data.LoggingLevel.IsNull() {
+		params["logging_level"] = data.LoggingLevel.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
 
 	result, err := r.client.Call("replication.create", params)
@@ -364,45 +425,106 @@ func (r *ReplicationResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"direction": data.Direction.ValueString(),
-		"transport": data.Transport.ValueString(),
-		"ssh_credentials": data.SshCredentials.ValueString(),
-		"netcat_active_side": data.NetcatActiveSide.ValueString(),
-		"netcat_active_side_listen_address": data.NetcatActiveSideListenAddress.ValueString(),
-		"netcat_active_side_port_min": data.NetcatActiveSidePortMin.ValueString(),
-		"netcat_active_side_port_max": data.NetcatActiveSidePortMax.ValueString(),
-		"netcat_passive_side_connect_address": data.NetcatPassiveSideConnectAddress.ValueString(),
-		"sudo": data.Sudo.ValueBool(),
-		"target_dataset": data.TargetDataset.ValueString(),
-		"recursive": data.Recursive.ValueBool(),
-		"properties": data.Properties.ValueBool(),
-		"replicate": data.Replicate.ValueBool(),
-		"encryption": data.Encryption.ValueBool(),
-		"encryption_inherit": data.EncryptionInherit.ValueString(),
-		"encryption_key": data.EncryptionKey.ValueString(),
-		"encryption_key_format": data.EncryptionKeyFormat.ValueString(),
-		"encryption_key_location": data.EncryptionKeyLocation.ValueString(),
-		"name_regex": data.NameRegex.ValueString(),
-		"auto": data.Auto.ValueBool(),
-		"schedule": data.Schedule.ValueString(),
-		"restrict_schedule": data.RestrictSchedule.ValueString(),
-		"only_matching_schedule": data.OnlyMatchingSchedule.ValueBool(),
-		"allow_from_scratch": data.AllowFromScratch.ValueBool(),
-		"readonly": data.Readonly.ValueString(),
-		"hold_pending_snapshots": data.HoldPendingSnapshots.ValueBool(),
-		"retention_policy": data.RetentionPolicy.ValueString(),
-		"lifetime_value": data.LifetimeValue.ValueString(),
-		"lifetime_unit": data.LifetimeUnit.ValueString(),
-		"compression": data.Compression.ValueString(),
-		"speed_limit": data.SpeedLimit.ValueString(),
-		"large_block": data.LargeBlock.ValueBool(),
-		"embed": data.Embed.ValueBool(),
-		"compressed": data.Compressed.ValueBool(),
-		"retries": data.Retries.ValueInt64(),
-		"logging_level": data.LoggingLevel.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["direction"] = data.Direction.ValueString()
+	params["transport"] = data.Transport.ValueString()
+	if !data.SshCredentials.IsNull() {
+		params["ssh_credentials"] = data.SshCredentials.ValueString()
+	}
+	if !data.NetcatActiveSide.IsNull() {
+		params["netcat_active_side"] = data.NetcatActiveSide.ValueString()
+	}
+	if !data.NetcatActiveSideListenAddress.IsNull() {
+		params["netcat_active_side_listen_address"] = data.NetcatActiveSideListenAddress.ValueString()
+	}
+	if !data.NetcatActiveSidePortMin.IsNull() {
+		params["netcat_active_side_port_min"] = data.NetcatActiveSidePortMin.ValueString()
+	}
+	if !data.NetcatActiveSidePortMax.IsNull() {
+		params["netcat_active_side_port_max"] = data.NetcatActiveSidePortMax.ValueString()
+	}
+	if !data.NetcatPassiveSideConnectAddress.IsNull() {
+		params["netcat_passive_side_connect_address"] = data.NetcatPassiveSideConnectAddress.ValueString()
+	}
+	if !data.Sudo.IsNull() {
+		params["sudo"] = data.Sudo.ValueBool()
+	}
+	params["target_dataset"] = data.TargetDataset.ValueString()
+	params["recursive"] = data.Recursive.ValueBool()
+	if !data.Properties.IsNull() {
+		params["properties"] = data.Properties.ValueBool()
+	}
+	if !data.Replicate.IsNull() {
+		params["replicate"] = data.Replicate.ValueBool()
+	}
+	if !data.Encryption.IsNull() {
+		params["encryption"] = data.Encryption.ValueBool()
+	}
+	if !data.EncryptionInherit.IsNull() {
+		params["encryption_inherit"] = data.EncryptionInherit.ValueString()
+	}
+	if !data.EncryptionKey.IsNull() {
+		params["encryption_key"] = data.EncryptionKey.ValueString()
+	}
+	if !data.EncryptionKeyFormat.IsNull() {
+		params["encryption_key_format"] = data.EncryptionKeyFormat.ValueString()
+	}
+	if !data.EncryptionKeyLocation.IsNull() {
+		params["encryption_key_location"] = data.EncryptionKeyLocation.ValueString()
+	}
+	if !data.NameRegex.IsNull() {
+		params["name_regex"] = data.NameRegex.ValueString()
+	}
+	params["auto"] = data.Auto.ValueBool()
+	if !data.Schedule.IsNull() {
+		params["schedule"] = data.Schedule.ValueString()
+	}
+	if !data.RestrictSchedule.IsNull() {
+		params["restrict_schedule"] = data.RestrictSchedule.ValueString()
+	}
+	if !data.OnlyMatchingSchedule.IsNull() {
+		params["only_matching_schedule"] = data.OnlyMatchingSchedule.ValueBool()
+	}
+	if !data.AllowFromScratch.IsNull() {
+		params["allow_from_scratch"] = data.AllowFromScratch.ValueBool()
+	}
+	if !data.Readonly.IsNull() {
+		params["readonly"] = data.Readonly.ValueString()
+	}
+	if !data.HoldPendingSnapshots.IsNull() {
+		params["hold_pending_snapshots"] = data.HoldPendingSnapshots.ValueBool()
+	}
+	params["retention_policy"] = data.RetentionPolicy.ValueString()
+	if !data.LifetimeValue.IsNull() {
+		params["lifetime_value"] = data.LifetimeValue.ValueString()
+	}
+	if !data.LifetimeUnit.IsNull() {
+		params["lifetime_unit"] = data.LifetimeUnit.ValueString()
+	}
+	if !data.Compression.IsNull() {
+		params["compression"] = data.Compression.ValueString()
+	}
+	if !data.SpeedLimit.IsNull() {
+		params["speed_limit"] = data.SpeedLimit.ValueString()
+	}
+	if !data.LargeBlock.IsNull() {
+		params["large_block"] = data.LargeBlock.ValueBool()
+	}
+	if !data.Embed.IsNull() {
+		params["embed"] = data.Embed.ValueBool()
+	}
+	if !data.Compressed.IsNull() {
+		params["compressed"] = data.Compressed.ValueBool()
+	}
+	if !data.Retries.IsNull() {
+		params["retries"] = data.Retries.ValueInt64()
+	}
+	if !data.LoggingLevel.IsNull() {
+		params["logging_level"] = data.LoggingLevel.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
 
 	_, err := r.client.Call("replication.update", []interface{}{data.ID.ValueString(), params})

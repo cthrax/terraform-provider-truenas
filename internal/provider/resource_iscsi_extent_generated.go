@@ -136,23 +136,52 @@ func (r *IscsiExtentResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"type": data.Type.ValueString(),
-		"disk": data.Disk.ValueString(),
-		"serial": data.Serial.ValueString(),
-		"path": data.Path.ValueString(),
-		"filesize": data.Filesize.ValueString(),
-		"blocksize": data.Blocksize.ValueInt64(),
-		"pblocksize": data.Pblocksize.ValueBool(),
-		"avail_threshold": data.AvailThreshold.ValueString(),
-		"comment": data.Comment.ValueString(),
-		"insecure_tpc": data.InsecureTpc.ValueBool(),
-		"xen": data.Xen.ValueBool(),
-		"rpm": data.Rpm.ValueString(),
-		"ro": data.Ro.ValueBool(),
-		"enabled": data.Enabled.ValueBool(),
-		"product_id": data.ProductId.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Type.IsNull() {
+		params["type"] = data.Type.ValueString()
+	}
+	if !data.Disk.IsNull() {
+		params["disk"] = data.Disk.ValueString()
+	}
+	if !data.Serial.IsNull() {
+		params["serial"] = data.Serial.ValueString()
+	}
+	if !data.Path.IsNull() {
+		params["path"] = data.Path.ValueString()
+	}
+	if !data.Filesize.IsNull() {
+		params["filesize"] = data.Filesize.ValueString()
+	}
+	if !data.Blocksize.IsNull() {
+		params["blocksize"] = data.Blocksize.ValueInt64()
+	}
+	if !data.Pblocksize.IsNull() {
+		params["pblocksize"] = data.Pblocksize.ValueBool()
+	}
+	if !data.AvailThreshold.IsNull() {
+		params["avail_threshold"] = data.AvailThreshold.ValueString()
+	}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.InsecureTpc.IsNull() {
+		params["insecure_tpc"] = data.InsecureTpc.ValueBool()
+	}
+	if !data.Xen.IsNull() {
+		params["xen"] = data.Xen.ValueBool()
+	}
+	if !data.Rpm.IsNull() {
+		params["rpm"] = data.Rpm.ValueString()
+	}
+	if !data.Ro.IsNull() {
+		params["ro"] = data.Ro.ValueBool()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.ProductId.IsNull() {
+		params["product_id"] = data.ProductId.ValueString()
 	}
 
 	result, err := r.client.Call("iscsi/extent.create", params)
@@ -192,23 +221,52 @@ func (r *IscsiExtentResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"type": data.Type.ValueString(),
-		"disk": data.Disk.ValueString(),
-		"serial": data.Serial.ValueString(),
-		"path": data.Path.ValueString(),
-		"filesize": data.Filesize.ValueString(),
-		"blocksize": data.Blocksize.ValueInt64(),
-		"pblocksize": data.Pblocksize.ValueBool(),
-		"avail_threshold": data.AvailThreshold.ValueString(),
-		"comment": data.Comment.ValueString(),
-		"insecure_tpc": data.InsecureTpc.ValueBool(),
-		"xen": data.Xen.ValueBool(),
-		"rpm": data.Rpm.ValueString(),
-		"ro": data.Ro.ValueBool(),
-		"enabled": data.Enabled.ValueBool(),
-		"product_id": data.ProductId.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Type.IsNull() {
+		params["type"] = data.Type.ValueString()
+	}
+	if !data.Disk.IsNull() {
+		params["disk"] = data.Disk.ValueString()
+	}
+	if !data.Serial.IsNull() {
+		params["serial"] = data.Serial.ValueString()
+	}
+	if !data.Path.IsNull() {
+		params["path"] = data.Path.ValueString()
+	}
+	if !data.Filesize.IsNull() {
+		params["filesize"] = data.Filesize.ValueString()
+	}
+	if !data.Blocksize.IsNull() {
+		params["blocksize"] = data.Blocksize.ValueInt64()
+	}
+	if !data.Pblocksize.IsNull() {
+		params["pblocksize"] = data.Pblocksize.ValueBool()
+	}
+	if !data.AvailThreshold.IsNull() {
+		params["avail_threshold"] = data.AvailThreshold.ValueString()
+	}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.InsecureTpc.IsNull() {
+		params["insecure_tpc"] = data.InsecureTpc.ValueBool()
+	}
+	if !data.Xen.IsNull() {
+		params["xen"] = data.Xen.ValueBool()
+	}
+	if !data.Rpm.IsNull() {
+		params["rpm"] = data.Rpm.ValueString()
+	}
+	if !data.Ro.IsNull() {
+		params["ro"] = data.Ro.ValueBool()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.ProductId.IsNull() {
+		params["product_id"] = data.ProductId.ValueString()
 	}
 
 	_, err := r.client.Call("iscsi/extent.update", []interface{}{data.ID.ValueString(), params})

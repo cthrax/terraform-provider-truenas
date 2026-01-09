@@ -86,13 +86,20 @@ func (r *TunableResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	params := map[string]interface{}{
-		"type": data.Type.ValueString(),
-		"var": data.Var.ValueString(),
-		"value": data.Value.ValueString(),
-		"comment": data.Comment.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"update_initramfs": data.UpdateInitramfs.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.Type.IsNull() {
+		params["type"] = data.Type.ValueString()
+	}
+	params["var"] = data.Var.ValueString()
+	params["value"] = data.Value.ValueString()
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.UpdateInitramfs.IsNull() {
+		params["update_initramfs"] = data.UpdateInitramfs.ValueBool()
 	}
 
 	result, err := r.client.Call("tunable.create", params)
@@ -132,13 +139,20 @@ func (r *TunableResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	params := map[string]interface{}{
-		"type": data.Type.ValueString(),
-		"var": data.Var.ValueString(),
-		"value": data.Value.ValueString(),
-		"comment": data.Comment.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"update_initramfs": data.UpdateInitramfs.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.Type.IsNull() {
+		params["type"] = data.Type.ValueString()
+	}
+	params["var"] = data.Var.ValueString()
+	params["value"] = data.Value.ValueString()
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.UpdateInitramfs.IsNull() {
+		params["update_initramfs"] = data.UpdateInitramfs.ValueBool()
 	}
 
 	_, err := r.client.Call("tunable.update", []interface{}{data.ID.ValueString(), params})

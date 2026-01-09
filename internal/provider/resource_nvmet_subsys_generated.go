@@ -91,14 +91,25 @@ func (r *NvmetSubsysResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"subnqn": data.Subnqn.ValueString(),
-		"allow_any_host": data.AllowAnyHost.ValueBool(),
-		"pi_enable": data.PiEnable.ValueString(),
-		"qid_max": data.QidMax.ValueString(),
-		"ieee_oui": data.IeeeOui.ValueString(),
-		"ana": data.Ana.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Subnqn.IsNull() {
+		params["subnqn"] = data.Subnqn.ValueString()
+	}
+	if !data.AllowAnyHost.IsNull() {
+		params["allow_any_host"] = data.AllowAnyHost.ValueBool()
+	}
+	if !data.PiEnable.IsNull() {
+		params["pi_enable"] = data.PiEnable.ValueString()
+	}
+	if !data.QidMax.IsNull() {
+		params["qid_max"] = data.QidMax.ValueString()
+	}
+	if !data.IeeeOui.IsNull() {
+		params["ieee_oui"] = data.IeeeOui.ValueString()
+	}
+	if !data.Ana.IsNull() {
+		params["ana"] = data.Ana.ValueString()
 	}
 
 	result, err := r.client.Call("nvmet/subsys.create", params)
@@ -138,14 +149,25 @@ func (r *NvmetSubsysResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"subnqn": data.Subnqn.ValueString(),
-		"allow_any_host": data.AllowAnyHost.ValueBool(),
-		"pi_enable": data.PiEnable.ValueString(),
-		"qid_max": data.QidMax.ValueString(),
-		"ieee_oui": data.IeeeOui.ValueString(),
-		"ana": data.Ana.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Subnqn.IsNull() {
+		params["subnqn"] = data.Subnqn.ValueString()
+	}
+	if !data.AllowAnyHost.IsNull() {
+		params["allow_any_host"] = data.AllowAnyHost.ValueBool()
+	}
+	if !data.PiEnable.IsNull() {
+		params["pi_enable"] = data.PiEnable.ValueString()
+	}
+	if !data.QidMax.IsNull() {
+		params["qid_max"] = data.QidMax.ValueString()
+	}
+	if !data.IeeeOui.IsNull() {
+		params["ieee_oui"] = data.IeeeOui.ValueString()
+	}
+	if !data.Ana.IsNull() {
+		params["ana"] = data.Ana.ValueString()
 	}
 
 	_, err := r.client.Call("nvmet/subsys.update", []interface{}{data.ID.ValueString(), params})

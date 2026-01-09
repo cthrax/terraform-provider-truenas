@@ -66,10 +66,9 @@ func (r *FcportResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	params := map[string]interface{}{
-		"port": data.Port.ValueString(),
-		"target_id": data.TargetId.ValueInt64(),
-	}
+	params := map[string]interface{}{}
+	params["port"] = data.Port.ValueString()
+	params["target_id"] = data.TargetId.ValueInt64()
 
 	result, err := r.client.Call("fcport.create", params)
 	if err != nil {
@@ -108,10 +107,9 @@ func (r *FcportResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	params := map[string]interface{}{
-		"port": data.Port.ValueString(),
-		"target_id": data.TargetId.ValueInt64(),
-	}
+	params := map[string]interface{}{}
+	params["port"] = data.Port.ValueString()
+	params["target_id"] = data.TargetId.ValueInt64()
 
 	_, err := r.client.Call("fcport.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

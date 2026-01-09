@@ -81,12 +81,15 @@ func (r *AppRegistryResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"description": data.Description.ValueString(),
-		"username": data.Username.ValueString(),
-		"password": data.Password.ValueString(),
-		"uri": data.Uri.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["username"] = data.Username.ValueString()
+	params["password"] = data.Password.ValueString()
+	if !data.Uri.IsNull() {
+		params["uri"] = data.Uri.ValueString()
 	}
 
 	result, err := r.client.Call("app/registry.create", params)
@@ -126,12 +129,15 @@ func (r *AppRegistryResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"description": data.Description.ValueString(),
-		"username": data.Username.ValueString(),
-		"password": data.Password.ValueString(),
-		"uri": data.Uri.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["username"] = data.Username.ValueString()
+	params["password"] = data.Password.ValueString()
+	if !data.Uri.IsNull() {
+		params["uri"] = data.Uri.ValueString()
 	}
 
 	_, err := r.client.Call("app/registry.update", []interface{}{data.ID.ValueString(), params})

@@ -91,14 +91,23 @@ func (r *InitshutdownscriptResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	params := map[string]interface{}{
-		"type": data.Type.ValueString(),
-		"command": data.Command.ValueString(),
-		"script": data.Script.ValueString(),
-		"when": data.When.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"timeout": data.Timeout.ValueInt64(),
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	params["type"] = data.Type.ValueString()
+	if !data.Command.IsNull() {
+		params["command"] = data.Command.ValueString()
+	}
+	if !data.Script.IsNull() {
+		params["script"] = data.Script.ValueString()
+	}
+	params["when"] = data.When.ValueString()
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.Timeout.IsNull() {
+		params["timeout"] = data.Timeout.ValueInt64()
+	}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	result, err := r.client.Call("initshutdownscript.create", params)
@@ -138,14 +147,23 @@ func (r *InitshutdownscriptResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	params := map[string]interface{}{
-		"type": data.Type.ValueString(),
-		"command": data.Command.ValueString(),
-		"script": data.Script.ValueString(),
-		"when": data.When.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"timeout": data.Timeout.ValueInt64(),
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	params["type"] = data.Type.ValueString()
+	if !data.Command.IsNull() {
+		params["command"] = data.Command.ValueString()
+	}
+	if !data.Script.IsNull() {
+		params["script"] = data.Script.ValueString()
+	}
+	params["when"] = data.When.ValueString()
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.Timeout.IsNull() {
+		params["timeout"] = data.Timeout.ValueInt64()
+	}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	_, err := r.client.Call("initshutdownscript.update", []interface{}{data.ID.ValueString(), params})

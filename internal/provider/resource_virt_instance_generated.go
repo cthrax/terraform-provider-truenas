@@ -132,21 +132,44 @@ func (r *VirtInstanceResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"source_type": data.SourceType.ValueString(),
-		"storage_pool": data.StoragePool.ValueString(),
-		"image": data.Image.ValueString(),
-		"root_disk_size": data.RootDiskSize.ValueInt64(),
-		"root_disk_io_bus": data.RootDiskIoBus.ValueString(),
-		"remote": data.Remote.ValueString(),
-		"instance_type": data.InstanceType.ValueString(),
-		"environment": data.Environment.ValueString(),
-		"autostart": data.Autostart.ValueString(),
-		"cpu": data.Cpu.ValueString(),
-		"devices": data.Devices.ValueString(),
-		"memory": data.Memory.ValueString(),
-		"privileged_mode": data.PrivilegedMode.ValueBool(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.SourceType.IsNull() {
+		params["source_type"] = data.SourceType.ValueString()
+	}
+	if !data.StoragePool.IsNull() {
+		params["storage_pool"] = data.StoragePool.ValueString()
+	}
+	params["image"] = data.Image.ValueString()
+	if !data.RootDiskSize.IsNull() {
+		params["root_disk_size"] = data.RootDiskSize.ValueInt64()
+	}
+	if !data.RootDiskIoBus.IsNull() {
+		params["root_disk_io_bus"] = data.RootDiskIoBus.ValueString()
+	}
+	if !data.Remote.IsNull() {
+		params["remote"] = data.Remote.ValueString()
+	}
+	if !data.InstanceType.IsNull() {
+		params["instance_type"] = data.InstanceType.ValueString()
+	}
+	if !data.Environment.IsNull() {
+		params["environment"] = data.Environment.ValueString()
+	}
+	if !data.Autostart.IsNull() {
+		params["autostart"] = data.Autostart.ValueString()
+	}
+	if !data.Cpu.IsNull() {
+		params["cpu"] = data.Cpu.ValueString()
+	}
+	if !data.Devices.IsNull() {
+		params["devices"] = data.Devices.ValueString()
+	}
+	if !data.Memory.IsNull() {
+		params["memory"] = data.Memory.ValueString()
+	}
+	if !data.PrivilegedMode.IsNull() {
+		params["privileged_mode"] = data.PrivilegedMode.ValueBool()
 	}
 
 	result, err := r.client.Call("virt/instance.create", params)
@@ -201,21 +224,44 @@ func (r *VirtInstanceResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"source_type": data.SourceType.ValueString(),
-		"storage_pool": data.StoragePool.ValueString(),
-		"image": data.Image.ValueString(),
-		"root_disk_size": data.RootDiskSize.ValueInt64(),
-		"root_disk_io_bus": data.RootDiskIoBus.ValueString(),
-		"remote": data.Remote.ValueString(),
-		"instance_type": data.InstanceType.ValueString(),
-		"environment": data.Environment.ValueString(),
-		"autostart": data.Autostart.ValueString(),
-		"cpu": data.Cpu.ValueString(),
-		"devices": data.Devices.ValueString(),
-		"memory": data.Memory.ValueString(),
-		"privileged_mode": data.PrivilegedMode.ValueBool(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.SourceType.IsNull() {
+		params["source_type"] = data.SourceType.ValueString()
+	}
+	if !data.StoragePool.IsNull() {
+		params["storage_pool"] = data.StoragePool.ValueString()
+	}
+	params["image"] = data.Image.ValueString()
+	if !data.RootDiskSize.IsNull() {
+		params["root_disk_size"] = data.RootDiskSize.ValueInt64()
+	}
+	if !data.RootDiskIoBus.IsNull() {
+		params["root_disk_io_bus"] = data.RootDiskIoBus.ValueString()
+	}
+	if !data.Remote.IsNull() {
+		params["remote"] = data.Remote.ValueString()
+	}
+	if !data.InstanceType.IsNull() {
+		params["instance_type"] = data.InstanceType.ValueString()
+	}
+	if !data.Environment.IsNull() {
+		params["environment"] = data.Environment.ValueString()
+	}
+	if !data.Autostart.IsNull() {
+		params["autostart"] = data.Autostart.ValueString()
+	}
+	if !data.Cpu.IsNull() {
+		params["cpu"] = data.Cpu.ValueString()
+	}
+	if !data.Devices.IsNull() {
+		params["devices"] = data.Devices.ValueString()
+	}
+	if !data.Memory.IsNull() {
+		params["memory"] = data.Memory.ValueString()
+	}
+	if !data.PrivilegedMode.IsNull() {
+		params["privileged_mode"] = data.PrivilegedMode.ValueBool()
 	}
 
 	_, err := r.client.Call("virt/instance.update", []interface{}{data.ID.ValueString(), params})

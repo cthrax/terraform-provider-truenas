@@ -76,11 +76,12 @@ func (r *FilesystemAcltemplateResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"acltype": data.Acltype.ValueString(),
-		"acl": data.Acl.ValueString(),
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["acltype"] = data.Acltype.ValueString()
+	params["acl"] = data.Acl.ValueString()
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	result, err := r.client.Call("filesystem/acltemplate.create", params)
@@ -120,11 +121,12 @@ func (r *FilesystemAcltemplateResource) Update(ctx context.Context, req resource
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"acltype": data.Acltype.ValueString(),
-		"acl": data.Acl.ValueString(),
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["acltype"] = data.Acltype.ValueString()
+	params["acl"] = data.Acl.ValueString()
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	_, err := r.client.Call("filesystem/acltemplate.update", []interface{}{data.ID.ValueString(), params})

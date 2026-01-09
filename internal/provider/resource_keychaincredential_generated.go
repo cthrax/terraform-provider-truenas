@@ -56,9 +56,8 @@ func (r *KeychaincredentialResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	result, err := r.client.Call("keychaincredential.create", params)
 	if err != nil {
@@ -97,9 +96,8 @@ func (r *KeychaincredentialResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	_, err := r.client.Call("keychaincredential.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

@@ -66,10 +66,9 @@ func (r *AcmeDnsAuthenticatorResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	params := map[string]interface{}{
-		"attributes": data.Attributes.ValueString(),
-		"name": data.Name.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["attributes"] = data.Attributes.ValueString()
+	params["name"] = data.Name.ValueString()
 
 	result, err := r.client.Call("acme/dns/authenticator.create", params)
 	if err != nil {
@@ -108,10 +107,9 @@ func (r *AcmeDnsAuthenticatorResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	params := map[string]interface{}{
-		"attributes": data.Attributes.ValueString(),
-		"name": data.Name.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["attributes"] = data.Attributes.ValueString()
+	params["name"] = data.Name.ValueString()
 
 	_, err := r.client.Call("acme/dns/authenticator.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

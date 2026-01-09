@@ -121,16 +121,31 @@ func (r *SharingNfsResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	params := map[string]interface{}{
-		"path": data.Path.ValueString(),
-		"comment": data.Comment.ValueString(),
-		"ro": data.Ro.ValueBool(),
-		"maproot_user": data.MaprootUser.ValueString(),
-		"maproot_group": data.MaprootGroup.ValueString(),
-		"mapall_user": data.MapallUser.ValueString(),
-		"mapall_group": data.MapallGroup.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"expose_snapshots": data.ExposeSnapshots.ValueBool(),
+	params := map[string]interface{}{}
+	params["path"] = data.Path.ValueString()
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.Ro.IsNull() {
+		params["ro"] = data.Ro.ValueBool()
+	}
+	if !data.MaprootUser.IsNull() {
+		params["maproot_user"] = data.MaprootUser.ValueString()
+	}
+	if !data.MaprootGroup.IsNull() {
+		params["maproot_group"] = data.MaprootGroup.ValueString()
+	}
+	if !data.MapallUser.IsNull() {
+		params["mapall_user"] = data.MapallUser.ValueString()
+	}
+	if !data.MapallGroup.IsNull() {
+		params["mapall_group"] = data.MapallGroup.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.ExposeSnapshots.IsNull() {
+		params["expose_snapshots"] = data.ExposeSnapshots.ValueBool()
 	}
 
 	result, err := r.client.Call("sharing/nfs.create", params)
@@ -170,16 +185,31 @@ func (r *SharingNfsResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	params := map[string]interface{}{
-		"path": data.Path.ValueString(),
-		"comment": data.Comment.ValueString(),
-		"ro": data.Ro.ValueBool(),
-		"maproot_user": data.MaprootUser.ValueString(),
-		"maproot_group": data.MaprootGroup.ValueString(),
-		"mapall_user": data.MapallUser.ValueString(),
-		"mapall_group": data.MapallGroup.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"expose_snapshots": data.ExposeSnapshots.ValueBool(),
+	params := map[string]interface{}{}
+	params["path"] = data.Path.ValueString()
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
+	}
+	if !data.Ro.IsNull() {
+		params["ro"] = data.Ro.ValueBool()
+	}
+	if !data.MaprootUser.IsNull() {
+		params["maproot_user"] = data.MaprootUser.ValueString()
+	}
+	if !data.MaprootGroup.IsNull() {
+		params["maproot_group"] = data.MaprootGroup.ValueString()
+	}
+	if !data.MapallUser.IsNull() {
+		params["mapall_user"] = data.MapallUser.ValueString()
+	}
+	if !data.MapallGroup.IsNull() {
+		params["mapall_group"] = data.MapallGroup.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.ExposeSnapshots.IsNull() {
+		params["expose_snapshots"] = data.ExposeSnapshots.ValueBool()
 	}
 
 	_, err := r.client.Call("sharing/nfs.update", []interface{}{data.ID.ValueString(), params})

@@ -66,10 +66,9 @@ func (r *NvmetPortSubsysResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	params := map[string]interface{}{
-		"port_id": data.PortId.ValueInt64(),
-		"subsys_id": data.SubsysId.ValueInt64(),
-	}
+	params := map[string]interface{}{}
+	params["port_id"] = data.PortId.ValueInt64()
+	params["subsys_id"] = data.SubsysId.ValueInt64()
 
 	result, err := r.client.Call("nvmet/port_subsys.create", params)
 	if err != nil {
@@ -108,10 +107,9 @@ func (r *NvmetPortSubsysResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	params := map[string]interface{}{
-		"port_id": data.PortId.ValueInt64(),
-		"subsys_id": data.SubsysId.ValueInt64(),
-	}
+	params := map[string]interface{}{}
+	params["port_id"] = data.PortId.ValueInt64()
+	params["subsys_id"] = data.SubsysId.ValueInt64()
 
 	_, err := r.client.Call("nvmet/port_subsys.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

@@ -81,12 +81,19 @@ func (r *NvmetHostResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"hostnqn": data.Hostnqn.ValueString(),
-		"dhchap_key": data.DhchapKey.ValueString(),
-		"dhchap_ctrl_key": data.DhchapCtrlKey.ValueString(),
-		"dhchap_dhgroup": data.DhchapDhgroup.ValueString(),
-		"dhchap_hash": data.DhchapHash.ValueString(),
+	params := map[string]interface{}{}
+	params["hostnqn"] = data.Hostnqn.ValueString()
+	if !data.DhchapKey.IsNull() {
+		params["dhchap_key"] = data.DhchapKey.ValueString()
+	}
+	if !data.DhchapCtrlKey.IsNull() {
+		params["dhchap_ctrl_key"] = data.DhchapCtrlKey.ValueString()
+	}
+	if !data.DhchapDhgroup.IsNull() {
+		params["dhchap_dhgroup"] = data.DhchapDhgroup.ValueString()
+	}
+	if !data.DhchapHash.IsNull() {
+		params["dhchap_hash"] = data.DhchapHash.ValueString()
 	}
 
 	result, err := r.client.Call("nvmet/host.create", params)
@@ -126,12 +133,19 @@ func (r *NvmetHostResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"hostnqn": data.Hostnqn.ValueString(),
-		"dhchap_key": data.DhchapKey.ValueString(),
-		"dhchap_ctrl_key": data.DhchapCtrlKey.ValueString(),
-		"dhchap_dhgroup": data.DhchapDhgroup.ValueString(),
-		"dhchap_hash": data.DhchapHash.ValueString(),
+	params := map[string]interface{}{}
+	params["hostnqn"] = data.Hostnqn.ValueString()
+	if !data.DhchapKey.IsNull() {
+		params["dhchap_key"] = data.DhchapKey.ValueString()
+	}
+	if !data.DhchapCtrlKey.IsNull() {
+		params["dhchap_ctrl_key"] = data.DhchapCtrlKey.ValueString()
+	}
+	if !data.DhchapDhgroup.IsNull() {
+		params["dhchap_dhgroup"] = data.DhchapDhgroup.ValueString()
+	}
+	if !data.DhchapHash.IsNull() {
+		params["dhchap_hash"] = data.DhchapHash.ValueString()
 	}
 
 	_, err := r.client.Call("nvmet/host.update", []interface{}{data.ID.ValueString(), params})

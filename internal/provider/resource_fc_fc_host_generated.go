@@ -76,11 +76,16 @@ func (r *FcFcHostResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	params := map[string]interface{}{
-		"alias": data.Alias.ValueString(),
-		"wwpn": data.Wwpn.ValueString(),
-		"wwpn_b": data.WwpnB.ValueString(),
-		"npiv": data.Npiv.ValueInt64(),
+	params := map[string]interface{}{}
+	params["alias"] = data.Alias.ValueString()
+	if !data.Wwpn.IsNull() {
+		params["wwpn"] = data.Wwpn.ValueString()
+	}
+	if !data.WwpnB.IsNull() {
+		params["wwpn_b"] = data.WwpnB.ValueString()
+	}
+	if !data.Npiv.IsNull() {
+		params["npiv"] = data.Npiv.ValueInt64()
 	}
 
 	result, err := r.client.Call("fc/fc_host.create", params)
@@ -120,11 +125,16 @@ func (r *FcFcHostResource) Update(ctx context.Context, req resource.UpdateReques
 		return
 	}
 
-	params := map[string]interface{}{
-		"alias": data.Alias.ValueString(),
-		"wwpn": data.Wwpn.ValueString(),
-		"wwpn_b": data.WwpnB.ValueString(),
-		"npiv": data.Npiv.ValueInt64(),
+	params := map[string]interface{}{}
+	params["alias"] = data.Alias.ValueString()
+	if !data.Wwpn.IsNull() {
+		params["wwpn"] = data.Wwpn.ValueString()
+	}
+	if !data.WwpnB.IsNull() {
+		params["wwpn_b"] = data.WwpnB.ValueString()
+	}
+	if !data.Npiv.IsNull() {
+		params["npiv"] = data.Npiv.ValueInt64()
 	}
 
 	_, err := r.client.Call("fc/fc_host.update", []interface{}{data.ID.ValueString(), params})

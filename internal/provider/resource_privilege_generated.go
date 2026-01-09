@@ -81,10 +81,9 @@ func (r *PrivilegeResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"web_shell": data.WebShell.ValueBool(),
-	}
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["web_shell"] = data.WebShell.ValueBool()
 
 	result, err := r.client.Call("privilege.create", params)
 	if err != nil {
@@ -123,10 +122,9 @@ func (r *PrivilegeResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"web_shell": data.WebShell.ValueBool(),
-	}
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["web_shell"] = data.WebShell.ValueBool()
 
 	_, err := r.client.Call("privilege.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

@@ -71,11 +71,10 @@ func (r *ReportingExportersResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	params := map[string]interface{}{
-		"enabled": data.Enabled.ValueBool(),
-		"attributes": data.Attributes.ValueString(),
-		"name": data.Name.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["enabled"] = data.Enabled.ValueBool()
+	params["attributes"] = data.Attributes.ValueString()
+	params["name"] = data.Name.ValueString()
 
 	result, err := r.client.Call("reporting/exporters.create", params)
 	if err != nil {
@@ -114,11 +113,10 @@ func (r *ReportingExportersResource) Update(ctx context.Context, req resource.Up
 		return
 	}
 
-	params := map[string]interface{}{
-		"enabled": data.Enabled.ValueBool(),
-		"attributes": data.Attributes.ValueString(),
-		"name": data.Name.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["enabled"] = data.Enabled.ValueBool()
+	params["attributes"] = data.Attributes.ValueString()
+	params["name"] = data.Name.ValueString()
 
 	_, err := r.client.Call("reporting/exporters.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

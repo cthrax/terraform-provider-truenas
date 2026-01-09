@@ -166,24 +166,55 @@ func (r *InterfaceResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"description": data.Description.ValueString(),
-		"type": data.Type.ValueString(),
-		"ipv4_dhcp": data.Ipv4Dhcp.ValueBool(),
-		"ipv6_auto": data.Ipv6Auto.ValueBool(),
-		"failover_critical": data.FailoverCritical.ValueBool(),
-		"failover_group": data.FailoverGroup.ValueString(),
-		"failover_vhid": data.FailoverVhid.ValueString(),
-		"enable_learning": data.EnableLearning.ValueBool(),
-		"stp": data.Stp.ValueBool(),
-		"lag_protocol": data.LagProtocol.ValueString(),
-		"xmit_hash_policy": data.XmitHashPolicy.ValueString(),
-		"lacpdu_rate": data.LacpduRate.ValueString(),
-		"vlan_parent_interface": data.VlanParentInterface.ValueString(),
-		"vlan_tag": data.VlanTag.ValueInt64(),
-		"vlan_pcp": data.VlanPcp.ValueString(),
-		"mtu": data.Mtu.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Name.IsNull() {
+		params["name"] = data.Name.ValueString()
+	}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["type"] = data.Type.ValueString()
+	if !data.Ipv4Dhcp.IsNull() {
+		params["ipv4_dhcp"] = data.Ipv4Dhcp.ValueBool()
+	}
+	if !data.Ipv6Auto.IsNull() {
+		params["ipv6_auto"] = data.Ipv6Auto.ValueBool()
+	}
+	if !data.FailoverCritical.IsNull() {
+		params["failover_critical"] = data.FailoverCritical.ValueBool()
+	}
+	if !data.FailoverGroup.IsNull() {
+		params["failover_group"] = data.FailoverGroup.ValueString()
+	}
+	if !data.FailoverVhid.IsNull() {
+		params["failover_vhid"] = data.FailoverVhid.ValueString()
+	}
+	if !data.EnableLearning.IsNull() {
+		params["enable_learning"] = data.EnableLearning.ValueBool()
+	}
+	if !data.Stp.IsNull() {
+		params["stp"] = data.Stp.ValueBool()
+	}
+	if !data.LagProtocol.IsNull() {
+		params["lag_protocol"] = data.LagProtocol.ValueString()
+	}
+	if !data.XmitHashPolicy.IsNull() {
+		params["xmit_hash_policy"] = data.XmitHashPolicy.ValueString()
+	}
+	if !data.LacpduRate.IsNull() {
+		params["lacpdu_rate"] = data.LacpduRate.ValueString()
+	}
+	if !data.VlanParentInterface.IsNull() {
+		params["vlan_parent_interface"] = data.VlanParentInterface.ValueString()
+	}
+	if !data.VlanTag.IsNull() {
+		params["vlan_tag"] = data.VlanTag.ValueInt64()
+	}
+	if !data.VlanPcp.IsNull() {
+		params["vlan_pcp"] = data.VlanPcp.ValueString()
+	}
+	if !data.Mtu.IsNull() {
+		params["mtu"] = data.Mtu.ValueString()
 	}
 
 	result, err := r.client.Call("interface.create", params)
@@ -223,24 +254,55 @@ func (r *InterfaceResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"description": data.Description.ValueString(),
-		"type": data.Type.ValueString(),
-		"ipv4_dhcp": data.Ipv4Dhcp.ValueBool(),
-		"ipv6_auto": data.Ipv6Auto.ValueBool(),
-		"failover_critical": data.FailoverCritical.ValueBool(),
-		"failover_group": data.FailoverGroup.ValueString(),
-		"failover_vhid": data.FailoverVhid.ValueString(),
-		"enable_learning": data.EnableLearning.ValueBool(),
-		"stp": data.Stp.ValueBool(),
-		"lag_protocol": data.LagProtocol.ValueString(),
-		"xmit_hash_policy": data.XmitHashPolicy.ValueString(),
-		"lacpdu_rate": data.LacpduRate.ValueString(),
-		"vlan_parent_interface": data.VlanParentInterface.ValueString(),
-		"vlan_tag": data.VlanTag.ValueInt64(),
-		"vlan_pcp": data.VlanPcp.ValueString(),
-		"mtu": data.Mtu.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Name.IsNull() {
+		params["name"] = data.Name.ValueString()
+	}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["type"] = data.Type.ValueString()
+	if !data.Ipv4Dhcp.IsNull() {
+		params["ipv4_dhcp"] = data.Ipv4Dhcp.ValueBool()
+	}
+	if !data.Ipv6Auto.IsNull() {
+		params["ipv6_auto"] = data.Ipv6Auto.ValueBool()
+	}
+	if !data.FailoverCritical.IsNull() {
+		params["failover_critical"] = data.FailoverCritical.ValueBool()
+	}
+	if !data.FailoverGroup.IsNull() {
+		params["failover_group"] = data.FailoverGroup.ValueString()
+	}
+	if !data.FailoverVhid.IsNull() {
+		params["failover_vhid"] = data.FailoverVhid.ValueString()
+	}
+	if !data.EnableLearning.IsNull() {
+		params["enable_learning"] = data.EnableLearning.ValueBool()
+	}
+	if !data.Stp.IsNull() {
+		params["stp"] = data.Stp.ValueBool()
+	}
+	if !data.LagProtocol.IsNull() {
+		params["lag_protocol"] = data.LagProtocol.ValueString()
+	}
+	if !data.XmitHashPolicy.IsNull() {
+		params["xmit_hash_policy"] = data.XmitHashPolicy.ValueString()
+	}
+	if !data.LacpduRate.IsNull() {
+		params["lacpdu_rate"] = data.LacpduRate.ValueString()
+	}
+	if !data.VlanParentInterface.IsNull() {
+		params["vlan_parent_interface"] = data.VlanParentInterface.ValueString()
+	}
+	if !data.VlanTag.IsNull() {
+		params["vlan_tag"] = data.VlanTag.ValueInt64()
+	}
+	if !data.VlanPcp.IsNull() {
+		params["vlan_pcp"] = data.VlanPcp.ValueString()
+	}
+	if !data.Mtu.IsNull() {
+		params["mtu"] = data.Mtu.ValueString()
 	}
 
 	_, err := r.client.Call("interface.update", []interface{}{data.ID.ValueString(), params})

@@ -86,13 +86,18 @@ func (r *IscsiAuthResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"tag": data.Tag.ValueInt64(),
-		"user": data.User.ValueString(),
-		"secret": data.Secret.ValueString(),
-		"peeruser": data.Peeruser.ValueString(),
-		"peersecret": data.Peersecret.ValueString(),
-		"discovery_auth": data.DiscoveryAuth.ValueString(),
+	params := map[string]interface{}{}
+	params["tag"] = data.Tag.ValueInt64()
+	params["user"] = data.User.ValueString()
+	params["secret"] = data.Secret.ValueString()
+	if !data.Peeruser.IsNull() {
+		params["peeruser"] = data.Peeruser.ValueString()
+	}
+	if !data.Peersecret.IsNull() {
+		params["peersecret"] = data.Peersecret.ValueString()
+	}
+	if !data.DiscoveryAuth.IsNull() {
+		params["discovery_auth"] = data.DiscoveryAuth.ValueString()
 	}
 
 	result, err := r.client.Call("iscsi/auth.create", params)
@@ -132,13 +137,18 @@ func (r *IscsiAuthResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"tag": data.Tag.ValueInt64(),
-		"user": data.User.ValueString(),
-		"secret": data.Secret.ValueString(),
-		"peeruser": data.Peeruser.ValueString(),
-		"peersecret": data.Peersecret.ValueString(),
-		"discovery_auth": data.DiscoveryAuth.ValueString(),
+	params := map[string]interface{}{}
+	params["tag"] = data.Tag.ValueInt64()
+	params["user"] = data.User.ValueString()
+	params["secret"] = data.Secret.ValueString()
+	if !data.Peeruser.IsNull() {
+		params["peeruser"] = data.Peeruser.ValueString()
+	}
+	if !data.Peersecret.IsNull() {
+		params["peersecret"] = data.Peersecret.ValueString()
+	}
+	if !data.DiscoveryAuth.IsNull() {
+		params["discovery_auth"] = data.DiscoveryAuth.ValueString()
 	}
 
 	_, err := r.client.Call("iscsi/auth.update", []interface{}{data.ID.ValueString(), params})

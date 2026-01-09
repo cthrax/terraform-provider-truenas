@@ -71,10 +71,11 @@ func (r *StaticrouteResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"destination": data.Destination.ValueString(),
-		"gateway": data.Gateway.ValueString(),
-		"description": data.Description.ValueString(),
+	params := map[string]interface{}{}
+	params["destination"] = data.Destination.ValueString()
+	params["gateway"] = data.Gateway.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
 	}
 
 	result, err := r.client.Call("staticroute.create", params)
@@ -114,10 +115,11 @@ func (r *StaticrouteResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"destination": data.Destination.ValueString(),
-		"gateway": data.Gateway.ValueString(),
-		"description": data.Description.ValueString(),
+	params := map[string]interface{}{}
+	params["destination"] = data.Destination.ValueString()
+	params["gateway"] = data.Gateway.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
 	}
 
 	_, err := r.client.Call("staticroute.update", []interface{}{data.ID.ValueString(), params})

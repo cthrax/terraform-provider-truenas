@@ -66,10 +66,9 @@ func (r *CloudsyncCredentialsResource) Create(ctx context.Context, req resource.
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"provider": data.Provider.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["provider"] = data.Provider.ValueString()
 
 	result, err := r.client.Call("cloudsync/credentials.create", params)
 	if err != nil {
@@ -108,10 +107,9 @@ func (r *CloudsyncCredentialsResource) Update(ctx context.Context, req resource.
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"provider": data.Provider.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["provider"] = data.Provider.ValueString()
 
 	_, err := r.client.Call("cloudsync/credentials.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

@@ -81,11 +81,16 @@ func (r *PoolScrubResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"pool": data.Pool.ValueInt64(),
-		"threshold": data.Threshold.ValueInt64(),
-		"description": data.Description.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
+	params := map[string]interface{}{}
+	params["pool"] = data.Pool.ValueInt64()
+	if !data.Threshold.IsNull() {
+		params["threshold"] = data.Threshold.ValueInt64()
+	}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
 
 	result, err := r.client.Call("pool/scrub.create", params)
@@ -125,11 +130,16 @@ func (r *PoolScrubResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"pool": data.Pool.ValueInt64(),
-		"threshold": data.Threshold.ValueInt64(),
-		"description": data.Description.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
+	params := map[string]interface{}{}
+	params["pool"] = data.Pool.ValueInt64()
+	if !data.Threshold.IsNull() {
+		params["threshold"] = data.Threshold.ValueInt64()
+	}
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
 
 	_, err := r.client.Call("pool/scrub.update", []interface{}{data.ID.ValueString(), params})

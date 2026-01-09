@@ -66,10 +66,9 @@ func (r *KerberosKeytabResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"file": data.File.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["file"] = data.File.ValueString()
 
 	result, err := r.client.Call("kerberos/keytab.create", params)
 	if err != nil {
@@ -108,10 +107,9 @@ func (r *KerberosKeytabResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"file": data.File.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["file"] = data.File.ValueString()
 
 	_, err := r.client.Call("kerberos/keytab.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

@@ -91,14 +91,25 @@ func (r *SystemNtpserverResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	params := map[string]interface{}{
-		"address": data.Address.ValueString(),
-		"burst": data.Burst.ValueBool(),
-		"iburst": data.Iburst.ValueBool(),
-		"prefer": data.Prefer.ValueBool(),
-		"minpoll": data.Minpoll.ValueInt64(),
-		"maxpoll": data.Maxpoll.ValueInt64(),
-		"force": data.Force.ValueBool(),
+	params := map[string]interface{}{}
+	params["address"] = data.Address.ValueString()
+	if !data.Burst.IsNull() {
+		params["burst"] = data.Burst.ValueBool()
+	}
+	if !data.Iburst.IsNull() {
+		params["iburst"] = data.Iburst.ValueBool()
+	}
+	if !data.Prefer.IsNull() {
+		params["prefer"] = data.Prefer.ValueBool()
+	}
+	if !data.Minpoll.IsNull() {
+		params["minpoll"] = data.Minpoll.ValueInt64()
+	}
+	if !data.Maxpoll.IsNull() {
+		params["maxpoll"] = data.Maxpoll.ValueInt64()
+	}
+	if !data.Force.IsNull() {
+		params["force"] = data.Force.ValueBool()
 	}
 
 	result, err := r.client.Call("system/ntpserver.create", params)
@@ -138,14 +149,25 @@ func (r *SystemNtpserverResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	params := map[string]interface{}{
-		"address": data.Address.ValueString(),
-		"burst": data.Burst.ValueBool(),
-		"iburst": data.Iburst.ValueBool(),
-		"prefer": data.Prefer.ValueBool(),
-		"minpoll": data.Minpoll.ValueInt64(),
-		"maxpoll": data.Maxpoll.ValueInt64(),
-		"force": data.Force.ValueBool(),
+	params := map[string]interface{}{}
+	params["address"] = data.Address.ValueString()
+	if !data.Burst.IsNull() {
+		params["burst"] = data.Burst.ValueBool()
+	}
+	if !data.Iburst.IsNull() {
+		params["iburst"] = data.Iburst.ValueBool()
+	}
+	if !data.Prefer.IsNull() {
+		params["prefer"] = data.Prefer.ValueBool()
+	}
+	if !data.Minpoll.IsNull() {
+		params["minpoll"] = data.Minpoll.ValueInt64()
+	}
+	if !data.Maxpoll.IsNull() {
+		params["maxpoll"] = data.Maxpoll.ValueInt64()
+	}
+	if !data.Force.IsNull() {
+		params["force"] = data.Force.ValueBool()
 	}
 
 	_, err := r.client.Call("system/ntpserver.update", []interface{}{data.ID.ValueString(), params})

@@ -181,29 +181,68 @@ func (r *CertificateResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"create_type": data.CreateType.ValueString(),
-		"add_to_trusted_store": data.AddToTrustedStore.ValueBool(),
-		"certificate": data.Certificate.ValueString(),
-		"privatekey": data.Privatekey.ValueString(),
-		"CSR": data.Csr.ValueString(),
-		"key_length": data.KeyLength.ValueString(),
-		"key_type": data.KeyType.ValueString(),
-		"ec_curve": data.EcCurve.ValueString(),
-		"passphrase": data.Passphrase.ValueString(),
-		"city": data.City.ValueString(),
-		"common": data.Common.ValueString(),
-		"country": data.Country.ValueString(),
-		"email": data.Email.ValueString(),
-		"organization": data.Organization.ValueString(),
-		"organizational_unit": data.OrganizationalUnit.ValueString(),
-		"state": data.State.ValueString(),
-		"digest_algorithm": data.DigestAlgorithm.ValueString(),
-		"acme_directory_uri": data.AcmeDirectoryUri.ValueString(),
-		"csr_id": data.CsrId.ValueString(),
-		"tos": data.Tos.ValueString(),
-		"renew_days": data.RenewDays.ValueInt64(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["create_type"] = data.CreateType.ValueString()
+	if !data.AddToTrustedStore.IsNull() {
+		params["add_to_trusted_store"] = data.AddToTrustedStore.ValueBool()
+	}
+	if !data.Certificate.IsNull() {
+		params["certificate"] = data.Certificate.ValueString()
+	}
+	if !data.Privatekey.IsNull() {
+		params["privatekey"] = data.Privatekey.ValueString()
+	}
+	if !data.Csr.IsNull() {
+		params["CSR"] = data.Csr.ValueString()
+	}
+	if !data.KeyLength.IsNull() {
+		params["key_length"] = data.KeyLength.ValueString()
+	}
+	if !data.KeyType.IsNull() {
+		params["key_type"] = data.KeyType.ValueString()
+	}
+	if !data.EcCurve.IsNull() {
+		params["ec_curve"] = data.EcCurve.ValueString()
+	}
+	if !data.Passphrase.IsNull() {
+		params["passphrase"] = data.Passphrase.ValueString()
+	}
+	if !data.City.IsNull() {
+		params["city"] = data.City.ValueString()
+	}
+	if !data.Common.IsNull() {
+		params["common"] = data.Common.ValueString()
+	}
+	if !data.Country.IsNull() {
+		params["country"] = data.Country.ValueString()
+	}
+	if !data.Email.IsNull() {
+		params["email"] = data.Email.ValueString()
+	}
+	if !data.Organization.IsNull() {
+		params["organization"] = data.Organization.ValueString()
+	}
+	if !data.OrganizationalUnit.IsNull() {
+		params["organizational_unit"] = data.OrganizationalUnit.ValueString()
+	}
+	if !data.State.IsNull() {
+		params["state"] = data.State.ValueString()
+	}
+	if !data.DigestAlgorithm.IsNull() {
+		params["digest_algorithm"] = data.DigestAlgorithm.ValueString()
+	}
+	if !data.AcmeDirectoryUri.IsNull() {
+		params["acme_directory_uri"] = data.AcmeDirectoryUri.ValueString()
+	}
+	if !data.CsrId.IsNull() {
+		params["csr_id"] = data.CsrId.ValueString()
+	}
+	if !data.Tos.IsNull() {
+		params["tos"] = data.Tos.ValueString()
+	}
+	if !data.RenewDays.IsNull() {
+		params["renew_days"] = data.RenewDays.ValueInt64()
 	}
 
 	result, err := r.client.Call("certificate.create", params)
@@ -243,29 +282,68 @@ func (r *CertificateResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"create_type": data.CreateType.ValueString(),
-		"add_to_trusted_store": data.AddToTrustedStore.ValueBool(),
-		"certificate": data.Certificate.ValueString(),
-		"privatekey": data.Privatekey.ValueString(),
-		"CSR": data.Csr.ValueString(),
-		"key_length": data.KeyLength.ValueString(),
-		"key_type": data.KeyType.ValueString(),
-		"ec_curve": data.EcCurve.ValueString(),
-		"passphrase": data.Passphrase.ValueString(),
-		"city": data.City.ValueString(),
-		"common": data.Common.ValueString(),
-		"country": data.Country.ValueString(),
-		"email": data.Email.ValueString(),
-		"organization": data.Organization.ValueString(),
-		"organizational_unit": data.OrganizationalUnit.ValueString(),
-		"state": data.State.ValueString(),
-		"digest_algorithm": data.DigestAlgorithm.ValueString(),
-		"acme_directory_uri": data.AcmeDirectoryUri.ValueString(),
-		"csr_id": data.CsrId.ValueString(),
-		"tos": data.Tos.ValueString(),
-		"renew_days": data.RenewDays.ValueInt64(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["create_type"] = data.CreateType.ValueString()
+	if !data.AddToTrustedStore.IsNull() {
+		params["add_to_trusted_store"] = data.AddToTrustedStore.ValueBool()
+	}
+	if !data.Certificate.IsNull() {
+		params["certificate"] = data.Certificate.ValueString()
+	}
+	if !data.Privatekey.IsNull() {
+		params["privatekey"] = data.Privatekey.ValueString()
+	}
+	if !data.Csr.IsNull() {
+		params["CSR"] = data.Csr.ValueString()
+	}
+	if !data.KeyLength.IsNull() {
+		params["key_length"] = data.KeyLength.ValueString()
+	}
+	if !data.KeyType.IsNull() {
+		params["key_type"] = data.KeyType.ValueString()
+	}
+	if !data.EcCurve.IsNull() {
+		params["ec_curve"] = data.EcCurve.ValueString()
+	}
+	if !data.Passphrase.IsNull() {
+		params["passphrase"] = data.Passphrase.ValueString()
+	}
+	if !data.City.IsNull() {
+		params["city"] = data.City.ValueString()
+	}
+	if !data.Common.IsNull() {
+		params["common"] = data.Common.ValueString()
+	}
+	if !data.Country.IsNull() {
+		params["country"] = data.Country.ValueString()
+	}
+	if !data.Email.IsNull() {
+		params["email"] = data.Email.ValueString()
+	}
+	if !data.Organization.IsNull() {
+		params["organization"] = data.Organization.ValueString()
+	}
+	if !data.OrganizationalUnit.IsNull() {
+		params["organizational_unit"] = data.OrganizationalUnit.ValueString()
+	}
+	if !data.State.IsNull() {
+		params["state"] = data.State.ValueString()
+	}
+	if !data.DigestAlgorithm.IsNull() {
+		params["digest_algorithm"] = data.DigestAlgorithm.ValueString()
+	}
+	if !data.AcmeDirectoryUri.IsNull() {
+		params["acme_directory_uri"] = data.AcmeDirectoryUri.ValueString()
+	}
+	if !data.CsrId.IsNull() {
+		params["csr_id"] = data.CsrId.ValueString()
+	}
+	if !data.Tos.IsNull() {
+		params["tos"] = data.Tos.ValueString()
+	}
+	if !data.RenewDays.IsNull() {
+		params["renew_days"] = data.RenewDays.ValueInt64()
 	}
 
 	_, err := r.client.Call("certificate.update", []interface{}{data.ID.ValueString(), params})

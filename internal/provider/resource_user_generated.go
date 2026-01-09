@@ -161,25 +161,56 @@ func (r *UserResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	params := map[string]interface{}{
-		"uid": data.Uid.ValueString(),
-		"username": data.Username.ValueString(),
-		"home": data.Home.ValueString(),
-		"shell": data.Shell.ValueString(),
-		"full_name": data.FullName.ValueString(),
-		"smb": data.Smb.ValueBool(),
-		"userns_idmap": data.UsernsIdmap.ValueString(),
-		"group": data.Group.ValueString(),
-		"password_disabled": data.PasswordDisabled.ValueBool(),
-		"ssh_password_enabled": data.SshPasswordEnabled.ValueBool(),
-		"sshpubkey": data.Sshpubkey.ValueString(),
-		"locked": data.Locked.ValueBool(),
-		"email": data.Email.ValueString(),
-		"group_create": data.GroupCreate.ValueBool(),
-		"home_create": data.HomeCreate.ValueBool(),
-		"home_mode": data.HomeMode.ValueString(),
-		"password": data.Password.ValueString(),
-		"random_password": data.RandomPassword.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.Uid.IsNull() {
+		params["uid"] = data.Uid.ValueString()
+	}
+	params["username"] = data.Username.ValueString()
+	if !data.Home.IsNull() {
+		params["home"] = data.Home.ValueString()
+	}
+	if !data.Shell.IsNull() {
+		params["shell"] = data.Shell.ValueString()
+	}
+	params["full_name"] = data.FullName.ValueString()
+	if !data.Smb.IsNull() {
+		params["smb"] = data.Smb.ValueBool()
+	}
+	if !data.UsernsIdmap.IsNull() {
+		params["userns_idmap"] = data.UsernsIdmap.ValueString()
+	}
+	if !data.Group.IsNull() {
+		params["group"] = data.Group.ValueString()
+	}
+	if !data.PasswordDisabled.IsNull() {
+		params["password_disabled"] = data.PasswordDisabled.ValueBool()
+	}
+	if !data.SshPasswordEnabled.IsNull() {
+		params["ssh_password_enabled"] = data.SshPasswordEnabled.ValueBool()
+	}
+	if !data.Sshpubkey.IsNull() {
+		params["sshpubkey"] = data.Sshpubkey.ValueString()
+	}
+	if !data.Locked.IsNull() {
+		params["locked"] = data.Locked.ValueBool()
+	}
+	if !data.Email.IsNull() {
+		params["email"] = data.Email.ValueString()
+	}
+	if !data.GroupCreate.IsNull() {
+		params["group_create"] = data.GroupCreate.ValueBool()
+	}
+	if !data.HomeCreate.IsNull() {
+		params["home_create"] = data.HomeCreate.ValueBool()
+	}
+	if !data.HomeMode.IsNull() {
+		params["home_mode"] = data.HomeMode.ValueString()
+	}
+	if !data.Password.IsNull() {
+		params["password"] = data.Password.ValueString()
+	}
+	if !data.RandomPassword.IsNull() {
+		params["random_password"] = data.RandomPassword.ValueBool()
 	}
 
 	result, err := r.client.Call("user.create", params)
@@ -219,25 +250,56 @@ func (r *UserResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	params := map[string]interface{}{
-		"uid": data.Uid.ValueString(),
-		"username": data.Username.ValueString(),
-		"home": data.Home.ValueString(),
-		"shell": data.Shell.ValueString(),
-		"full_name": data.FullName.ValueString(),
-		"smb": data.Smb.ValueBool(),
-		"userns_idmap": data.UsernsIdmap.ValueString(),
-		"group": data.Group.ValueString(),
-		"password_disabled": data.PasswordDisabled.ValueBool(),
-		"ssh_password_enabled": data.SshPasswordEnabled.ValueBool(),
-		"sshpubkey": data.Sshpubkey.ValueString(),
-		"locked": data.Locked.ValueBool(),
-		"email": data.Email.ValueString(),
-		"group_create": data.GroupCreate.ValueBool(),
-		"home_create": data.HomeCreate.ValueBool(),
-		"home_mode": data.HomeMode.ValueString(),
-		"password": data.Password.ValueString(),
-		"random_password": data.RandomPassword.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.Uid.IsNull() {
+		params["uid"] = data.Uid.ValueString()
+	}
+	params["username"] = data.Username.ValueString()
+	if !data.Home.IsNull() {
+		params["home"] = data.Home.ValueString()
+	}
+	if !data.Shell.IsNull() {
+		params["shell"] = data.Shell.ValueString()
+	}
+	params["full_name"] = data.FullName.ValueString()
+	if !data.Smb.IsNull() {
+		params["smb"] = data.Smb.ValueBool()
+	}
+	if !data.UsernsIdmap.IsNull() {
+		params["userns_idmap"] = data.UsernsIdmap.ValueString()
+	}
+	if !data.Group.IsNull() {
+		params["group"] = data.Group.ValueString()
+	}
+	if !data.PasswordDisabled.IsNull() {
+		params["password_disabled"] = data.PasswordDisabled.ValueBool()
+	}
+	if !data.SshPasswordEnabled.IsNull() {
+		params["ssh_password_enabled"] = data.SshPasswordEnabled.ValueBool()
+	}
+	if !data.Sshpubkey.IsNull() {
+		params["sshpubkey"] = data.Sshpubkey.ValueString()
+	}
+	if !data.Locked.IsNull() {
+		params["locked"] = data.Locked.ValueBool()
+	}
+	if !data.Email.IsNull() {
+		params["email"] = data.Email.ValueString()
+	}
+	if !data.GroupCreate.IsNull() {
+		params["group_create"] = data.GroupCreate.ValueBool()
+	}
+	if !data.HomeCreate.IsNull() {
+		params["home_create"] = data.HomeCreate.ValueBool()
+	}
+	if !data.HomeMode.IsNull() {
+		params["home_mode"] = data.HomeMode.ValueString()
+	}
+	if !data.Password.IsNull() {
+		params["password"] = data.Password.ValueString()
+	}
+	if !data.RandomPassword.IsNull() {
+		params["random_password"] = data.RandomPassword.ValueBool()
 	}
 
 	_, err := r.client.Call("user.update", []interface{}{data.ID.ValueString(), params})

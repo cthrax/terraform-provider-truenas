@@ -176,29 +176,68 @@ func (r *RsynctaskResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"path": data.Path.ValueString(),
-		"user": data.User.ValueString(),
-		"mode": data.Mode.ValueString(),
-		"remotehost": data.Remotehost.ValueString(),
-		"remoteport": data.Remoteport.ValueString(),
-		"remotemodule": data.Remotemodule.ValueString(),
-		"ssh_credentials": data.SshCredentials.ValueString(),
-		"remotepath": data.Remotepath.ValueString(),
-		"direction": data.Direction.ValueString(),
-		"desc": data.Desc.ValueString(),
-		"recursive": data.Recursive.ValueBool(),
-		"times": data.Times.ValueBool(),
-		"compress": data.Compress.ValueBool(),
-		"archive": data.Archive.ValueBool(),
-		"delete": data.Delete.ValueBool(),
-		"quiet": data.Quiet.ValueBool(),
-		"preserveperm": data.Preserveperm.ValueBool(),
-		"preserveattr": data.Preserveattr.ValueBool(),
-		"delayupdates": data.Delayupdates.ValueBool(),
-		"enabled": data.Enabled.ValueBool(),
-		"validate_rpath": data.ValidateRpath.ValueBool(),
-		"ssh_keyscan": data.SshKeyscan.ValueBool(),
+	params := map[string]interface{}{}
+	params["path"] = data.Path.ValueString()
+	params["user"] = data.User.ValueString()
+	if !data.Mode.IsNull() {
+		params["mode"] = data.Mode.ValueString()
+	}
+	if !data.Remotehost.IsNull() {
+		params["remotehost"] = data.Remotehost.ValueString()
+	}
+	if !data.Remoteport.IsNull() {
+		params["remoteport"] = data.Remoteport.ValueString()
+	}
+	if !data.Remotemodule.IsNull() {
+		params["remotemodule"] = data.Remotemodule.ValueString()
+	}
+	if !data.SshCredentials.IsNull() {
+		params["ssh_credentials"] = data.SshCredentials.ValueString()
+	}
+	if !data.Remotepath.IsNull() {
+		params["remotepath"] = data.Remotepath.ValueString()
+	}
+	if !data.Direction.IsNull() {
+		params["direction"] = data.Direction.ValueString()
+	}
+	if !data.Desc.IsNull() {
+		params["desc"] = data.Desc.ValueString()
+	}
+	if !data.Recursive.IsNull() {
+		params["recursive"] = data.Recursive.ValueBool()
+	}
+	if !data.Times.IsNull() {
+		params["times"] = data.Times.ValueBool()
+	}
+	if !data.Compress.IsNull() {
+		params["compress"] = data.Compress.ValueBool()
+	}
+	if !data.Archive.IsNull() {
+		params["archive"] = data.Archive.ValueBool()
+	}
+	if !data.Delete.IsNull() {
+		params["delete"] = data.Delete.ValueBool()
+	}
+	if !data.Quiet.IsNull() {
+		params["quiet"] = data.Quiet.ValueBool()
+	}
+	if !data.Preserveperm.IsNull() {
+		params["preserveperm"] = data.Preserveperm.ValueBool()
+	}
+	if !data.Preserveattr.IsNull() {
+		params["preserveattr"] = data.Preserveattr.ValueBool()
+	}
+	if !data.Delayupdates.IsNull() {
+		params["delayupdates"] = data.Delayupdates.ValueBool()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.ValidateRpath.IsNull() {
+		params["validate_rpath"] = data.ValidateRpath.ValueBool()
+	}
+	if !data.SshKeyscan.IsNull() {
+		params["ssh_keyscan"] = data.SshKeyscan.ValueBool()
 	}
 
 	result, err := r.client.Call("rsynctask.create", params)
@@ -238,29 +277,68 @@ func (r *RsynctaskResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	params := map[string]interface{}{
-		"path": data.Path.ValueString(),
-		"user": data.User.ValueString(),
-		"mode": data.Mode.ValueString(),
-		"remotehost": data.Remotehost.ValueString(),
-		"remoteport": data.Remoteport.ValueString(),
-		"remotemodule": data.Remotemodule.ValueString(),
-		"ssh_credentials": data.SshCredentials.ValueString(),
-		"remotepath": data.Remotepath.ValueString(),
-		"direction": data.Direction.ValueString(),
-		"desc": data.Desc.ValueString(),
-		"recursive": data.Recursive.ValueBool(),
-		"times": data.Times.ValueBool(),
-		"compress": data.Compress.ValueBool(),
-		"archive": data.Archive.ValueBool(),
-		"delete": data.Delete.ValueBool(),
-		"quiet": data.Quiet.ValueBool(),
-		"preserveperm": data.Preserveperm.ValueBool(),
-		"preserveattr": data.Preserveattr.ValueBool(),
-		"delayupdates": data.Delayupdates.ValueBool(),
-		"enabled": data.Enabled.ValueBool(),
-		"validate_rpath": data.ValidateRpath.ValueBool(),
-		"ssh_keyscan": data.SshKeyscan.ValueBool(),
+	params := map[string]interface{}{}
+	params["path"] = data.Path.ValueString()
+	params["user"] = data.User.ValueString()
+	if !data.Mode.IsNull() {
+		params["mode"] = data.Mode.ValueString()
+	}
+	if !data.Remotehost.IsNull() {
+		params["remotehost"] = data.Remotehost.ValueString()
+	}
+	if !data.Remoteport.IsNull() {
+		params["remoteport"] = data.Remoteport.ValueString()
+	}
+	if !data.Remotemodule.IsNull() {
+		params["remotemodule"] = data.Remotemodule.ValueString()
+	}
+	if !data.SshCredentials.IsNull() {
+		params["ssh_credentials"] = data.SshCredentials.ValueString()
+	}
+	if !data.Remotepath.IsNull() {
+		params["remotepath"] = data.Remotepath.ValueString()
+	}
+	if !data.Direction.IsNull() {
+		params["direction"] = data.Direction.ValueString()
+	}
+	if !data.Desc.IsNull() {
+		params["desc"] = data.Desc.ValueString()
+	}
+	if !data.Recursive.IsNull() {
+		params["recursive"] = data.Recursive.ValueBool()
+	}
+	if !data.Times.IsNull() {
+		params["times"] = data.Times.ValueBool()
+	}
+	if !data.Compress.IsNull() {
+		params["compress"] = data.Compress.ValueBool()
+	}
+	if !data.Archive.IsNull() {
+		params["archive"] = data.Archive.ValueBool()
+	}
+	if !data.Delete.IsNull() {
+		params["delete"] = data.Delete.ValueBool()
+	}
+	if !data.Quiet.IsNull() {
+		params["quiet"] = data.Quiet.ValueBool()
+	}
+	if !data.Preserveperm.IsNull() {
+		params["preserveperm"] = data.Preserveperm.ValueBool()
+	}
+	if !data.Preserveattr.IsNull() {
+		params["preserveattr"] = data.Preserveattr.ValueBool()
+	}
+	if !data.Delayupdates.IsNull() {
+		params["delayupdates"] = data.Delayupdates.ValueBool()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.ValidateRpath.IsNull() {
+		params["validate_rpath"] = data.ValidateRpath.ValueBool()
+	}
+	if !data.SshKeyscan.IsNull() {
+		params["ssh_keyscan"] = data.SshKeyscan.ValueBool()
 	}
 
 	_, err := r.client.Call("rsynctask.update", []interface{}{data.ID.ValueString(), params})

@@ -86,11 +86,16 @@ func (r *IscsiTargetResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"alias": data.Alias.ValueString(),
-		"mode": data.Mode.ValueString(),
-		"iscsi_parameters": data.IscsiParameters.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Alias.IsNull() {
+		params["alias"] = data.Alias.ValueString()
+	}
+	if !data.Mode.IsNull() {
+		params["mode"] = data.Mode.ValueString()
+	}
+	if !data.IscsiParameters.IsNull() {
+		params["iscsi_parameters"] = data.IscsiParameters.ValueString()
 	}
 
 	result, err := r.client.Call("iscsi/target.create", params)
@@ -130,11 +135,16 @@ func (r *IscsiTargetResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"alias": data.Alias.ValueString(),
-		"mode": data.Mode.ValueString(),
-		"iscsi_parameters": data.IscsiParameters.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.Alias.IsNull() {
+		params["alias"] = data.Alias.ValueString()
+	}
+	if !data.Mode.IsNull() {
+		params["mode"] = data.Mode.ValueString()
+	}
+	if !data.IscsiParameters.IsNull() {
+		params["iscsi_parameters"] = data.IscsiParameters.ValueString()
 	}
 
 	_, err := r.client.Call("iscsi/target.update", []interface{}{data.ID.ValueString(), params})

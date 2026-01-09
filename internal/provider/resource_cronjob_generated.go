@@ -91,14 +91,21 @@ func (r *CronjobResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	params := map[string]interface{}{
-		"enabled": data.Enabled.ValueBool(),
-		"stderr": data.Stderr.ValueBool(),
-		"stdout": data.Stdout.ValueBool(),
-		"command": data.Command.ValueString(),
-		"description": data.Description.ValueString(),
-		"user": data.User.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
+	if !data.Stderr.IsNull() {
+		params["stderr"] = data.Stderr.ValueBool()
+	}
+	if !data.Stdout.IsNull() {
+		params["stdout"] = data.Stdout.ValueBool()
+	}
+	params["command"] = data.Command.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["user"] = data.User.ValueString()
 
 	result, err := r.client.Call("cronjob.create", params)
 	if err != nil {
@@ -137,14 +144,21 @@ func (r *CronjobResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	params := map[string]interface{}{
-		"enabled": data.Enabled.ValueBool(),
-		"stderr": data.Stderr.ValueBool(),
-		"stdout": data.Stdout.ValueBool(),
-		"command": data.Command.ValueString(),
-		"description": data.Description.ValueString(),
-		"user": data.User.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
+	if !data.Stderr.IsNull() {
+		params["stderr"] = data.Stderr.ValueBool()
+	}
+	if !data.Stdout.IsNull() {
+		params["stdout"] = data.Stdout.ValueBool()
+	}
+	params["command"] = data.Command.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	params["user"] = data.User.ValueString()
 
 	_, err := r.client.Call("cronjob.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

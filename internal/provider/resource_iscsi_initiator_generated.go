@@ -66,8 +66,9 @@ func (r *IscsiInitiatorResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	params := map[string]interface{}{
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	result, err := r.client.Call("iscsi/initiator.create", params)
@@ -107,8 +108,9 @@ func (r *IscsiInitiatorResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	params := map[string]interface{}{
-		"comment": data.Comment.ValueString(),
+	params := map[string]interface{}{}
+	if !data.Comment.IsNull() {
+		params["comment"] = data.Comment.ValueString()
 	}
 
 	_, err := r.client.Call("iscsi/initiator.update", []interface{}{data.ID.ValueString(), params})

@@ -101,14 +101,25 @@ func (r *PoolSnapshottaskResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	params := map[string]interface{}{
-		"dataset": data.Dataset.ValueString(),
-		"recursive": data.Recursive.ValueBool(),
-		"lifetime_value": data.LifetimeValue.ValueInt64(),
-		"lifetime_unit": data.LifetimeUnit.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"naming_schema": data.NamingSchema.ValueString(),
-		"allow_empty": data.AllowEmpty.ValueBool(),
+	params := map[string]interface{}{}
+	params["dataset"] = data.Dataset.ValueString()
+	if !data.Recursive.IsNull() {
+		params["recursive"] = data.Recursive.ValueBool()
+	}
+	if !data.LifetimeValue.IsNull() {
+		params["lifetime_value"] = data.LifetimeValue.ValueInt64()
+	}
+	if !data.LifetimeUnit.IsNull() {
+		params["lifetime_unit"] = data.LifetimeUnit.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.NamingSchema.IsNull() {
+		params["naming_schema"] = data.NamingSchema.ValueString()
+	}
+	if !data.AllowEmpty.IsNull() {
+		params["allow_empty"] = data.AllowEmpty.ValueBool()
 	}
 
 	result, err := r.client.Call("pool/snapshottask.create", params)
@@ -148,14 +159,25 @@ func (r *PoolSnapshottaskResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	params := map[string]interface{}{
-		"dataset": data.Dataset.ValueString(),
-		"recursive": data.Recursive.ValueBool(),
-		"lifetime_value": data.LifetimeValue.ValueInt64(),
-		"lifetime_unit": data.LifetimeUnit.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"naming_schema": data.NamingSchema.ValueString(),
-		"allow_empty": data.AllowEmpty.ValueBool(),
+	params := map[string]interface{}{}
+	params["dataset"] = data.Dataset.ValueString()
+	if !data.Recursive.IsNull() {
+		params["recursive"] = data.Recursive.ValueBool()
+	}
+	if !data.LifetimeValue.IsNull() {
+		params["lifetime_value"] = data.LifetimeValue.ValueInt64()
+	}
+	if !data.LifetimeUnit.IsNull() {
+		params["lifetime_unit"] = data.LifetimeUnit.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	if !data.NamingSchema.IsNull() {
+		params["naming_schema"] = data.NamingSchema.ValueString()
+	}
+	if !data.AllowEmpty.IsNull() {
+		params["allow_empty"] = data.AllowEmpty.ValueBool()
 	}
 
 	_, err := r.client.Call("pool/snapshottask.update", []interface{}{data.ID.ValueString(), params})

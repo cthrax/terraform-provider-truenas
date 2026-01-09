@@ -76,11 +76,12 @@ func (r *AlertserviceResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"attributes": data.Attributes.ValueString(),
-		"level": data.Level.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["attributes"] = data.Attributes.ValueString()
+	params["level"] = data.Level.ValueString()
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
 
 	result, err := r.client.Call("alertservice.create", params)
@@ -120,11 +121,12 @@ func (r *AlertserviceResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"attributes": data.Attributes.ValueString(),
-		"level": data.Level.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	params["attributes"] = data.Attributes.ValueString()
+	params["level"] = data.Level.ValueString()
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
 	}
 
 	_, err := r.client.Call("alertservice.update", []interface{}{data.ID.ValueString(), params})

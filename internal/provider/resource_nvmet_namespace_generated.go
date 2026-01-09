@@ -86,14 +86,19 @@ func (r *NvmetNamespaceResource) Create(ctx context.Context, req resource.Create
 		return
 	}
 
-	params := map[string]interface{}{
-		"nsid": data.Nsid.ValueString(),
-		"device_type": data.DeviceType.ValueString(),
-		"device_path": data.DevicePath.ValueString(),
-		"filesize": data.Filesize.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"subsys_id": data.SubsysId.ValueInt64(),
+	params := map[string]interface{}{}
+	if !data.Nsid.IsNull() {
+		params["nsid"] = data.Nsid.ValueString()
 	}
+	params["device_type"] = data.DeviceType.ValueString()
+	params["device_path"] = data.DevicePath.ValueString()
+	if !data.Filesize.IsNull() {
+		params["filesize"] = data.Filesize.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	params["subsys_id"] = data.SubsysId.ValueInt64()
 
 	result, err := r.client.Call("nvmet/namespace.create", params)
 	if err != nil {
@@ -132,14 +137,19 @@ func (r *NvmetNamespaceResource) Update(ctx context.Context, req resource.Update
 		return
 	}
 
-	params := map[string]interface{}{
-		"nsid": data.Nsid.ValueString(),
-		"device_type": data.DeviceType.ValueString(),
-		"device_path": data.DevicePath.ValueString(),
-		"filesize": data.Filesize.ValueString(),
-		"enabled": data.Enabled.ValueBool(),
-		"subsys_id": data.SubsysId.ValueInt64(),
+	params := map[string]interface{}{}
+	if !data.Nsid.IsNull() {
+		params["nsid"] = data.Nsid.ValueString()
 	}
+	params["device_type"] = data.DeviceType.ValueString()
+	params["device_path"] = data.DevicePath.ValueString()
+	if !data.Filesize.IsNull() {
+		params["filesize"] = data.Filesize.ValueString()
+	}
+	if !data.Enabled.IsNull() {
+		params["enabled"] = data.Enabled.ValueBool()
+	}
+	params["subsys_id"] = data.SubsysId.ValueInt64()
 
 	_, err := r.client.Call("nvmet/namespace.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

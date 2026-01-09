@@ -66,10 +66,9 @@ func (r *NvmetHostSubsysResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	params := map[string]interface{}{
-		"host_id": data.HostId.ValueInt64(),
-		"subsys_id": data.SubsysId.ValueInt64(),
-	}
+	params := map[string]interface{}{}
+	params["host_id"] = data.HostId.ValueInt64()
+	params["subsys_id"] = data.SubsysId.ValueInt64()
 
 	result, err := r.client.Call("nvmet/host_subsys.create", params)
 	if err != nil {
@@ -108,10 +107,9 @@ func (r *NvmetHostSubsysResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	params := map[string]interface{}{
-		"host_id": data.HostId.ValueInt64(),
-		"subsys_id": data.SubsysId.ValueInt64(),
-	}
+	params := map[string]interface{}{}
+	params["host_id"] = data.HostId.ValueInt64()
+	params["subsys_id"] = data.SubsysId.ValueInt64()
 
 	_, err := r.client.Call("nvmet/host_subsys.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

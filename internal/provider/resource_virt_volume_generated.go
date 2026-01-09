@@ -76,11 +76,16 @@ func (r *VirtVolumeResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"content_type": data.ContentType.ValueString(),
-		"size": data.Size.ValueInt64(),
-		"storage_pool": data.StoragePool.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.ContentType.IsNull() {
+		params["content_type"] = data.ContentType.ValueString()
+	}
+	if !data.Size.IsNull() {
+		params["size"] = data.Size.ValueInt64()
+	}
+	if !data.StoragePool.IsNull() {
+		params["storage_pool"] = data.StoragePool.ValueString()
 	}
 
 	result, err := r.client.Call("virt/volume.create", params)
@@ -120,11 +125,16 @@ func (r *VirtVolumeResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	params := map[string]interface{}{
-		"name": data.Name.ValueString(),
-		"content_type": data.ContentType.ValueString(),
-		"size": data.Size.ValueInt64(),
-		"storage_pool": data.StoragePool.ValueString(),
+	params := map[string]interface{}{}
+	params["name"] = data.Name.ValueString()
+	if !data.ContentType.IsNull() {
+		params["content_type"] = data.ContentType.ValueString()
+	}
+	if !data.Size.IsNull() {
+		params["size"] = data.Size.ValueInt64()
+	}
+	if !data.StoragePool.IsNull() {
+		params["storage_pool"] = data.StoragePool.ValueString()
 	}
 
 	_, err := r.client.Call("virt/volume.update", []interface{}{data.ID.ValueString(), params})

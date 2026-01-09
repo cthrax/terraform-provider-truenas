@@ -56,9 +56,8 @@ func (r *PoolDatasetResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	result, err := r.client.Call("pool/dataset.create", params)
 	if err != nil {
@@ -97,9 +96,8 @@ func (r *PoolDatasetResource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	_, err := r.client.Call("pool/dataset.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

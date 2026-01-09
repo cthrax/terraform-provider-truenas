@@ -197,34 +197,83 @@ func (r *VmResource) Create(ctx context.Context, req resource.CreateRequest, res
 		return
 	}
 
-	params := map[string]interface{}{
-		"command_line_args": data.CommandLineArgs.ValueString(),
-		"cpu_mode": data.CpuMode.ValueString(),
-		"cpu_model": data.CpuModel.ValueString(),
-		"name": data.Name.ValueString(),
-		"description": data.Description.ValueString(),
-		"vcpus": data.Vcpus.ValueInt64(),
-		"cores": data.Cores.ValueInt64(),
-		"threads": data.Threads.ValueInt64(),
-		"cpuset": data.Cpuset.ValueString(),
-		"nodeset": data.Nodeset.ValueString(),
-		"enable_cpu_topology_extension": data.EnableCpuTopologyExtension.ValueBool(),
-		"pin_vcpus": data.PinVcpus.ValueBool(),
-		"suspend_on_snapshot": data.SuspendOnSnapshot.ValueBool(),
-		"trusted_platform_module": data.TrustedPlatformModule.ValueBool(),
-		"memory": data.Memory.ValueInt64(),
-		"min_memory": data.MinMemory.ValueString(),
-		"hyperv_enlightenments": data.HypervEnlightenments.ValueBool(),
-		"bootloader": data.Bootloader.ValueString(),
-		"bootloader_ovmf": data.BootloaderOvmf.ValueString(),
-		"autostart": data.Autostart.ValueBool(),
-		"hide_from_msr": data.HideFromMsr.ValueBool(),
-		"ensure_display_device": data.EnsureDisplayDevice.ValueBool(),
-		"time": data.Time.ValueString(),
-		"shutdown_timeout": data.ShutdownTimeout.ValueInt64(),
-		"arch_type": data.ArchType.ValueString(),
-		"machine_type": data.MachineType.ValueString(),
-		"enable_secure_boot": data.EnableSecureBoot.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.CommandLineArgs.IsNull() {
+		params["command_line_args"] = data.CommandLineArgs.ValueString()
+	}
+	if !data.CpuMode.IsNull() {
+		params["cpu_mode"] = data.CpuMode.ValueString()
+	}
+	if !data.CpuModel.IsNull() {
+		params["cpu_model"] = data.CpuModel.ValueString()
+	}
+	params["name"] = data.Name.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	if !data.Vcpus.IsNull() {
+		params["vcpus"] = data.Vcpus.ValueInt64()
+	}
+	if !data.Cores.IsNull() {
+		params["cores"] = data.Cores.ValueInt64()
+	}
+	if !data.Threads.IsNull() {
+		params["threads"] = data.Threads.ValueInt64()
+	}
+	if !data.Cpuset.IsNull() {
+		params["cpuset"] = data.Cpuset.ValueString()
+	}
+	if !data.Nodeset.IsNull() {
+		params["nodeset"] = data.Nodeset.ValueString()
+	}
+	if !data.EnableCpuTopologyExtension.IsNull() {
+		params["enable_cpu_topology_extension"] = data.EnableCpuTopologyExtension.ValueBool()
+	}
+	if !data.PinVcpus.IsNull() {
+		params["pin_vcpus"] = data.PinVcpus.ValueBool()
+	}
+	if !data.SuspendOnSnapshot.IsNull() {
+		params["suspend_on_snapshot"] = data.SuspendOnSnapshot.ValueBool()
+	}
+	if !data.TrustedPlatformModule.IsNull() {
+		params["trusted_platform_module"] = data.TrustedPlatformModule.ValueBool()
+	}
+	params["memory"] = data.Memory.ValueInt64()
+	if !data.MinMemory.IsNull() {
+		params["min_memory"] = data.MinMemory.ValueString()
+	}
+	if !data.HypervEnlightenments.IsNull() {
+		params["hyperv_enlightenments"] = data.HypervEnlightenments.ValueBool()
+	}
+	if !data.Bootloader.IsNull() {
+		params["bootloader"] = data.Bootloader.ValueString()
+	}
+	if !data.BootloaderOvmf.IsNull() {
+		params["bootloader_ovmf"] = data.BootloaderOvmf.ValueString()
+	}
+	if !data.Autostart.IsNull() {
+		params["autostart"] = data.Autostart.ValueBool()
+	}
+	if !data.HideFromMsr.IsNull() {
+		params["hide_from_msr"] = data.HideFromMsr.ValueBool()
+	}
+	if !data.EnsureDisplayDevice.IsNull() {
+		params["ensure_display_device"] = data.EnsureDisplayDevice.ValueBool()
+	}
+	if !data.Time.IsNull() {
+		params["time"] = data.Time.ValueString()
+	}
+	if !data.ShutdownTimeout.IsNull() {
+		params["shutdown_timeout"] = data.ShutdownTimeout.ValueInt64()
+	}
+	if !data.ArchType.IsNull() {
+		params["arch_type"] = data.ArchType.ValueString()
+	}
+	if !data.MachineType.IsNull() {
+		params["machine_type"] = data.MachineType.ValueString()
+	}
+	if !data.EnableSecureBoot.IsNull() {
+		params["enable_secure_boot"] = data.EnableSecureBoot.ValueBool()
 	}
 
 	result, err := r.client.Call("vm.create", params)
@@ -279,34 +328,83 @@ func (r *VmResource) Update(ctx context.Context, req resource.UpdateRequest, res
 		return
 	}
 
-	params := map[string]interface{}{
-		"command_line_args": data.CommandLineArgs.ValueString(),
-		"cpu_mode": data.CpuMode.ValueString(),
-		"cpu_model": data.CpuModel.ValueString(),
-		"name": data.Name.ValueString(),
-		"description": data.Description.ValueString(),
-		"vcpus": data.Vcpus.ValueInt64(),
-		"cores": data.Cores.ValueInt64(),
-		"threads": data.Threads.ValueInt64(),
-		"cpuset": data.Cpuset.ValueString(),
-		"nodeset": data.Nodeset.ValueString(),
-		"enable_cpu_topology_extension": data.EnableCpuTopologyExtension.ValueBool(),
-		"pin_vcpus": data.PinVcpus.ValueBool(),
-		"suspend_on_snapshot": data.SuspendOnSnapshot.ValueBool(),
-		"trusted_platform_module": data.TrustedPlatformModule.ValueBool(),
-		"memory": data.Memory.ValueInt64(),
-		"min_memory": data.MinMemory.ValueString(),
-		"hyperv_enlightenments": data.HypervEnlightenments.ValueBool(),
-		"bootloader": data.Bootloader.ValueString(),
-		"bootloader_ovmf": data.BootloaderOvmf.ValueString(),
-		"autostart": data.Autostart.ValueBool(),
-		"hide_from_msr": data.HideFromMsr.ValueBool(),
-		"ensure_display_device": data.EnsureDisplayDevice.ValueBool(),
-		"time": data.Time.ValueString(),
-		"shutdown_timeout": data.ShutdownTimeout.ValueInt64(),
-		"arch_type": data.ArchType.ValueString(),
-		"machine_type": data.MachineType.ValueString(),
-		"enable_secure_boot": data.EnableSecureBoot.ValueBool(),
+	params := map[string]interface{}{}
+	if !data.CommandLineArgs.IsNull() {
+		params["command_line_args"] = data.CommandLineArgs.ValueString()
+	}
+	if !data.CpuMode.IsNull() {
+		params["cpu_mode"] = data.CpuMode.ValueString()
+	}
+	if !data.CpuModel.IsNull() {
+		params["cpu_model"] = data.CpuModel.ValueString()
+	}
+	params["name"] = data.Name.ValueString()
+	if !data.Description.IsNull() {
+		params["description"] = data.Description.ValueString()
+	}
+	if !data.Vcpus.IsNull() {
+		params["vcpus"] = data.Vcpus.ValueInt64()
+	}
+	if !data.Cores.IsNull() {
+		params["cores"] = data.Cores.ValueInt64()
+	}
+	if !data.Threads.IsNull() {
+		params["threads"] = data.Threads.ValueInt64()
+	}
+	if !data.Cpuset.IsNull() {
+		params["cpuset"] = data.Cpuset.ValueString()
+	}
+	if !data.Nodeset.IsNull() {
+		params["nodeset"] = data.Nodeset.ValueString()
+	}
+	if !data.EnableCpuTopologyExtension.IsNull() {
+		params["enable_cpu_topology_extension"] = data.EnableCpuTopologyExtension.ValueBool()
+	}
+	if !data.PinVcpus.IsNull() {
+		params["pin_vcpus"] = data.PinVcpus.ValueBool()
+	}
+	if !data.SuspendOnSnapshot.IsNull() {
+		params["suspend_on_snapshot"] = data.SuspendOnSnapshot.ValueBool()
+	}
+	if !data.TrustedPlatformModule.IsNull() {
+		params["trusted_platform_module"] = data.TrustedPlatformModule.ValueBool()
+	}
+	params["memory"] = data.Memory.ValueInt64()
+	if !data.MinMemory.IsNull() {
+		params["min_memory"] = data.MinMemory.ValueString()
+	}
+	if !data.HypervEnlightenments.IsNull() {
+		params["hyperv_enlightenments"] = data.HypervEnlightenments.ValueBool()
+	}
+	if !data.Bootloader.IsNull() {
+		params["bootloader"] = data.Bootloader.ValueString()
+	}
+	if !data.BootloaderOvmf.IsNull() {
+		params["bootloader_ovmf"] = data.BootloaderOvmf.ValueString()
+	}
+	if !data.Autostart.IsNull() {
+		params["autostart"] = data.Autostart.ValueBool()
+	}
+	if !data.HideFromMsr.IsNull() {
+		params["hide_from_msr"] = data.HideFromMsr.ValueBool()
+	}
+	if !data.EnsureDisplayDevice.IsNull() {
+		params["ensure_display_device"] = data.EnsureDisplayDevice.ValueBool()
+	}
+	if !data.Time.IsNull() {
+		params["time"] = data.Time.ValueString()
+	}
+	if !data.ShutdownTimeout.IsNull() {
+		params["shutdown_timeout"] = data.ShutdownTimeout.ValueInt64()
+	}
+	if !data.ArchType.IsNull() {
+		params["arch_type"] = data.ArchType.ValueString()
+	}
+	if !data.MachineType.IsNull() {
+		params["machine_type"] = data.MachineType.ValueString()
+	}
+	if !data.EnableSecureBoot.IsNull() {
+		params["enable_secure_boot"] = data.EnableSecureBoot.ValueBool()
 	}
 
 	_, err := r.client.Call("vm.update", []interface{}{data.ID.ValueString(), params})

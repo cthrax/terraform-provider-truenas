@@ -56,9 +56,8 @@ func (r *PoolSnapshotResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	result, err := r.client.Call("pool/snapshot.create", params)
 	if err != nil {
@@ -97,9 +96,8 @@ func (r *PoolSnapshotResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	params := map[string]interface{}{
+	params := map[string]interface{}{}
 
-	}
 
 	_, err := r.client.Call("pool/snapshot.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

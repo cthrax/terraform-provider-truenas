@@ -81,13 +81,12 @@ func (r *VmwareResource) Create(ctx context.Context, req resource.CreateRequest,
 		return
 	}
 
-	params := map[string]interface{}{
-		"datastore": data.Datastore.ValueString(),
-		"filesystem": data.Filesystem.ValueString(),
-		"hostname": data.Hostname.ValueString(),
-		"username": data.Username.ValueString(),
-		"password": data.Password.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["datastore"] = data.Datastore.ValueString()
+	params["filesystem"] = data.Filesystem.ValueString()
+	params["hostname"] = data.Hostname.ValueString()
+	params["username"] = data.Username.ValueString()
+	params["password"] = data.Password.ValueString()
 
 	result, err := r.client.Call("vmware.create", params)
 	if err != nil {
@@ -126,13 +125,12 @@ func (r *VmwareResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	params := map[string]interface{}{
-		"datastore": data.Datastore.ValueString(),
-		"filesystem": data.Filesystem.ValueString(),
-		"hostname": data.Hostname.ValueString(),
-		"username": data.Username.ValueString(),
-		"password": data.Password.ValueString(),
-	}
+	params := map[string]interface{}{}
+	params["datastore"] = data.Datastore.ValueString()
+	params["filesystem"] = data.Filesystem.ValueString()
+	params["hostname"] = data.Hostname.ValueString()
+	params["username"] = data.Username.ValueString()
+	params["password"] = data.Password.ValueString()
 
 	_, err := r.client.Call("vmware.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {

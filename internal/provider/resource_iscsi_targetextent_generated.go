@@ -71,11 +71,12 @@ func (r *IscsiTargetextentResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	params := map[string]interface{}{
-		"target": data.Target.ValueInt64(),
-		"lunid": data.Lunid.ValueString(),
-		"extent": data.Extent.ValueInt64(),
+	params := map[string]interface{}{}
+	params["target"] = data.Target.ValueInt64()
+	if !data.Lunid.IsNull() {
+		params["lunid"] = data.Lunid.ValueString()
 	}
+	params["extent"] = data.Extent.ValueInt64()
 
 	result, err := r.client.Call("iscsi/targetextent.create", params)
 	if err != nil {
@@ -114,11 +115,12 @@ func (r *IscsiTargetextentResource) Update(ctx context.Context, req resource.Upd
 		return
 	}
 
-	params := map[string]interface{}{
-		"target": data.Target.ValueInt64(),
-		"lunid": data.Lunid.ValueString(),
-		"extent": data.Extent.ValueInt64(),
+	params := map[string]interface{}{}
+	params["target"] = data.Target.ValueInt64()
+	if !data.Lunid.IsNull() {
+		params["lunid"] = data.Lunid.ValueString()
 	}
+	params["extent"] = data.Extent.ValueInt64()
 
 	_, err := r.client.Call("iscsi/targetextent.update", []interface{}{data.ID.ValueString(), params})
 	if err != nil {
