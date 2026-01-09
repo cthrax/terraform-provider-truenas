@@ -235,7 +235,9 @@ func (c *Client) UploadFile(endpoint string, jsonData map[string]interface{}, fi
 	if err != nil {
 		return nil, fmt.Errorf("HTTP request failed: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

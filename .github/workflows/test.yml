@@ -34,9 +34,7 @@ jobs:
       - name: Run unit tests
         run: go test -v -cover -coverprofile=coverage.out ./internal/...
         timeout-minutes: 10
-        env:
-          # TF_ACC not set - only unit tests run, acceptance tests skip
-          
+      
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:
