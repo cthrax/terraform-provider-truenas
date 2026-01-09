@@ -42,10 +42,10 @@ provider "truenas" {
 
 ```hcl
 resource "truenas_vm" "example" {
-  name        = "test-vm"
+  name        = "testvm"
   description = "Test VM created by Terraform"
   vcpus       = 2
-  memory      = 2147483648  # 2GB in bytes
+  memory      = 2048  # 2GB in megabytes
   autostart   = false
 }
 ```
@@ -75,6 +75,53 @@ Built with:
 - Terraform Plugin Framework
 - WebSocket JSON-RPC 2.0
 - OpenAPI-driven code generation
+
+## Testing
+
+This provider uses a two-tier testing strategy:
+
+### Unit Tests (CI/CD)
+
+Unit tests run automatically in CI and test core logic without requiring a TrueNAS instance:
+- Schema validation
+- Parameter building
+- Optional field handling
+- Business logic
+
+```bash
+# Run unit tests locally
+go test -v ./internal/...
+```
+
+### Acceptance Tests (Local Only)
+
+Acceptance tests require a real TrueNAS instance and are skipped in CI:
+- Full CRUD lifecycle testing
+- Real API integration
+- Resource state management
+
+**Prerequisites:**
+- TrueNAS SCALE instance (accessible via network)
+- API token with appropriate permissions
+
+**Running acceptance tests:**
+
+```bash
+# Set environment variables
+export TRUENAS_HOST=192.168.1.100
+export TRUENAS_TOKEN=your-api-token
+
+# Run acceptance tests
+./test-local.sh
+```
+
+Or run directly:
+
+```bash
+TRUENAS_HOST=192.168.1.100 TRUENAS_TOKEN=your-token TF_ACC=1 go test ./internal/provider -v -run TestAcc
+```
+
+**Note:** Acceptance tests create and destroy real resources on your TrueNAS instance. Use a test environment.
 
 ## License
 
