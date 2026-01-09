@@ -11,6 +11,7 @@ TEMPLATE_DIR = Path(__file__).parent / 'templates'
 # Load templates from files
 GO_RESOURCE_TEMPLATE = (TEMPLATE_DIR / 'resource.go.tmpl').read_text()
 GO_RESOURCE_WITH_JSON_TEMPLATE = (TEMPLATE_DIR / 'resource_with_json.go.tmpl').read_text()
+GO_RESOURCE_VM_DEVICE_TEMPLATE = (TEMPLATE_DIR / 'resource_vm_device.go.tmpl').read_text()
 GO_RESOURCE_UPDATE_ONLY_TEMPLATE = (TEMPLATE_DIR / 'resource_update_only.go.tmpl').read_text()
 ACTION_RESOURCE_TEMPLATE = (TEMPLATE_DIR / 'action_resource.go.tmpl').read_text()
 RESOURCE_DOC_TEMPLATE = (TEMPLATE_DIR / 'resource_doc.md.tmpl').read_text()
@@ -378,7 +379,12 @@ def generate_resource(name, path, schema, spec, update_only=False):
             ReadMapping=chr(10).join(read_mapping) if read_mapping else '\t\t// No fields to map'
         )
     else:
-        template = GO_RESOURCE_WITH_JSON_TEMPLATE if needs_json else GO_RESOURCE_TEMPLATE
+        # Special template for vm_device (needs VM stop before delete)
+        if api_name == 'vm.device':
+            template = GO_RESOURCE_VM_DEVICE_TEMPLATE
+        else:
+            template = GO_RESOURCE_WITH_JSON_TEMPLATE if needs_json else GO_RESOURCE_TEMPLATE
+        
         return template.format(
             resource_name=resource_name,
             name=name.replace('/', '_').replace('-', '_'),

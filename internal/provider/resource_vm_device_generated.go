@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -179,6 +180,17 @@ func (r *VmDeviceResource) Delete(ctx context.Context, req resource.DeleteReques
 		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
 		return
 	}
+
+	// Stop VM before deleting device (TrueNAS requirement)
+	vmID := int(data.Vm.ValueInt64())
+	stopParams := []interface{}{
+		vmID,
+		map[string]interface{}{"force": true},
+	}
+	_, _ = r.client.Call("vm.stop", stopParams)  // Ignore errors (VM may already be stopped by another device)
+	
+	// Wait for VM to actually stop (vm.stop is asynchronous)
+	time.Sleep(5 * time.Second)
 
 	_, err = r.client.Call("vm.device.delete", resourceID)
 	if err != nil {
