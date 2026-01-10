@@ -1,0 +1,6 @@
+truenas_host   = "192.168.1.100"
+truenas_token  = "your-api-token-here"
+pool_name      = "tank"
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC... your-key-here"
+vm_hostname    = "testtruenas"
+vm_ip          = "192.168.1.50"

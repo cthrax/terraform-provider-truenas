@@ -19,7 +19,6 @@ type FilesystemPutResourceModel struct {
 	ID      types.String `tfsdk:"id"`
 	Path    types.String `tfsdk:"path"`
 	Content types.String `tfsdk:"content"`
-	Mode    types.Int64  `tfsdk:"mode"`
 }
 
 func NewFilesystemPutResource() resource.Resource {
@@ -46,10 +45,6 @@ func (r *FilesystemPutResource) Schema(ctx context.Context, req resource.SchemaR
 				Required:            true,
 				Sensitive:           true,
 				MarkdownDescription: "Base64-encoded file content",
-			},
-			"mode": schema.Int64Attribute{
-				Optional:            true,
-				MarkdownDescription: "File permissions (octal, e.g., 0644)",
 			},
 		},
 	}
@@ -85,9 +80,6 @@ func (r *FilesystemPutResource) Create(ctx context.Context, req resource.CreateR
 	jsonData := map[string]interface{}{
 		"path": data.Path.ValueString(),
 	}
-	if !data.Mode.IsNull() {
-		jsonData["mode"] = data.Mode.ValueInt64()
-	}
 
 	// Upload file
 	_, err = r.client.UploadFile("/api/v2.0/filesystem/put", jsonData, fileContent, data.Path.ValueString())
@@ -122,9 +114,6 @@ func (r *FilesystemPutResource) Update(ctx context.Context, req resource.UpdateR
 	// Prepare JSON data
 	jsonData := map[string]interface{}{
 		"path": data.Path.ValueString(),
-	}
-	if !data.Mode.IsNull() {
-		jsonData["mode"] = data.Mode.ValueInt64()
 	}
 
 	// Upload file
