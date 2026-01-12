@@ -24,9 +24,17 @@ type Client struct {
 	mu             sync.Mutex
 	reconnectMu    sync.Mutex
 	requests       map[string]chan DDPResponse
+	subscriptions  map[string]chan DDPEvent
 	nextID         int
 	connected      bool
 	connGeneration int
+}
+
+type DDPEvent struct {
+	Msg        string                 `json:"msg"`
+	Collection string                 `json:"collection,omitempty"`
+	ID         string                 `json:"id,omitempty"`
+	Fields     map[string]interface{} `json:"fields,omitempty"`
 }
 
 type DDPMessage struct {
@@ -48,9 +56,10 @@ type DDPResponse struct {
 
 func NewClient(host, token string) (*Client, error) {
 	return &Client{
-		host:     host,
-		token:    token,
-		requests: make(map[string]chan DDPResponse),
+		host:          host,
+		token:         token,
+		requests:      make(map[string]chan DDPResponse),
+		subscriptions: make(map[string]chan DDPEvent),
 		httpClient: &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -164,10 +173,9 @@ func (c *Client) connect() error {
 
 func (c *Client) handleMessages(generation int) {
 	for {
-		var response DDPResponse
-		if err := c.conn.ReadJSON(&response); err != nil {
+		var msg map[string]interface{}
+		if err := c.conn.ReadJSON(&msg); err != nil {
 			c.mu.Lock()
-			// Only update state if this is still the current connection
 			if c.connGeneration == generation {
 				log.Printf("WebSocket read error: %v", err)
 				c.connected = false
@@ -180,11 +188,45 @@ func (c *Client) handleMessages(generation int) {
 			return
 		}
 
-		if response.ID != "" {
+		msgType, _ := msg["msg"].(string)
+
+		// Handle method responses
+		if msgType == "result" || msgType == "error" {
+			if id, ok := msg["id"].(string); ok {
+				c.mu.Lock()
+				if ch, exists := c.requests[id]; exists {
+					response := DDPResponse{
+						Msg:    msgType,
+						ID:     id,
+						Result: msg["result"],
+						Error:  msg["error"],
+					}
+					ch <- response
+					delete(c.requests, id)
+				}
+				c.mu.Unlock()
+			}
+		}
+
+		// Handle collection events (for subscriptions)
+		if msgType == "changed" || msgType == "added" {
+			collection, _ := msg["collection"].(string)
+			id, _ := msg["id"].(string)
+			fields, _ := msg["fields"].(map[string]interface{})
+
+			event := DDPEvent{
+				Msg:        msgType,
+				Collection: collection,
+				ID:         id,
+				Fields:     fields,
+			}
+
 			c.mu.Lock()
-			if ch, exists := c.requests[response.ID]; exists {
-				ch <- response
-				delete(c.requests, response.ID)
+			for _, ch := range c.subscriptions {
+				select {
+				case ch <- event:
+				default:
+				}
 			}
 			c.mu.Unlock()
 		}
@@ -263,25 +305,32 @@ func (c *Client) call(method string, params interface{}) (*DDPResponse, error) {
 func (c *Client) Call(method string, params interface{}) (interface{}, error) {
 	// For DDP protocol, params should be wrapped in array unless already an array
 	var ddpParams interface{}
-	switch method {
-	case "vm.update", "vm.stop", "vm.device.update", "pool.dataset.delete", "pool.dataset.update", "pool.snapshot.delete":
-		// These expect [id, data] format - params should already be correct
+	
+	// Check if params is already an array
+	if _, isSlice := params.([]interface{}); isSlice {
+		// Already an array, use as-is
 		ddpParams = params
-	case "vm.delete", "vm.get_instance":
-		// These expect integer ID parameter
-		if idStr, ok := params.(string); ok {
-			// Convert string ID to integer
-			if id, err := strconv.Atoi(idStr); err == nil {
-				ddpParams = []interface{}{id}
+	} else {
+		switch method {
+		case "vm.update", "vm.stop", "vm.device.update", "pool.dataset.delete", "pool.dataset.update", "pool.snapshot.delete", "core.subscribe":
+			// These expect params as-is (already in correct format)
+			ddpParams = params
+		case "vm.delete", "vm.get_instance":
+			// These expect integer ID parameter
+			if idStr, ok := params.(string); ok {
+				// Convert string ID to integer
+				if id, err := strconv.Atoi(idStr); err == nil {
+					ddpParams = []interface{}{id}
+				} else {
+					return nil, fmt.Errorf("invalid ID format: %s", idStr)
+				}
 			} else {
-				return nil, fmt.Errorf("invalid ID format: %s", idStr)
+				ddpParams = []interface{}{params}
 			}
-		} else {
+		default:
+			// vm.create and others expect [data] format
 			ddpParams = []interface{}{params}
 		}
-	default:
-		// vm.create and others expect [data] format
-		ddpParams = []interface{}{params}
 	}
 
 	response, err := c.call(method, ddpParams)
@@ -396,4 +445,106 @@ func (c *Client) Close() error {
 		return c.conn.Close()
 	}
 	return nil
+}
+
+// JobResult contains the final state of a completed job
+type JobResult struct {
+	ID       int
+	State    string
+	Result   interface{}
+	Progress float64
+	Error    string
+}
+
+// WaitForJob subscribes to job events and waits for completion
+func (c *Client) WaitForJob(jobID int, timeout time.Duration) (*JobResult, error) {
+	// Subscribe to job updates
+	subID := fmt.Sprintf("job_%d", jobID)
+	eventChan := make(chan DDPEvent, 10)
+
+	c.mu.Lock()
+	c.subscriptions[subID] = eventChan
+	c.mu.Unlock()
+
+	defer func() {
+		c.mu.Lock()
+		delete(c.subscriptions, subID)
+		c.mu.Unlock()
+		close(eventChan)
+	}()
+
+	// Subscribe to core.get_jobs events
+	// Use raw call() to avoid parameter wrapping
+	resp, err := c.call("core.subscribe", []interface{}{"core.get_jobs"})
+	if err != nil {
+		return nil, fmt.Errorf("failed to subscribe to jobs: %v", err)
+	}
+	if resp.Error != nil {
+		return nil, fmt.Errorf("subscribe failed: %v", resp.Error)
+	}
+
+	// Wait for job completion
+	deadline := time.Now().Add(timeout)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case event := <-eventChan:
+			if event.Collection == "core.get_jobs" {
+				// Check if this event is for our job
+				eventJobID := 0
+				if idField, ok := event.Fields["id"].(float64); ok {
+					eventJobID = int(idField)
+				} else if idField, ok := event.Fields["id"].(int); ok {
+					eventJobID = idField
+				}
+				
+				if eventJobID != jobID {
+					continue // Not our job, skip
+				}
+				
+				state, _ := event.Fields["state"].(string)
+				progress, _ := event.Fields["progress"].(map[string]interface{})
+				progressPct := 0.0
+				if progress != nil {
+					if pct, ok := progress["percent"].(float64); ok {
+						progressPct = pct
+					}
+				}
+
+				log.Printf("Job %d: state=%s progress=%.1f%%", jobID, state, progressPct)
+
+				if state == "SUCCESS" {
+					return &JobResult{
+						ID:       jobID,
+						State:    state,
+						Result:   event.Fields["result"],
+						Progress: progressPct,
+					}, nil
+				}
+
+				if state == "FAILED" || state == "ABORTED" {
+					errMsg := ""
+					if errField, ok := event.Fields["error"].(string); ok {
+						errMsg = errField
+					}
+					return &JobResult{
+						ID:       jobID,
+						State:    state,
+						Progress: progressPct,
+						Error:    errMsg,
+					}, fmt.Errorf("job failed: %s", errMsg)
+				}
+			}
+
+		case <-ticker.C:
+			if time.Now().After(deadline) {
+				return nil, fmt.Errorf("job timeout after %v", timeout)
+			}
+
+		case <-time.After(timeout):
+			return nil, fmt.Errorf("job timeout")
+		}
+	}
 }

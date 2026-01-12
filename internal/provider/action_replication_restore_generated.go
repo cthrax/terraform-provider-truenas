@@ -11,43 +11,71 @@ import (
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
-type ReplicationRestoreActionResource struct {
+type ActionReplicationRestoreResource struct {
 	client *client.Client
 }
 
-type ReplicationRestoreActionResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	ResourceID types.String `tfsdk:"resource_id"`
+type ActionReplicationRestoreResourceModel struct {
+	Id types.Int64 `tfsdk:"id"`
 	ReplicationRestore types.String `tfsdk:"replication_restore"`
+	// Computed outputs
+	ActionID types.String  `tfsdk:"action_id"`
+	JobID    types.Int64   `tfsdk:"job_id"`
+	State    types.String  `tfsdk:"state"`
+	Progress types.Float64 `tfsdk:"progress"`
+	Result   types.String  `tfsdk:"result"`
+	Error    types.String  `tfsdk:"error"`
 }
 
-func NewReplicationRestoreActionResource() resource.Resource {
-	return &ReplicationRestoreActionResource{}
+func NewActionReplicationRestoreResource() resource.Resource {
+	return &ActionReplicationRestoreResource{}
 }
 
-func (r *ReplicationRestoreActionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_replication_restore_action"
+func (r *ActionReplicationRestoreResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_action_replication_restore"
 }
 
-func (r *ReplicationRestoreActionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ActionReplicationRestoreResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Executes restore action on replication resource",
+		MarkdownDescription: "Create the opposite of replication task `id` (PULL if it was PUSH and vice versa)",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed: true,
-			},
-			"resource_id": schema.StringAttribute{
+			"id": schema.Int64Attribute{
 				Required: true,
-				Description: "ID of the resource to perform action on",
+				MarkdownDescription: "ID of the replication task to restore.",
 			},
 			"replication_restore": schema.StringAttribute{
-				Optional: true,
+				Required: true,
+				MarkdownDescription: "Configuration options for restoring the replication task.",
+			},
+			"action_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action execution identifier",
+			},
+			"job_id": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Background job ID (if applicable)",
+			},
+			"state": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Job state: SUCCESS, FAILED, or RUNNING",
+			},
+			"progress": schema.Float64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Job progress percentage (0-100)",
+			},
+			"result": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action result data",
+			},
+			"error": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Error message if action failed",
 			},
 		},
 	}
 }
 
-func (r *ReplicationRestoreActionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ActionReplicationRestoreResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -59,58 +87,69 @@ func (r *ReplicationRestoreActionResource) Configure(ctx context.Context, req re
 	r.client = client
 }
 
-func (r *ReplicationRestoreActionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data ReplicationRestoreActionResourceModel
+func (r *ActionReplicationRestoreResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data ActionReplicationRestoreResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	params := map[string]interface{}{}
-		if !data.ReplicationRestore.IsNull() {
-			params["replication_restore"] = data.ReplicationRestore.ValueString()
-		}
+	// Build parameters
+	// Build parameters as array (positional)
+	params := []interface{}{}
+	params = append(params, data.Id.ValueInt64())
+	params = append(params, data.ReplicationRestore.ValueString())
 
-	_, err := r.client.Call("replication/restore", data.ResourceID.ValueString())
+	// Execute action
+	result, err := r.client.Call("replication.restore", params)
 	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute restore: %s", err.Error()))
+		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute replication.restore: %s", err.Error()))
 		return
 	}
 
-	// Use timestamp as ID since actions are ephemeral
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
+	// Check if result is a job ID
+	if jobID, ok := result.(float64); ok && false {
+		// Background job - wait for completion
+		data.JobID = types.Int64Value(int64(jobID))
+		
+		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
+		if err != nil {
+			data.State = types.StringValue("FAILED")
+			data.Error = types.StringValue(err.Error())
+			resp.Diagnostics.AddError("Job Failed", err.Error())
+		} else {
+			data.State = types.StringValue(jobResult.State)
+			data.Progress = types.Float64Value(jobResult.Progress)
+			data.Result = types.StringValue(fmt.Sprintf("%v", jobResult.Result))
+			if jobResult.Error != "" {
+				data.Error = types.StringValue(jobResult.Error)
+			} else {
+				data.Error = types.StringValue("")
+			}
+		}
+	} else {
+		// Immediate result
+		data.State = types.StringValue("SUCCESS")
+		data.Progress = types.Float64Value(100.0)
+		data.Result = types.StringValue(fmt.Sprintf("%v", result))
+		data.Error = types.StringValue("")
+	}
+
+	// Generate ID from timestamp
+	data.ActionID = types.StringValue(fmt.Sprintf("replication.restore-%d", time.Now().Unix()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ReplicationRestoreActionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// Actions are ephemeral - nothing to read
-	var data ReplicationRestoreActionResourceModel
+func (r *ActionReplicationRestoreResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	// Actions are immutable - just return current state
+	var data ActionReplicationRestoreResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 }
 
-func (r *ReplicationRestoreActionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// Actions are immutable - re-execute on update
-	var data ReplicationRestoreActionResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	params := map[string]interface{}{}
-		if !data.ReplicationRestore.IsNull() {
-			params["replication_restore"] = data.ReplicationRestore.ValueString()
-		}
-
-	_, err := r.client.Call("replication/restore", data.ResourceID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute restore: %s", err.Error()))
-		return
-	}
-
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+func (r *ActionReplicationRestoreResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
 }
 
-func (r *ReplicationRestoreActionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Actions cannot be undone - just remove from state
+func (r *ActionReplicationRestoreResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// No-op - actions cannot be undone
 }

@@ -11,47 +11,71 @@ import (
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
-type PoolScrubScrubActionResource struct {
+type ActionPoolScrubScrubResource struct {
 	client *client.Client
 }
 
-type PoolScrubScrubActionResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	ResourceID types.String `tfsdk:"resource_id"`
+type ActionPoolScrubScrubResourceModel struct {
 	Name types.String `tfsdk:"name"`
 	Action types.String `tfsdk:"action"`
+	// Computed outputs
+	ActionID types.String  `tfsdk:"action_id"`
+	JobID    types.Int64   `tfsdk:"job_id"`
+	State    types.String  `tfsdk:"state"`
+	Progress types.Float64 `tfsdk:"progress"`
+	Result   types.String  `tfsdk:"result"`
+	Error    types.String  `tfsdk:"error"`
 }
 
-func NewPoolScrubScrubActionResource() resource.Resource {
-	return &PoolScrubScrubActionResource{}
+func NewActionPoolScrubScrubResource() resource.Resource {
+	return &ActionPoolScrubScrubResource{}
 }
 
-func (r *PoolScrubScrubActionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_pool_scrub_scrub_action"
+func (r *ActionPoolScrubScrubResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_action_pool_scrub_scrub"
 }
 
-func (r *PoolScrubScrubActionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ActionPoolScrubScrubResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Executes scrub action on pool_scrub resource",
+		MarkdownDescription: "Start/Stop/Pause a scrub on pool `name`",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed: true,
-			},
-			"resource_id": schema.StringAttribute{
-				Required: true,
-				Description: "ID of the resource to perform action on",
-			},
 			"name": schema.StringAttribute{
-				Optional: true,
+				Required: true,
+				MarkdownDescription: "Name of the pool to perform scrub action on.",
 			},
 			"action": schema.StringAttribute{
 				Optional: true,
+				MarkdownDescription: "The scrub action to perform on the pool.",
+			},
+			"action_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action execution identifier",
+			},
+			"job_id": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Background job ID (if applicable)",
+			},
+			"state": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Job state: SUCCESS, FAILED, or RUNNING",
+			},
+			"progress": schema.Float64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Job progress percentage (0-100)",
+			},
+			"result": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action result data",
+			},
+			"error": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Error message if action failed",
 			},
 		},
 	}
 }
 
-func (r *PoolScrubScrubActionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ActionPoolScrubScrubResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -63,64 +87,71 @@ func (r *PoolScrubScrubActionResource) Configure(ctx context.Context, req resour
 	r.client = client
 }
 
-func (r *PoolScrubScrubActionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data PoolScrubScrubActionResourceModel
+func (r *ActionPoolScrubScrubResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data ActionPoolScrubScrubResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	params := map[string]interface{}{}
-		if !data.Name.IsNull() {
-			params["name"] = data.Name.ValueString()
-		}
-		if !data.Action.IsNull() {
-			params["action"] = data.Action.ValueString()
-		}
+	// Build parameters
+	// Build parameters as array (positional)
+	params := []interface{}{}
+	params = append(params, data.Name.ValueString())
+	if !data.Action.IsNull() {
+		params = append(params, data.Action.ValueString())
+	}
 
-	_, err := r.client.Call("pool/scrub/scrub", data.ResourceID.ValueString())
+	// Execute action
+	result, err := r.client.Call("pool.scrub.scrub", params)
 	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute scrub: %s", err.Error()))
+		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute pool.scrub.scrub: %s", err.Error()))
 		return
 	}
 
-	// Use timestamp as ID since actions are ephemeral
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
+	// Check if result is a job ID
+	if jobID, ok := result.(float64); ok && true {
+		// Background job - wait for completion
+		data.JobID = types.Int64Value(int64(jobID))
+		
+		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
+		if err != nil {
+			data.State = types.StringValue("FAILED")
+			data.Error = types.StringValue(err.Error())
+			resp.Diagnostics.AddError("Job Failed", err.Error())
+		} else {
+			data.State = types.StringValue(jobResult.State)
+			data.Progress = types.Float64Value(jobResult.Progress)
+			data.Result = types.StringValue(fmt.Sprintf("%v", jobResult.Result))
+			if jobResult.Error != "" {
+				data.Error = types.StringValue(jobResult.Error)
+			} else {
+				data.Error = types.StringValue("")
+			}
+		}
+	} else {
+		// Immediate result
+		data.State = types.StringValue("SUCCESS")
+		data.Progress = types.Float64Value(100.0)
+		data.Result = types.StringValue(fmt.Sprintf("%v", result))
+		data.Error = types.StringValue("")
+	}
+
+	// Generate ID from timestamp
+	data.ActionID = types.StringValue(fmt.Sprintf("pool.scrub.scrub-%d", time.Now().Unix()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *PoolScrubScrubActionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// Actions are ephemeral - nothing to read
-	var data PoolScrubScrubActionResourceModel
+func (r *ActionPoolScrubScrubResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	// Actions are immutable - just return current state
+	var data ActionPoolScrubScrubResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 }
 
-func (r *PoolScrubScrubActionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// Actions are immutable - re-execute on update
-	var data PoolScrubScrubActionResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	params := map[string]interface{}{}
-		if !data.Name.IsNull() {
-			params["name"] = data.Name.ValueString()
-		}
-		if !data.Action.IsNull() {
-			params["action"] = data.Action.ValueString()
-		}
-
-	_, err := r.client.Call("pool/scrub/scrub", data.ResourceID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute scrub: %s", err.Error()))
-		return
-	}
-
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+func (r *ActionPoolScrubScrubResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
 }
 
-func (r *PoolScrubScrubActionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Actions cannot be undone - just remove from state
+func (r *ActionPoolScrubScrubResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// No-op - actions cannot be undone
 }

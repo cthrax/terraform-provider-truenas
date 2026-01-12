@@ -11,47 +11,71 @@ import (
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
-type PoolScrubRunActionResource struct {
+type ActionPoolScrubRunResource struct {
 	client *client.Client
 }
 
-type PoolScrubRunActionResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	ResourceID types.String `tfsdk:"resource_id"`
+type ActionPoolScrubRunResourceModel struct {
 	Name types.String `tfsdk:"name"`
-	Threshold types.String `tfsdk:"threshold"`
+	Threshold types.Int64 `tfsdk:"threshold"`
+	// Computed outputs
+	ActionID types.String  `tfsdk:"action_id"`
+	JobID    types.Int64   `tfsdk:"job_id"`
+	State    types.String  `tfsdk:"state"`
+	Progress types.Float64 `tfsdk:"progress"`
+	Result   types.String  `tfsdk:"result"`
+	Error    types.String  `tfsdk:"error"`
 }
 
-func NewPoolScrubRunActionResource() resource.Resource {
-	return &PoolScrubRunActionResource{}
+func NewActionPoolScrubRunResource() resource.Resource {
+	return &ActionPoolScrubRunResource{}
 }
 
-func (r *PoolScrubRunActionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_pool_scrub_run_action"
+func (r *ActionPoolScrubRunResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_action_pool_scrub_run"
 }
 
-func (r *PoolScrubRunActionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ActionPoolScrubRunResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Executes run action on pool_scrub resource",
+		MarkdownDescription: "Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed: true,
-			},
-			"resource_id": schema.StringAttribute{
-				Required: true,
-				Description: "ID of the resource to perform action on",
-			},
 			"name": schema.StringAttribute{
-				Optional: true,
+				Required: true,
+				MarkdownDescription: "Name of the pool to run scrub on.",
 			},
-			"threshold": schema.StringAttribute{
+			"threshold": schema.Int64Attribute{
 				Optional: true,
+				MarkdownDescription: "Days before a scrub is due when the scrub should start.",
+			},
+			"action_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action execution identifier",
+			},
+			"job_id": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Background job ID (if applicable)",
+			},
+			"state": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Job state: SUCCESS, FAILED, or RUNNING",
+			},
+			"progress": schema.Float64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Job progress percentage (0-100)",
+			},
+			"result": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action result data",
+			},
+			"error": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Error message if action failed",
 			},
 		},
 	}
 }
 
-func (r *PoolScrubRunActionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ActionPoolScrubRunResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -63,64 +87,71 @@ func (r *PoolScrubRunActionResource) Configure(ctx context.Context, req resource
 	r.client = client
 }
 
-func (r *PoolScrubRunActionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data PoolScrubRunActionResourceModel
+func (r *ActionPoolScrubRunResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data ActionPoolScrubRunResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	params := map[string]interface{}{}
-		if !data.Name.IsNull() {
-			params["name"] = data.Name.ValueString()
-		}
-		if !data.Threshold.IsNull() {
-			params["threshold"] = data.Threshold.ValueString()
-		}
+	// Build parameters
+	// Build parameters as array (positional)
+	params := []interface{}{}
+	params = append(params, data.Name.ValueString())
+	if !data.Threshold.IsNull() {
+		params = append(params, data.Threshold.ValueInt64())
+	}
 
-	_, err := r.client.Call("pool/scrub/run", data.ResourceID.ValueString())
+	// Execute action
+	result, err := r.client.Call("pool.scrub.run", params)
 	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute run: %s", err.Error()))
+		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute pool.scrub.run: %s", err.Error()))
 		return
 	}
 
-	// Use timestamp as ID since actions are ephemeral
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
+	// Check if result is a job ID
+	if jobID, ok := result.(float64); ok && false {
+		// Background job - wait for completion
+		data.JobID = types.Int64Value(int64(jobID))
+		
+		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
+		if err != nil {
+			data.State = types.StringValue("FAILED")
+			data.Error = types.StringValue(err.Error())
+			resp.Diagnostics.AddError("Job Failed", err.Error())
+		} else {
+			data.State = types.StringValue(jobResult.State)
+			data.Progress = types.Float64Value(jobResult.Progress)
+			data.Result = types.StringValue(fmt.Sprintf("%v", jobResult.Result))
+			if jobResult.Error != "" {
+				data.Error = types.StringValue(jobResult.Error)
+			} else {
+				data.Error = types.StringValue("")
+			}
+		}
+	} else {
+		// Immediate result
+		data.State = types.StringValue("SUCCESS")
+		data.Progress = types.Float64Value(100.0)
+		data.Result = types.StringValue(fmt.Sprintf("%v", result))
+		data.Error = types.StringValue("")
+	}
+
+	// Generate ID from timestamp
+	data.ActionID = types.StringValue(fmt.Sprintf("pool.scrub.run-%d", time.Now().Unix()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *PoolScrubRunActionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// Actions are ephemeral - nothing to read
-	var data PoolScrubRunActionResourceModel
+func (r *ActionPoolScrubRunResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	// Actions are immutable - just return current state
+	var data ActionPoolScrubRunResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 }
 
-func (r *PoolScrubRunActionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// Actions are immutable - re-execute on update
-	var data PoolScrubRunActionResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	params := map[string]interface{}{}
-		if !data.Name.IsNull() {
-			params["name"] = data.Name.ValueString()
-		}
-		if !data.Threshold.IsNull() {
-			params["threshold"] = data.Threshold.ValueString()
-		}
-
-	_, err := r.client.Call("pool/scrub/run", data.ResourceID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute run: %s", err.Error()))
-		return
-	}
-
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+func (r *ActionPoolScrubRunResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
 }
 
-func (r *PoolScrubRunActionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Actions cannot be undone - just remove from state
+func (r *ActionPoolScrubRunResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// No-op - actions cannot be undone
 }

@@ -11,43 +11,71 @@ import (
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
-type CloudsyncRestoreActionResource struct {
+type ActionCloudsyncRestoreResource struct {
 	client *client.Client
 }
 
-type CloudsyncRestoreActionResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	ResourceID types.String `tfsdk:"resource_id"`
+type ActionCloudsyncRestoreResourceModel struct {
+	Id types.Int64 `tfsdk:"id"`
 	Opts types.String `tfsdk:"opts"`
+	// Computed outputs
+	ActionID types.String  `tfsdk:"action_id"`
+	JobID    types.Int64   `tfsdk:"job_id"`
+	State    types.String  `tfsdk:"state"`
+	Progress types.Float64 `tfsdk:"progress"`
+	Result   types.String  `tfsdk:"result"`
+	Error    types.String  `tfsdk:"error"`
 }
 
-func NewCloudsyncRestoreActionResource() resource.Resource {
-	return &CloudsyncRestoreActionResource{}
+func NewActionCloudsyncRestoreResource() resource.Resource {
+	return &ActionCloudsyncRestoreResource{}
 }
 
-func (r *CloudsyncRestoreActionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_cloudsync_restore_action"
+func (r *ActionCloudsyncRestoreResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_action_cloudsync_restore"
 }
 
-func (r *CloudsyncRestoreActionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ActionCloudsyncRestoreResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Executes restore action on cloudsync resource",
+		MarkdownDescription: "Create the opposite of cloud sync task `id` (PULL if it was PUSH and vice versa)",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Computed: true,
-			},
-			"resource_id": schema.StringAttribute{
+			"id": schema.Int64Attribute{
 				Required: true,
-				Description: "ID of the resource to perform action on",
+				MarkdownDescription: "ID of the cloud sync task to restore from.",
 			},
 			"opts": schema.StringAttribute{
-				Optional: true,
+				Required: true,
+				MarkdownDescription: "Restore operation configuration options.",
+			},
+			"action_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action execution identifier",
+			},
+			"job_id": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Background job ID (if applicable)",
+			},
+			"state": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Job state: SUCCESS, FAILED, or RUNNING",
+			},
+			"progress": schema.Float64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Job progress percentage (0-100)",
+			},
+			"result": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Action result data",
+			},
+			"error": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Error message if action failed",
 			},
 		},
 	}
 }
 
-func (r *CloudsyncRestoreActionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ActionCloudsyncRestoreResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -59,58 +87,69 @@ func (r *CloudsyncRestoreActionResource) Configure(ctx context.Context, req reso
 	r.client = client
 }
 
-func (r *CloudsyncRestoreActionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data CloudsyncRestoreActionResourceModel
+func (r *ActionCloudsyncRestoreResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data ActionCloudsyncRestoreResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	params := map[string]interface{}{}
-		if !data.Opts.IsNull() {
-			params["opts"] = data.Opts.ValueString()
-		}
+	// Build parameters
+	// Build parameters as array (positional)
+	params := []interface{}{}
+	params = append(params, data.Id.ValueInt64())
+	params = append(params, data.Opts.ValueString())
 
-	_, err := r.client.Call("cloudsync/restore", data.ResourceID.ValueString())
+	// Execute action
+	result, err := r.client.Call("cloudsync.restore", params)
 	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute restore: %s", err.Error()))
+		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute cloudsync.restore: %s", err.Error()))
 		return
 	}
 
-	// Use timestamp as ID since actions are ephemeral
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
+	// Check if result is a job ID
+	if jobID, ok := result.(float64); ok && false {
+		// Background job - wait for completion
+		data.JobID = types.Int64Value(int64(jobID))
+		
+		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
+		if err != nil {
+			data.State = types.StringValue("FAILED")
+			data.Error = types.StringValue(err.Error())
+			resp.Diagnostics.AddError("Job Failed", err.Error())
+		} else {
+			data.State = types.StringValue(jobResult.State)
+			data.Progress = types.Float64Value(jobResult.Progress)
+			data.Result = types.StringValue(fmt.Sprintf("%v", jobResult.Result))
+			if jobResult.Error != "" {
+				data.Error = types.StringValue(jobResult.Error)
+			} else {
+				data.Error = types.StringValue("")
+			}
+		}
+	} else {
+		// Immediate result
+		data.State = types.StringValue("SUCCESS")
+		data.Progress = types.Float64Value(100.0)
+		data.Result = types.StringValue(fmt.Sprintf("%v", result))
+		data.Error = types.StringValue("")
+	}
+
+	// Generate ID from timestamp
+	data.ActionID = types.StringValue(fmt.Sprintf("cloudsync.restore-%d", time.Now().Unix()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *CloudsyncRestoreActionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// Actions are ephemeral - nothing to read
-	var data CloudsyncRestoreActionResourceModel
+func (r *ActionCloudsyncRestoreResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	// Actions are immutable - just return current state
+	var data ActionCloudsyncRestoreResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 }
 
-func (r *CloudsyncRestoreActionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// Actions are immutable - re-execute on update
-	var data CloudsyncRestoreActionResourceModel
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	params := map[string]interface{}{}
-		if !data.Opts.IsNull() {
-			params["opts"] = data.Opts.ValueString()
-		}
-
-	_, err := r.client.Call("cloudsync/restore", data.ResourceID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute restore: %s", err.Error()))
-		return
-	}
-
-	data.ID = types.StringValue(fmt.Sprintf("%s-%d", data.ResourceID.ValueString(), time.Now().Unix()))
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+func (r *ActionCloudsyncRestoreResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
 }
 
-func (r *CloudsyncRestoreActionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Actions cannot be undone - just remove from state
+func (r *ActionCloudsyncRestoreResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// No-op - actions cannot be undone
 }

@@ -4,11 +4,11 @@ A comprehensive Terraform provider for TrueNAS SCALE using native JSON-RPC 2.0 o
 
 ## Features
 
-- ✅ **274 Generated Resources** covering the entire TrueNAS API surface
-- ✅ **WebSocket JSON-RPC** for superior performance vs REST
-- ✅ **Complete CRUD Operations** for all resources
+- ✅ **Comprehensive API Coverage** - Auto-generated from TrueNAS OpenAPI specification
+- ✅ **Native WebSocket JSON-RPC** - Direct protocol support for optimal performance
+- ✅ **Complete CRUD Operations** for resources
 - ✅ **Terraform Plugin Framework** implementation
-- ✅ **Comprehensive Documentation** for all resources
+- ✅ **Generated Documentation** for discovered resources and data sources
 
 ## Requirements
 
