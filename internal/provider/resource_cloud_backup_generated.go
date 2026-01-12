@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -282,70 +281,71 @@ func (r *CloudBackupResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["description"]; ok && v != nil {
-			data.Description = types.StringValue(fmt.Sprintf("%v", v))
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["path"]; ok && v != nil {
-			data.Path = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Path = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Path = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Path = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["credentials"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Credentials = types.Int64Value(int64(fv)) }
+			switch val := v.(type) {
+			case float64:
+				data.Credentials = types.Int64Value(int64(val))
+			case map[string]interface{}:
+				if parsed, ok := val["parsed"]; ok && parsed != nil {
+					if fv, ok := parsed.(float64); ok { data.Credentials = types.Int64Value(int64(fv)) }
+				}
+			}
 		}
 		if v, ok := resultMap["attributes"]; ok && v != nil {
-			data.Attributes = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["schedule"]; ok && v != nil {
-			data.Schedule = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["pre_script"]; ok && v != nil {
-			data.PreScript = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["post_script"]; ok && v != nil {
-			data.PostScript = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["snapshot"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Snapshot = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["include"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Include, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Attributes = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Attributes = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Attributes = types.StringValue(fmt.Sprintf("%v", v))
 			}
-		}
-		if v, ok := resultMap["exclude"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Exclude, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["args"]; ok && v != nil {
-			data.Args = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
 		}
 		if v, ok := resultMap["password"]; ok && v != nil {
-			data.Password = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Password = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Password = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Password = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["keep_last"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.KeepLast = types.Int64Value(int64(fv)) }
+			switch val := v.(type) {
+			case float64:
+				data.KeepLast = types.Int64Value(int64(val))
+			case map[string]interface{}:
+				if parsed, ok := val["parsed"]; ok && parsed != nil {
+					if fv, ok := parsed.(float64); ok { data.KeepLast = types.Int64Value(int64(fv)) }
+				}
+			}
 		}
-		if v, ok := resultMap["transfer_setting"]; ok && v != nil {
-			data.TransferSetting = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["absolute_paths"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.AbsolutePaths = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["cache_path"]; ok && v != nil {
-			data.CachePath = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["rate_limit"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.RateLimit = types.Int64Value(int64(fv)) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

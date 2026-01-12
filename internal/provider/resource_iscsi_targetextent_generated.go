@@ -126,17 +126,35 @@ func (r *IscsiTargetextentResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["target"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Target = types.Int64Value(int64(fv)) }
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["lunid"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Lunid = types.Int64Value(int64(fv)) }
+		if v, ok := resultMap["target"]; ok && v != nil {
+			switch val := v.(type) {
+			case float64:
+				data.Target = types.Int64Value(int64(val))
+			case map[string]interface{}:
+				if parsed, ok := val["parsed"]; ok && parsed != nil {
+					if fv, ok := parsed.(float64); ok { data.Target = types.Int64Value(int64(fv)) }
+				}
+			}
 		}
 		if v, ok := resultMap["extent"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Extent = types.Int64Value(int64(fv)) }
+			switch val := v.(type) {
+			case float64:
+				data.Extent = types.Int64Value(int64(val))
+			case map[string]interface{}:
+				if parsed, ok := val["parsed"]; ok && parsed != nil {
+					if fv, ok := parsed.(float64); ok { data.Extent = types.Int64Value(int64(fv)) }
+				}
+			}
 		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -193,10 +211,11 @@ func (r *IscsiTargetextentResource) Delete(ctx context.Context, req resource.Del
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("iscsi.targetextent.delete", id)
 	if err != nil {

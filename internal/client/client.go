@@ -17,15 +17,16 @@ import (
 )
 
 type Client struct {
-	host         string
-	token        string
-	conn         *websocket.Conn
-	httpClient   *http.Client
-	mu           sync.Mutex
-	reconnectMu  sync.Mutex
-	requests     map[string]chan DDPResponse
-	nextID       int
-	connected    bool
+	host           string
+	token          string
+	conn           *websocket.Conn
+	httpClient     *http.Client
+	mu             sync.Mutex
+	reconnectMu    sync.Mutex
+	requests       map[string]chan DDPResponse
+	nextID         int
+	connected      bool
+	connGeneration int
 }
 
 type DDPMessage struct {
@@ -59,24 +60,27 @@ func NewClient(host, token string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Connect() error {
+func (c *Client) connect() error {
+	// Note: reconnectMu should be held by caller (ensureConnected)
+
 	// Force HTTP/1.1 for WebSocket upgrade
 	dialer := websocket.Dialer{
 		HandshakeTimeout: 45 * time.Second,
 		TLSClientConfig:  &tls.Config{InsecureSkipVerify: true},
 	}
-	
+
 	headers := http.Header{}
 	headers.Set("Authorization", "Bearer "+c.token)
-	
+
 	url := fmt.Sprintf("wss://%s/websocket", c.host)
 	conn, _, err := dialer.Dial(url, headers)
 	if err != nil {
 		return fmt.Errorf("websocket dial failed: %v", err)
 	}
-	
+
 	c.mu.Lock()
-	// Close old connection if exists
+	// Close old connection if exists - the old handleMessages will exit
+	// but we increment connGeneration so it won't affect our state
 	if c.conn != nil {
 		_ = c.conn.Close()
 	}
@@ -86,44 +90,45 @@ func (c *Client) Connect() error {
 		delete(c.requests, id)
 	}
 	c.conn = conn
-	c.connected = true
+	c.connGeneration++
+	generation := c.connGeneration
 	c.mu.Unlock()
-	
-	// Start message handler
-	go c.handleMessages()
-	
+
+	// Start message handler with current generation
+	go c.handleMessages(generation)
+
 	// Send DDP connect
 	connectMsg := DDPMessage{
 		Msg:     "connect",
 		Version: "1",
 		Support: []string{"1"},
 	}
-	
+
 	if err := conn.WriteJSON(connectMsg); err != nil {
 		c.mu.Lock()
 		c.connected = false
 		c.mu.Unlock()
 		return fmt.Errorf("failed to send connect: %v", err)
 	}
-	
+
 	// Wait for connected response
 	time.Sleep(200 * time.Millisecond)
-	
-	// Authenticate - use direct call without ensureConnected
+
+	// Authenticate
 	c.mu.Lock()
 	c.nextID++
 	id := fmt.Sprintf("req%d", c.nextID)
 	respChan := make(chan DDPResponse, 1)
 	c.requests[id] = respChan
 	c.mu.Unlock()
-	
+
 	authMsg := DDPMessage{
 		Msg:    "method",
 		Method: "auth.login_with_api_key",
 		Params: []interface{}{c.token},
 		ID:     id,
 	}
-	
+
 	if err := conn.WriteJSON(authMsg); err != nil {
 		c.mu.Lock()
 		delete(c.requests, id)
@@ -131,9 +136,10 @@ func (c *Client) Connect() error {
 		c.mu.Unlock()
 		return fmt.Errorf("failed to send auth: %v", err)
 	}
-	
+
 	select {
 	case authResp := <-respChan:
+		log.Printf("Auth response: result=%v (type=%T), error=%v", authResp.Result, authResp.Result, authResp.Error)
 		if result, ok := authResp.Result.(bool); !ok || !result {
 			c.mu.Lock()
 			c.connected = false
@@ -147,22 +153,33 @@ func (c *Client) Connect() error {
 		c.mu.Unlock()
 		return fmt.Errorf("authentication timeout")
 	}
-	
+
+	c.mu.Lock()
+	c.connected = true
+	c.mu.Unlock()
+
 	log.Println("WebSocket DDP connection established and authenticated")
 	return nil
 }
 
-func (c *Client) handleMessages() {
+func (c *Client) handleMessages(generation int) {
 	for {
 		var response DDPResponse
 		if err := c.conn.ReadJSON(&response); err != nil {
-			log.Printf("WebSocket read error: %v", err)
 			c.mu.Lock()
-			c.connected = false
+			// Only update state if this is still the current connection
+			if c.connGeneration == generation {
+				log.Printf("WebSocket read error: %v", err)
+				c.connected = false
+				if c.conn != nil {
+					_ = c.conn.Close()
+					c.conn = nil
+				}
+			}
 			c.mu.Unlock()
 			return
 		}
-		
+
 		if response.ID != "" {
 			c.mu.Lock()
 			if ch, exists := c.requests[response.ID]; exists {
@@ -178,53 +195,60 @@ func (c *Client) ensureConnected() error {
 	c.mu.Lock()
 	connected := c.connected && c.conn != nil
 	c.mu.Unlock()
-	
+
 	if connected {
 		return nil
 	}
-	
+
 	// Serialize reconnection attempts
 	c.reconnectMu.Lock()
 	defer c.reconnectMu.Unlock()
-	
+
 	// Check again after acquiring lock - another goroutine may have reconnected
 	c.mu.Lock()
 	connected = c.connected && c.conn != nil
 	c.mu.Unlock()
-	
+
 	if connected {
 		return nil
 	}
-	
-	log.Println("Connection lost, reconnecting...")
-	return c.Connect()
+
+	log.Println("Reconnecting...")
+	return c.connect()
+}
+
+// InitialConnect establishes the initial connection during provider setup
+func (c *Client) InitialConnect() error {
+	c.reconnectMu.Lock()
+	defer c.reconnectMu.Unlock()
+	return c.connect()
 }
 
 func (c *Client) call(method string, params interface{}) (*DDPResponse, error) {
 	if err := c.ensureConnected(); err != nil {
 		return nil, err
 	}
-	
+
 	c.mu.Lock()
 	c.nextID++
 	id := fmt.Sprintf("req%d", c.nextID)
 	respChan := make(chan DDPResponse, 1)
 	c.requests[id] = respChan
-	
+
 	msg := DDPMessage{
 		Msg:    "method",
 		Method: method,
 		Params: params,
 		ID:     id,
 	}
-	
+
 	if err := c.conn.WriteJSON(msg); err != nil {
 		delete(c.requests, id)
 		c.mu.Unlock()
 		return nil, fmt.Errorf("failed to send message: %v", err)
 	}
 	c.mu.Unlock()
-	
+
 	select {
 	case response := <-respChan:
 		return &response, nil
@@ -240,7 +264,7 @@ func (c *Client) Call(method string, params interface{}) (interface{}, error) {
 	// For DDP protocol, params should be wrapped in array unless already an array
 	var ddpParams interface{}
 	switch method {
-	case "vm.update", "vm.stop", "vm.device.update", "pool.dataset.delete", "pool.dataset.update":
+	case "vm.update", "vm.stop", "vm.device.update", "pool.dataset.delete", "pool.dataset.update", "pool.snapshot.delete":
 		// These expect [id, data] format - params should already be correct
 		ddpParams = params
 	case "vm.delete", "vm.get_instance":
@@ -259,16 +283,16 @@ func (c *Client) Call(method string, params interface{}) (interface{}, error) {
 		// vm.create and others expect [data] format
 		ddpParams = []interface{}{params}
 	}
-	
+
 	response, err := c.call(method, ddpParams)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if response.Error != nil {
 		return nil, fmt.Errorf("%s failed: %v", method, response.Error)
 	}
-	
+
 	return response.Result, nil
 }
 
@@ -278,7 +302,7 @@ func (c *Client) CallWithJob(method string, params interface{}) (interface{}, er
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Result should be a job ID (integer)
 	var jobID int
 	switch v := result.(type) {
@@ -290,17 +314,17 @@ func (c *Client) CallWithJob(method string, params interface{}) (interface{}, er
 		// Not a job, return result directly
 		return result, nil
 	}
-	
+
 	// Wait for job completion
 	jobResult, err := c.call("core.job_wait", []interface{}{jobID})
 	if err != nil {
 		return nil, fmt.Errorf("job wait failed: %v", err)
 	}
-	
+
 	if jobResult.Error != nil {
 		return nil, fmt.Errorf("job %d failed: %v", jobID, jobResult.Error)
 	}
-	
+
 	return jobResult.Result, nil
 }
 
@@ -308,7 +332,7 @@ func (c *Client) CallWithJob(method string, params interface{}) (interface{}, er
 func (c *Client) UploadFile(endpoint string, jsonData map[string]interface{}, fileContent []byte, filename string) (interface{}, error) {
 	var buf bytes.Buffer
 	writer := multipart.NewWriter(&buf)
-	
+
 	// Add JSON data part
 	jsonBytes, err := json.Marshal(jsonData)
 	if err != nil {
@@ -317,7 +341,7 @@ func (c *Client) UploadFile(endpoint string, jsonData map[string]interface{}, fi
 	if err := writer.WriteField("data", string(jsonBytes)); err != nil {
 		return nil, fmt.Errorf("failed to write data field: %v", err)
 	}
-	
+
 	// Add file part
 	part, err := writer.CreateFormFile("file", filename)
 	if err != nil {
@@ -326,21 +350,21 @@ func (c *Client) UploadFile(endpoint string, jsonData map[string]interface{}, fi
 	if _, err := io.Copy(part, bytes.NewReader(fileContent)); err != nil {
 		return nil, fmt.Errorf("failed to write file content: %v", err)
 	}
-	
+
 	if err := writer.Close(); err != nil {
 		return nil, fmt.Errorf("failed to close multipart writer: %v", err)
 	}
-	
+
 	// Create HTTP request
 	url := fmt.Sprintf("https://%s%s", c.host, endpoint)
 	req, err := http.NewRequest("POST", url, &buf)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
-	
+
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.Header.Set("Authorization", "Bearer "+c.token)
-	
+
 	// Execute request
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -349,21 +373,21 @@ func (c *Client) UploadFile(endpoint string, jsonData map[string]interface{}, fi
 	defer func() {
 		_ = resp.Body.Close()
 	}()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response: %v", err)
 	}
-	
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
 	}
-	
+
 	var result interface{}
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %v", err)
 	}
-	
+
 	return result, nil
 }
 

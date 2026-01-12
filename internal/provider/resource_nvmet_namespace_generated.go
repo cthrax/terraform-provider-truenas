@@ -153,26 +153,49 @@ func (r *NvmetNamespaceResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["nsid"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Nsid = types.Int64Value(int64(fv)) }
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["device_type"]; ok && v != nil {
-			data.DeviceType = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.DeviceType = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.DeviceType = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.DeviceType = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["device_path"]; ok && v != nil {
-			data.DevicePath = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["filesize"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Filesize = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
+			switch val := v.(type) {
+			case string:
+				data.DevicePath = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.DevicePath = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.DevicePath = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["subsys_id"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.SubsysId = types.Int64Value(int64(fv)) }
+			switch val := v.(type) {
+			case float64:
+				data.SubsysId = types.Int64Value(int64(val))
+			case map[string]interface{}:
+				if parsed, ok := val["parsed"]; ok && parsed != nil {
+					if fv, ok := parsed.(float64); ok { data.SubsysId = types.Int64Value(int64(fv)) }
+				}
+			}
 		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -238,10 +261,11 @@ func (r *NvmetNamespaceResource) Delete(ctx context.Context, req resource.Delete
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("nvmet.namespace.delete", id)
 	if err != nil {

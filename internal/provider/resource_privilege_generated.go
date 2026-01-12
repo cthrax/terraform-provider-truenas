@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -154,35 +153,30 @@ func (r *PrivilegeResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["local_groups"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.LocalGroups, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["ds_groups"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.DsGroups, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["roles"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Roles, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
 		if v, ok := resultMap["web_shell"]; ok && v != nil {
 			if bv, ok := v.(bool); ok { data.WebShell = types.BoolValue(bv) }
 		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

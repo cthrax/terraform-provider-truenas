@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -199,42 +198,27 @@ func (r *PoolSnapshottaskResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["dataset"]; ok && v != nil {
-			data.Dataset = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["recursive"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Recursive = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["lifetime_value"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.LifetimeValue = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["lifetime_unit"]; ok && v != nil {
-			data.LifetimeUnit = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["exclude"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Exclude, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Dataset = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Dataset = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Dataset = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
-		if v, ok := resultMap["naming_schema"]; ok && v != nil {
-			data.NamingSchema = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["allow_empty"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.AllowEmpty = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["schedule"]; ok && v != nil {
-			data.Schedule = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["fixate_removal_date"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.FixateRemovalDate = types.BoolValue(bv) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -319,10 +303,11 @@ func (r *PoolSnapshottaskResource) Delete(ctx context.Context, req resource.Dele
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("pool.snapshottask.delete", id)
 	if err != nil {

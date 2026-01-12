@@ -144,23 +144,51 @@ func (r *JbofResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["description"]; ok && v != nil {
-			data.Description = types.StringValue(fmt.Sprintf("%v", v))
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["mgmt_ip1"]; ok && v != nil {
-			data.MgmtIp1 = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["mgmt_ip2"]; ok && v != nil {
-			data.MgmtIp2 = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.MgmtIp1 = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.MgmtIp1 = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.MgmtIp1 = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["mgmt_username"]; ok && v != nil {
-			data.MgmtUsername = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.MgmtUsername = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.MgmtUsername = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.MgmtUsername = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["mgmt_password"]; ok && v != nil {
-			data.MgmtPassword = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.MgmtPassword = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.MgmtPassword = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.MgmtPassword = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -223,10 +251,11 @@ func (r *JbofResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("jbof.delete", id)
 	if err != nil {

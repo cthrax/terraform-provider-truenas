@@ -162,29 +162,27 @@ func (r *SystemNtpserverResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["address"]; ok && v != nil {
-			data.Address = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["burst"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Burst = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["iburst"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Iburst = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["prefer"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Prefer = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["minpoll"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Minpoll = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["maxpoll"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Maxpoll = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["force"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Force = types.BoolValue(bv) }
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["address"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Address = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Address = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Address = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

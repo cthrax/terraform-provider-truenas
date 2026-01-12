@@ -135,20 +135,27 @@ func (r *FcFcHostResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["alias"]; ok && v != nil {
-			data.Alias = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["wwpn"]; ok && v != nil {
-			data.Wwpn = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["wwpn_b"]; ok && v != nil {
-			data.WwpnB = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["npiv"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Npiv = types.Int64Value(int64(fv)) }
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["alias"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Alias = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Alias = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Alias = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

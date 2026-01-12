@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -325,84 +324,39 @@ func (r *RsynctaskResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["path"]; ok && v != nil {
-			data.Path = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["user"]; ok && v != nil {
-			data.User = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["mode"]; ok && v != nil {
-			data.Mode = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["remotehost"]; ok && v != nil {
-			data.Remotehost = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["remoteport"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Remoteport = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["remotemodule"]; ok && v != nil {
-			data.Remotemodule = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["ssh_credentials"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.SshCredentials = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["remotepath"]; ok && v != nil {
-			data.Remotepath = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["direction"]; ok && v != nil {
-			data.Direction = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["desc"]; ok && v != nil {
-			data.Desc = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["schedule"]; ok && v != nil {
-			data.Schedule = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["recursive"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Recursive = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["times"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Times = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["compress"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Compress = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["archive"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Archive = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["delete"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Delete = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["quiet"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Quiet = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["preserveperm"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Preserveperm = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["preserveattr"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Preserveattr = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["delayupdates"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Delayupdates = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["extra"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Extra, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Path = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Path = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Path = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
+		if v, ok := resultMap["user"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.User = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.User = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.User = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
-		if v, ok := resultMap["validate_rpath"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.ValidateRpath = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["ssh_keyscan"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.SshKeyscan = types.BoolValue(bv) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

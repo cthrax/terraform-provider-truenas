@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -154,35 +153,27 @@ func (r *KerberosRealmResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["realm"]; ok && v != nil {
-			data.Realm = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["primary_kdc"]; ok && v != nil {
-			data.PrimaryKdc = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["kdc"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Kdc, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["admin_server"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.AdminServer, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["kpasswd_server"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.KpasswdServer, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["realm"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Realm = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Realm = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Realm = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

@@ -126,17 +126,39 @@ func (r *StaticrouteResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["destination"]; ok && v != nil {
-			data.Destination = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Destination = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Destination = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Destination = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["gateway"]; ok && v != nil {
-			data.Gateway = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Gateway = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Gateway = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Gateway = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
-		if v, ok := resultMap["description"]; ok && v != nil {
-			data.Description = types.StringValue(fmt.Sprintf("%v", v))
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

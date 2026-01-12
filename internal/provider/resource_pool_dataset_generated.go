@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -461,130 +460,39 @@ func (r *PoolDatasetResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["comments"]; ok && v != nil {
-			data.Comments = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["sync"]; ok && v != nil {
-			data.Sync = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["snapdev"]; ok && v != nil {
-			data.Snapdev = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["compression"]; ok && v != nil {
-			data.Compression = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["exec"]; ok && v != nil {
-			data.Exec = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["managedby"]; ok && v != nil {
-			data.Managedby = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["quota_warning"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.QuotaWarning = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["quota_critical"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.QuotaCritical = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["refquota_warning"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.RefquotaWarning = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["refquota_critical"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.RefquotaCritical = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["reservation"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Reservation = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["refreservation"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Refreservation = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["special_small_block_size"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.SpecialSmallBlockSize = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["copies"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Copies = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["snapdir"]; ok && v != nil {
-			data.Snapdir = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["deduplication"]; ok && v != nil {
-			data.Deduplication = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["checksum"]; ok && v != nil {
-			data.Checksum = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["readonly"]; ok && v != nil {
-			data.Readonly = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["share_type"]; ok && v != nil {
-			data.ShareType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["encryption_options"]; ok && v != nil {
-			data.EncryptionOptions = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["encryption"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Encryption = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["inherit_encryption"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.InheritEncryption = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["user_properties"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.UserProperties, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
 			}
-		}
-		if v, ok := resultMap["create_ancestors"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.CreateAncestors = types.BoolValue(bv) }
 		}
 		if v, ok := resultMap["type"]; ok && v != nil {
-			data.Type = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["aclmode"]; ok && v != nil {
-			data.Aclmode = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["acltype"]; ok && v != nil {
-			data.Acltype = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["atime"]; ok && v != nil {
-			data.Atime = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["casesensitivity"]; ok && v != nil {
-			data.Casesensitivity = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["quota"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Quota = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["refquota"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Refquota = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["recordsize"]; ok && v != nil {
-			data.Recordsize = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["force_size"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.ForceSize = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sparse"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Sparse = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["volsize"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Volsize = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["volblocksize"]; ok && v != nil {
-			data.Volblocksize = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["user_properties_update"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.UserPropertiesUpdate, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Type = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Type = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Type = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -718,7 +626,7 @@ func (r *PoolDatasetResource) Delete(ctx context.Context, req resource.DeleteReq
 
 	var id interface{}
 	var err error
-	id = data.ID.ValueString()
+	id = []interface{}{data.ID.ValueString(), map[string]interface{}{}}
 
 	_, err = r.client.Call("pool.dataset.delete", id)
 	if err != nil {

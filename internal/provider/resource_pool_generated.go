@@ -207,38 +207,39 @@ func (r *PoolResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["encryption"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Encryption = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["dedup_table_quota"]; ok && v != nil {
-			data.DedupTableQuota = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["dedup_table_quota_value"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.DedupTableQuotaValue = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["deduplication"]; ok && v != nil {
-			data.Deduplication = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["checksum"]; ok && v != nil {
-			data.Checksum = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["encryption_options"]; ok && v != nil {
-			data.EncryptionOptions = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["topology"]; ok && v != nil {
-			data.Topology = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Topology = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Topology = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Topology = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
-		if v, ok := resultMap["allow_duplicate_serials"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.AllowDuplicateSerials = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["autotrim"]; ok && v != nil {
-			data.Autotrim = types.StringValue(fmt.Sprintf("%v", v))
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

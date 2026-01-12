@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
@@ -154,64 +153,28 @@ func (d *InterfaceDataSource) Read(ctx context.Context, req datasource.ReadReque
 	}
 
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["fake"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Fake = types.BoolValue(bv) }
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["type"]; ok && v != nil {
-			data.Type = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["state"]; ok && v != nil {
-			data.State = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["aliases"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Aliases, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Type = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Type = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Type = types.StringValue(fmt.Sprintf("%v", v))
 			}
-		}
-		if v, ok := resultMap["ipv4_dhcp"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Ipv4Dhcp = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["ipv6_auto"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Ipv6Auto = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["description"]; ok && v != nil {
-			data.Description = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["mtu"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Mtu = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["vlan_parent_interface"]; ok && v != nil {
-			data.VlanParentInterface = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["vlan_tag"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.VlanTag = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["vlan_pcp"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.VlanPcp = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["lag_protocol"]; ok && v != nil {
-			data.LagProtocol = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["lag_ports"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.LagPorts, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["bridge_members"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.BridgeMembers, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["enable_learning"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.EnableLearning = types.BoolValue(bv) }
 		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

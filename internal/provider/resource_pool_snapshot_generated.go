@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -200,47 +199,27 @@ func (r *PoolSnapshotResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["dataset"]; ok && v != nil {
-			data.Dataset = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["recursive"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Recursive = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["exclude"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Exclude, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["vmware_sync"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.VmwareSync = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["properties"]; ok && v != nil {
-			data.Properties = types.StringValue(fmt.Sprintf("%v", v))
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["naming_schema"]; ok && v != nil {
-			data.NamingSchema = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["user_properties_update"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.UserPropertiesUpdate, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
-		if v, ok := resultMap["user_properties_remove"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.UserPropertiesRemove, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -293,7 +272,7 @@ func (r *PoolSnapshotResource) Delete(ctx context.Context, req resource.DeleteRe
 
 	var id interface{}
 	var err error
-	id = data.ID.ValueString()
+	id = []interface{}{data.ID.ValueString(), map[string]interface{}{}}
 
 	_, err = r.client.Call("pool.snapshot.delete", id)
 	if err != nil {

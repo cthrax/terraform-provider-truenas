@@ -195,38 +195,39 @@ func (r *SharingSmbResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["purpose"]; ok && v != nil {
-			data.Purpose = types.StringValue(fmt.Sprintf("%v", v))
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["path"]; ok && v != nil {
-			data.Path = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Path = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Path = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Path = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["comment"]; ok && v != nil {
-			data.Comment = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["readonly"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Readonly = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["browsable"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Browsable = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["access_based_share_enumeration"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.AccessBasedShareEnumeration = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["audit"]; ok && v != nil {
-			data.Audit = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["options"]; ok && v != nil {
-			data.Options = types.StringValue(fmt.Sprintf("%v", v))
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

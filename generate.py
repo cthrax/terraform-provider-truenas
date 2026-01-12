@@ -241,15 +241,66 @@ def generate_create_params(properties):
     return "\n".join(lines)
 
 
-def generate_read_mapping(properties, skip_id_for_datasource=False):
+def generate_read_mapping(properties, skip_id_for_datasource=False, create_only_fields=None, required_fields=None):
     """Generate code to map API response to Terraform state."""
+    if create_only_fields is None:
+        create_only_fields = set()
+    if required_fields is None:
+        required_fields = set()
     lines = []
+    
+    # Determine if we'll actually read any fields
+    has_fields_to_read = False
+    if not skip_id_for_datasource:
+        has_fields_to_read = True
+    else:
+        for prop_name in properties.keys():
+            if prop_name in ["provider", "id"]:
+                continue
+            if prop_name in create_only_fields and prop_name not in ["name", "type"]:
+                continue
+            if required_fields is not None and prop_name not in required_fields and prop_name not in ["name", "type"]:
+                continue
+            has_fields_to_read = True
+            break
+    
+    # Only declare resultMap if we'll use it
+    if has_fields_to_read:
+        lines.append('\tresultMap, ok := result.(map[string]interface{})')
+        lines.append('\tif !ok {')
+        lines.append('\t\tresp.Diagnostics.AddError("Parse Error", "Failed to parse API response")')
+        lines.append('\t\treturn')
+        lines.append('\t}')
+        lines.append('')
+    else:
+        # If we're not reading any fields, suppress unused variable warning
+        lines.append('\t_ = result // No fields to read')
+        lines.append('')
+    
+    # Always read back the ID field from API response (if present)
+    if not skip_id_for_datasource:
+        lines.append('\t\tif v, ok := resultMap["id"]; ok && v != nil {')
+        lines.append('\t\t\tdata.ID = types.StringValue(fmt.Sprintf("%v", v))')
+        lines.append('\t\t}')
+    
     for prop_name, prop_schema in properties.items():
         # Skip reserved names
         if prop_name in ["provider"]:
             continue
         # Skip id for datasources (already set as String from input)
         if prop_name == "id" and skip_id_for_datasource:
+            continue
+        # Skip id in properties (handled above)
+        if prop_name == "id":
+            continue
+        # Skip create-only fields - keep config/state value, don't overwrite from API
+        # Exception: 'name' and 'type' should be read back as they're identifiers
+        if prop_name in create_only_fields and prop_name not in ["name", "type"]:
+            continue
+        # For resources: only read back required fields and name/type
+        # Optional fields should keep their config value (handled by Terraform)
+        # For datasources (required_fields is None): read all fields
+        if required_fields is not None and prop_name not in required_fields and prop_name not in ["name", "type"]:
             continue
         field_name = prop_name.title().replace("_", "")
         if prop_name == "CSR":
@@ -265,9 +316,15 @@ def generate_read_mapping(properties, skip_id_for_datasource=False):
                 f"\t\t\tif bv, ok := v.(bool); ok {{ data.{field_name} = types.BoolValue(bv) }}"
             )
         elif tf_type == "Int64":
-            lines.append(
-                f"\t\t\tif fv, ok := v.(float64); ok {{ data.{field_name} = types.Int64Value(int64(fv)) }}"
-            )
+            # Handle nested objects with 'parsed' field (e.g., quota, copies)
+            lines.append(f"\t\t\tswitch val := v.(type) {{")
+            lines.append(f"\t\t\tcase float64:")
+            lines.append(f"\t\t\t\tdata.{field_name} = types.Int64Value(int64(val))")
+            lines.append(f"\t\t\tcase map[string]interface{{}}:")
+            lines.append(f'\t\t\t\tif parsed, ok := val["parsed"]; ok && parsed != nil {{')
+            lines.append(f"\t\t\t\t\tif fv, ok := parsed.(float64); ok {{ data.{field_name} = types.Int64Value(int64(fv)) }}")
+            lines.append(f"\t\t\t\t}}")
+            lines.append(f"\t\t\t}}")
         elif tf_type == "Float64":
             lines.append(
                 f"\t\t\tif fv, ok := v.(float64); ok {{ data.{field_name} = types.Float64Value(fv) }}"
@@ -283,9 +340,17 @@ def generate_read_mapping(properties, skip_id_for_datasource=False):
             )
             lines.append(f"\t\t\t}}")
         else:
-            lines.append(
-                f'\t\t\tdata.{field_name} = types.StringValue(fmt.Sprintf("%v", v))'
-            )
+            # Handle nested objects with 'value' field (e.g., compression, atime)
+            lines.append(f"\t\t\tswitch val := v.(type) {{")
+            lines.append(f"\t\t\tcase string:")
+            lines.append(f"\t\t\t\tdata.{field_name} = types.StringValue(val)")
+            lines.append(f"\t\t\tcase map[string]interface{{}}:")
+            lines.append(f'\t\t\t\tif strVal, ok := val["value"]; ok && strVal != nil {{')
+            lines.append(f'\t\t\t\t\tdata.{field_name} = types.StringValue(fmt.Sprintf("%v", strVal))')
+            lines.append(f"\t\t\t\t}}")
+            lines.append(f"\t\t\tdefault:")
+            lines.append(f'\t\t\t\tdata.{field_name} = types.StringValue(fmt.Sprintf("%v", v))')
+            lines.append(f"\t\t\t}}")
 
         lines.append("\t\t}")
     return "\n".join(lines)
@@ -398,11 +463,22 @@ def generate_resource(base_name, methods_dict):
     update_call = "CallWithJob" if update_is_job else "Call"
     delete_call = "CallWithJob" if delete_is_job else "Call"
 
+    # Check if delete has optional parameters (needs [id, {}] format)
+    delete_spec = methods_dict.get(f"{base_name}.delete", {})
+    delete_accepts = delete_spec.get("accepts", [])
+    delete_needs_options = len(delete_accepts) >= 2
+
     # Generate ID handling code based on type
     if id_is_string:
         id_read_code = "\tid = data.ID.ValueString()"
         id_update_code = "\tid = state.ID.ValueString()"
-        id_delete_code = "\tid = data.ID.ValueString()"
+        if delete_needs_options:
+            # Wrap in array with empty options object
+            id_delete_code = (
+                "\tid = []interface{}{data.ID.ValueString(), map[string]interface{}{}}"
+            )
+        else:
+            id_delete_code = "\tid = data.ID.ValueString()"
     else:
         id_read_code = """	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {{
@@ -414,7 +490,16 @@ def generate_resource(base_name, methods_dict):
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
 	}}"""
-        id_delete_code = """	id, err = strconv.Atoi(data.ID.ValueString())
+        if delete_needs_options:
+            # Wrap in array with empty options object
+            id_delete_code = "\tid, err = strconv.Atoi(data.ID.ValueString())\n"
+            id_delete_code += "\tif err != nil {\n"
+            id_delete_code += '\t\tresp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))\n'
+            id_delete_code += "\t\treturn\n"
+            id_delete_code += "\t}\n"
+            id_delete_code += "\tid = []interface{}{id, map[string]interface{}{}}"
+        else:
+            id_delete_code = """	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {{
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
@@ -444,8 +529,15 @@ def generate_resource(base_name, methods_dict):
     # Determine if strconv import is needed (for int IDs or lifecycle code)
     extra_imports = '\t"strconv"' if (not id_is_string or has_start) else ""
 
-    # Check if any List fields exist
-    has_list = any(get_tf_type(p) == "List" for p in properties.values())
+    # Check if any List fields exist that will be used in read mapping
+    # For resources: only required List fields
+    # For datasources: all List fields
+    has_list = any(
+        get_tf_type(p) == "List" 
+        and (name not in create_only_fields or name in ["name", "type"])
+        and (name in required or name in ["name", "type"])
+        for name, p in properties.items()
+    )
     # Check if any complex objects need JSON parsing
     has_json = has_complex_objects(properties)
 
@@ -463,7 +555,8 @@ def generate_resource(base_name, methods_dict):
             elif tf_type == "Bool":
                 needs_bool_planmod = True
 
-    if has_list:
+    # Only add attr import if we actually have required List fields
+    if has_list and required:
         extra_imports += '\n\t"github.com/hashicorp/terraform-plugin-framework/attr"'
     if has_json:
         extra_imports += '\n\t"encoding/json"'
@@ -508,7 +601,7 @@ def generate_resource(base_name, methods_dict):
                 properties, required, has_start, create_only_fields
             ),
             create_params=generate_create_params(properties),
-            read_mapping=generate_read_mapping(properties),
+            read_mapping=generate_read_mapping(properties, create_only_fields=create_only_fields, required_fields=set(required)),
             lifecycle_code=lifecycle_code,
         )
     else:
@@ -525,7 +618,7 @@ def generate_resource(base_name, methods_dict):
             update_params=generate_create_params(
                 update_properties if update_properties else properties
             ),
-            read_mapping=generate_read_mapping(properties),
+            read_mapping=generate_read_mapping(properties, create_only_fields=create_only_fields, required_fields=set(required)),
             lifecycle_code=lifecycle_code,
             predelete_code=predelete_code,
             id_read_code=id_read_code,
@@ -684,12 +777,8 @@ def generate_datasource(base_name, methods_dict):
     if not properties:
         return None
 
-    # Check if any List fields exist
-    has_list = any(get_tf_type(p) == "List" for p in properties.values())
-
+    # Datasources read all fields, so no attr import needed (List fields are skipped in read mapping)
     extra_imports = ""
-    if has_list:
-        extra_imports = '\n\t"github.com/hashicorp/terraform-plugin-framework/attr"'
 
     # Determine ID type and parameter format from schema
     id_type = get_tf_type(properties.get("id", {"type": "string"}))

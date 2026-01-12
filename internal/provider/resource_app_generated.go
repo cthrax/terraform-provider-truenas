@@ -205,32 +205,15 @@ func (r *AppResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["custom_app"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.CustomApp = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["values"]; ok && v != nil {
-			data.Values = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["custom_compose_config"]; ok && v != nil {
-			data.CustomComposeConfig = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["custom_compose_config_string"]; ok && v != nil {
-			data.CustomComposeConfigString = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["catalog_app"]; ok && v != nil {
-			data.CatalogApp = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["app_name"]; ok && v != nil {
-			data.AppName = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["train"]; ok && v != nil {
-			data.Train = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["version"]; ok && v != nil {
-			data.Version = types.StringValue(fmt.Sprintf("%v", v))
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -292,7 +275,7 @@ func (r *AppResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 
 	var id interface{}
 	var err error
-	id = data.ID.ValueString()
+	id = []interface{}{data.ID.ValueString(), map[string]interface{}{}}
 
 	// Stop VM before deletion if running
 	vmID, err := strconv.Atoi(data.ID.ValueString())

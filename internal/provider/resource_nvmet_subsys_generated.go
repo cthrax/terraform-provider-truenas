@@ -162,29 +162,27 @@ func (r *NvmetSubsysResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["subnqn"]; ok && v != nil {
-			data.Subnqn = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["allow_any_host"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.AllowAnyHost = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["pi_enable"]; ok && v != nil {
-			data.PiEnable = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["qid_max"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.QidMax = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["ieee_oui"]; ok && v != nil {
-			data.IeeeOui = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["ana"]; ok && v != nil {
-			data.Ana = types.StringValue(fmt.Sprintf("%v", v))
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["name"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -253,10 +251,11 @@ func (r *NvmetSubsysResource) Delete(ctx context.Context, req resource.DeleteReq
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("nvmet.subsys.delete", id)
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -229,63 +228,27 @@ func (r *SharingNfsResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["path"]; ok && v != nil {
-			data.Path = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["aliases"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Aliases, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["comment"]; ok && v != nil {
-			data.Comment = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["networks"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Networks, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["hosts"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Hosts, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["ro"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Ro = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["maproot_user"]; ok && v != nil {
-			data.MaprootUser = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["maproot_group"]; ok && v != nil {
-			data.MaprootGroup = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["mapall_user"]; ok && v != nil {
-			data.MapallUser = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["mapall_group"]; ok && v != nil {
-			data.MapallGroup = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["security"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Security, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["expose_snapshots"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.ExposeSnapshots = types.BoolValue(bv) }
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["path"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Path = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Path = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Path = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

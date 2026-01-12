@@ -541,36 +541,50 @@ func (r *ReplicationResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["direction"]; ok && v != nil {
-			data.Direction = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Direction = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Direction = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Direction = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["transport"]; ok && v != nil {
-			data.Transport = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["ssh_credentials"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.SshCredentials = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["netcat_active_side"]; ok && v != nil {
-			data.NetcatActiveSide = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["netcat_active_side_listen_address"]; ok && v != nil {
-			data.NetcatActiveSideListenAddress = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["netcat_active_side_port_min"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.NetcatActiveSidePortMin = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["netcat_active_side_port_max"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.NetcatActiveSidePortMax = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["netcat_passive_side_connect_address"]; ok && v != nil {
-			data.NetcatPassiveSideConnectAddress = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["sudo"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Sudo = types.BoolValue(bv) }
+			switch val := v.(type) {
+			case string:
+				data.Transport = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Transport = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Transport = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["source_datasets"]; ok && v != nil {
 			if arr, ok := v.([]interface{}); ok {
@@ -580,135 +594,35 @@ func (r *ReplicationResource) Read(ctx context.Context, req resource.ReadRequest
 			}
 		}
 		if v, ok := resultMap["target_dataset"]; ok && v != nil {
-			data.TargetDataset = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.TargetDataset = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.TargetDataset = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.TargetDataset = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["recursive"]; ok && v != nil {
 			if bv, ok := v.(bool); ok { data.Recursive = types.BoolValue(bv) }
 		}
-		if v, ok := resultMap["exclude"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Exclude, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["properties"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Properties = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["properties_exclude"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.PropertiesExclude, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["properties_override"]; ok && v != nil {
-			data.PropertiesOverride = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["replicate"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Replicate = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["encryption"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Encryption = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["encryption_inherit"]; ok && v != nil {
-			data.EncryptionInherit = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["encryption_key"]; ok && v != nil {
-			data.EncryptionKey = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["encryption_key_format"]; ok && v != nil {
-			data.EncryptionKeyFormat = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["encryption_key_location"]; ok && v != nil {
-			data.EncryptionKeyLocation = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["periodic_snapshot_tasks"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.PeriodicSnapshotTasks, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["naming_schema"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.NamingSchema, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["also_include_naming_schema"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.AlsoIncludeNamingSchema, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["name_regex"]; ok && v != nil {
-			data.NameRegex = types.StringValue(fmt.Sprintf("%v", v))
-		}
 		if v, ok := resultMap["auto"]; ok && v != nil {
 			if bv, ok := v.(bool); ok { data.Auto = types.BoolValue(bv) }
 		}
-		if v, ok := resultMap["schedule"]; ok && v != nil {
-			data.Schedule = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["restrict_schedule"]; ok && v != nil {
-			data.RestrictSchedule = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["only_matching_schedule"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.OnlyMatchingSchedule = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["allow_from_scratch"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.AllowFromScratch = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["readonly"]; ok && v != nil {
-			data.Readonly = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["hold_pending_snapshots"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.HoldPendingSnapshots = types.BoolValue(bv) }
-		}
 		if v, ok := resultMap["retention_policy"]; ok && v != nil {
-			data.RetentionPolicy = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["lifetime_value"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.LifetimeValue = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["lifetime_unit"]; ok && v != nil {
-			data.LifetimeUnit = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["lifetimes"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Lifetimes, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.RetentionPolicy = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.RetentionPolicy = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.RetentionPolicy = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
-		if v, ok := resultMap["compression"]; ok && v != nil {
-			data.Compression = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["speed_limit"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.SpeedLimit = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["large_block"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.LargeBlock = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["embed"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Embed = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["compressed"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Compressed = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["retries"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Retries = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["logging_level"]; ok && v != nil {
-			data.LoggingLevel = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

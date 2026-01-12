@@ -144,23 +144,27 @@ func (r *NvmetHostResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["hostnqn"]; ok && v != nil {
-			data.Hostnqn = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["dhchap_key"]; ok && v != nil {
-			data.DhchapKey = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["dhchap_ctrl_key"]; ok && v != nil {
-			data.DhchapCtrlKey = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["dhchap_dhgroup"]; ok && v != nil {
-			data.DhchapDhgroup = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["dhchap_hash"]; ok && v != nil {
-			data.DhchapHash = types.StringValue(fmt.Sprintf("%v", v))
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["hostnqn"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Hostnqn = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Hostnqn = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Hostnqn = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -223,10 +227,11 @@ func (r *NvmetHostResource) Delete(ctx context.Context, req resource.DeleteReque
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("nvmet.host.delete", id)
 	if err != nil {

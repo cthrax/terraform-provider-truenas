@@ -243,56 +243,39 @@ func (r *IscsiExtentResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["type"]; ok && v != nil {
-			data.Type = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Type = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Type = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Type = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
-		if v, ok := resultMap["disk"]; ok && v != nil {
-			data.Disk = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["serial"]; ok && v != nil {
-			data.Serial = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["path"]; ok && v != nil {
-			data.Path = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["filesize"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Filesize = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["blocksize"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Blocksize = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["pblocksize"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Pblocksize = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["avail_threshold"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.AvailThreshold = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["comment"]; ok && v != nil {
-			data.Comment = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["insecure_tpc"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.InsecureTpc = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["xen"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Xen = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["rpm"]; ok && v != nil {
-			data.Rpm = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["ro"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Ro = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["product_id"]; ok && v != nil {
-			data.ProductId = types.StringValue(fmt.Sprintf("%v", v))
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -388,10 +371,11 @@ func (r *IscsiExtentResource) Delete(ctx context.Context, req resource.DeleteReq
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("iscsi.extent.delete", id)
 	if err != nil {

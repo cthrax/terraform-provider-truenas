@@ -96,9 +96,7 @@ func (r *{resource_name}Resource) Read(ctx context.Context, req resource.ReadReq
 	}}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{{}}); ok {{
 {read_mapping}
-	}}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }}

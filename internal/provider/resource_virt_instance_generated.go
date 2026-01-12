@@ -293,65 +293,27 @@ func (r *VirtInstanceResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["source_type"]; ok && v != nil {
-			data.SourceType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["storage_pool"]; ok && v != nil {
-			data.StoragePool = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["image"]; ok && v != nil {
-			data.Image = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["root_disk_size"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.RootDiskSize = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["root_disk_io_bus"]; ok && v != nil {
-			data.RootDiskIoBus = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["remote"]; ok && v != nil {
-			data.Remote = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["instance_type"]; ok && v != nil {
-			data.InstanceType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["environment"]; ok && v != nil {
-			data.Environment = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["autostart"]; ok && v != nil {
-			data.Autostart = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["cpu"]; ok && v != nil {
-			data.Cpu = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["devices"]; ok && v != nil {
-			data.Devices = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["memory"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Memory = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["privileged_mode"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.PrivilegedMode = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["vnc_port"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.VncPort = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["enable_vnc"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.EnableVnc = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["vnc_password"]; ok && v != nil {
-			data.VncPassword = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["secure_boot"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.SecureBoot = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["image_os"]; ok && v != nil {
-			data.ImageOs = types.StringValue(fmt.Sprintf("%v", v))
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["name"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

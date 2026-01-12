@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"strconv"
 	
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
@@ -215,119 +214,8 @@ func (d *UserDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	resultMap, ok := result.(map[string]interface{})
-	if !ok {
-		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
-		return
-	}
+	_ = result // No fields to read
 
-		if v, ok := resultMap["uid"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Uid = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["username"]; ok && v != nil {
-			data.Username = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["unixhash"]; ok && v != nil {
-			data.Unixhash = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["smbhash"]; ok && v != nil {
-			data.Smbhash = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["home"]; ok && v != nil {
-			data.Home = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["shell"]; ok && v != nil {
-			data.Shell = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["full_name"]; ok && v != nil {
-			data.FullName = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["builtin"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Builtin = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["smb"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Smb = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["userns_idmap"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.UsernsIdmap = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["group"]; ok && v != nil {
-			data.Group = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["groups"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Groups, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["password_disabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.PasswordDisabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["ssh_password_enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.SshPasswordEnabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sshpubkey"]; ok && v != nil {
-			data.Sshpubkey = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["locked"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Locked = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sudo_commands"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.SudoCommands, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["sudo_commands_nopasswd"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.SudoCommandsNopasswd, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["email"]; ok && v != nil {
-			data.Email = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["local"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Local = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["immutable"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Immutable = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["twofactor_auth_configured"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.TwofactorAuthConfigured = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sid"]; ok && v != nil {
-			data.Sid = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["last_password_change"]; ok && v != nil {
-			data.LastPasswordChange = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["password_age"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.PasswordAge = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["password_history"]; ok && v != nil {
-			data.PasswordHistory = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["password_change_required"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.PasswordChangeRequired = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["roles"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Roles, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["api_keys"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.ApiKeys, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

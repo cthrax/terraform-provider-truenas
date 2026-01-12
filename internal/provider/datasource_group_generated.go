@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"strconv"
 	
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
@@ -140,60 +139,17 @@ func (d *GroupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-		if v, ok := resultMap["gid"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Gid = types.Int64Value(int64(fv)) }
-		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["builtin"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Builtin = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sudo_commands"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.SudoCommands, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
 			}
-		}
-		if v, ok := resultMap["sudo_commands_nopasswd"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.SudoCommandsNopasswd, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["smb"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Smb = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["userns_idmap"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.UsernsIdmap = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["group"]; ok && v != nil {
-			data.Group = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["local"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Local = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sid"]; ok && v != nil {
-			data.Sid = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["roles"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Roles, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["users"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Users, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["immutable"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Immutable = types.BoolValue(bv) }
 		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

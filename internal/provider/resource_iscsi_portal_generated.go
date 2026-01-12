@@ -121,7 +121,15 @@ func (r *IscsiPortalResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["listen"]; ok && v != nil {
 			if arr, ok := v.([]interface{}); ok {
 				strVals := make([]attr.Value, len(arr))
@@ -129,10 +137,6 @@ func (r *IscsiPortalResource) Read(ctx context.Context, req resource.ReadRequest
 				data.Listen, _ = types.ListValue(types.StringType, strVals)
 			}
 		}
-		if v, ok := resultMap["comment"]; ok && v != nil {
-			data.Comment = types.StringValue(fmt.Sprintf("%v", v))
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

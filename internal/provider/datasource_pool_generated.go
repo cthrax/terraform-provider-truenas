@@ -191,76 +191,16 @@ func (d *PoolDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["guid"]; ok && v != nil {
-			data.Guid = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["status"]; ok && v != nil {
-			data.Status = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["path"]; ok && v != nil {
-			data.Path = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["scan"]; ok && v != nil {
-			data.Scan = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["expand"]; ok && v != nil {
-			data.Expand = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["is_upgraded"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.IsUpgraded = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["healthy"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Healthy = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["warning"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Warning = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["status_code"]; ok && v != nil {
-			data.StatusCode = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["status_detail"]; ok && v != nil {
-			data.StatusDetail = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["size"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Size = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["allocated"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Allocated = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["free"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Free = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["freeing"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Freeing = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["dedup_table_size"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.DedupTableSize = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["dedup_table_quota"]; ok && v != nil {
-			data.DedupTableQuota = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["fragmentation"]; ok && v != nil {
-			data.Fragmentation = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["size_str"]; ok && v != nil {
-			data.SizeStr = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["allocated_str"]; ok && v != nil {
-			data.AllocatedStr = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["free_str"]; ok && v != nil {
-			data.FreeStr = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["freeing_str"]; ok && v != nil {
-			data.FreeingStr = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["autotrim"]; ok && v != nil {
-			data.Autotrim = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["topology"]; ok && v != nil {
-			data.Topology = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

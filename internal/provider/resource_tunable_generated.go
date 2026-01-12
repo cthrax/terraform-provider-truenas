@@ -157,26 +157,39 @@ func (r *TunableResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["type"]; ok && v != nil {
-			data.Type = types.StringValue(fmt.Sprintf("%v", v))
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["var"]; ok && v != nil {
-			data.Var = types.StringValue(fmt.Sprintf("%v", v))
+		if v, ok := resultMap["type"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Type = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Type = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Type = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["value"]; ok && v != nil {
-			data.Value = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Value = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Value = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Value = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
-		if v, ok := resultMap["comment"]; ok && v != nil {
-			data.Comment = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["update_initramfs"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.UpdateInitramfs = types.BoolValue(bv) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

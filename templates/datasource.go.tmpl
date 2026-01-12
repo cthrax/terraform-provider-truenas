@@ -63,12 +63,6 @@ func (d *{resource_name}DataSource) Read(ctx context.Context, req datasource.Rea
 		return
 	}}
 
-	resultMap, ok := result.(map[string]interface{{}})
-	if !ok {{
-		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
-		return
-	}}
-
 {read_mapping}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)

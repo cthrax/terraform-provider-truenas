@@ -150,23 +150,25 @@ func (r *PoolScrubResource) Read(ctx context.Context, req resource.ReadRequest, 
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["pool"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Pool = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["threshold"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Threshold = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["description"]; ok && v != nil {
-			data.Description = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["schedule"]; ok && v != nil {
-			data.Schedule = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Enabled = types.BoolValue(bv) }
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["pool"]; ok && v != nil {
+			switch val := v.(type) {
+			case float64:
+				data.Pool = types.Int64Value(int64(val))
+			case map[string]interface{}:
+				if parsed, ok := val["parsed"]; ok && parsed != nil {
+					if fv, ok := parsed.(float64); ok { data.Pool = types.Int64Value(int64(fv)) }
+				}
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

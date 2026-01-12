@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -363,87 +362,27 @@ func (r *CertificateResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["create_type"]; ok && v != nil {
-			data.CreateType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["add_to_trusted_store"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.AddToTrustedStore = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["certificate"]; ok && v != nil {
-			data.Certificate = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["privatekey"]; ok && v != nil {
-			data.Privatekey = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["CSR"]; ok && v != nil {
-			data.Csr = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["key_length"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.KeyLength = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["key_type"]; ok && v != nil {
-			data.KeyType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["ec_curve"]; ok && v != nil {
-			data.EcCurve = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["passphrase"]; ok && v != nil {
-			data.Passphrase = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["city"]; ok && v != nil {
-			data.City = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["common"]; ok && v != nil {
-			data.Common = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["country"]; ok && v != nil {
-			data.Country = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["email"]; ok && v != nil {
-			data.Email = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["organization"]; ok && v != nil {
-			data.Organization = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["organizational_unit"]; ok && v != nil {
-			data.OrganizationalUnit = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["state"]; ok && v != nil {
-			data.State = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["digest_algorithm"]; ok && v != nil {
-			data.DigestAlgorithm = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["san"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.San, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
-		if v, ok := resultMap["cert_extensions"]; ok && v != nil {
-			data.CertExtensions = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["acme_directory_uri"]; ok && v != nil {
-			data.AcmeDirectoryUri = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["csr_id"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.CsrId = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["tos"]; ok && v != nil {
-			data.Tos = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["dns_mapping"]; ok && v != nil {
-			data.DnsMapping = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["renew_days"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.RenewDays = types.Int64Value(int64(fv)) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -500,10 +439,11 @@ func (r *CertificateResource) Delete(ctx context.Context, req resource.DeleteReq
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.CallWithJob("certificate.delete", id)
 	if err != nil {

@@ -375,92 +375,37 @@ func (r *VmResource) Read(ctx context.Context, req resource.ReadRequest, resp *r
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["command_line_args"]; ok && v != nil {
-			data.CommandLineArgs = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["cpu_mode"]; ok && v != nil {
-			data.CpuMode = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["cpu_model"]; ok && v != nil {
-			data.CpuModel = types.StringValue(fmt.Sprintf("%v", v))
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["description"]; ok && v != nil {
-			data.Description = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["vcpus"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Vcpus = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["cores"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Cores = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["threads"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Threads = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["cpuset"]; ok && v != nil {
-			data.Cpuset = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["nodeset"]; ok && v != nil {
-			data.Nodeset = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["enable_cpu_topology_extension"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.EnableCpuTopologyExtension = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["pin_vcpus"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.PinVcpus = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["suspend_on_snapshot"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.SuspendOnSnapshot = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["trusted_platform_module"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.TrustedPlatformModule = types.BoolValue(bv) }
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["memory"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Memory = types.Int64Value(int64(fv)) }
+			switch val := v.(type) {
+			case float64:
+				data.Memory = types.Int64Value(int64(val))
+			case map[string]interface{}:
+				if parsed, ok := val["parsed"]; ok && parsed != nil {
+					if fv, ok := parsed.(float64); ok { data.Memory = types.Int64Value(int64(fv)) }
+				}
+			}
 		}
-		if v, ok := resultMap["min_memory"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.MinMemory = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["hyperv_enlightenments"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.HypervEnlightenments = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["bootloader"]; ok && v != nil {
-			data.Bootloader = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["bootloader_ovmf"]; ok && v != nil {
-			data.BootloaderOvmf = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["autostart"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Autostart = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["hide_from_msr"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.HideFromMsr = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["ensure_display_device"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.EnsureDisplayDevice = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["time"]; ok && v != nil {
-			data.Time = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["shutdown_timeout"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.ShutdownTimeout = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["arch_type"]; ok && v != nil {
-			data.ArchType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["machine_type"]; ok && v != nil {
-			data.MachineType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["uuid"]; ok && v != nil {
-			data.Uuid = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["enable_secure_boot"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.EnableSecureBoot = types.BoolValue(bv) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -586,10 +531,11 @@ func (r *VmResource) Delete(ctx context.Context, req resource.DeleteRequest, res
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	// Stop VM before deletion if running
 	vmID, err := strconv.Atoi(data.ID.ValueString())

@@ -1,7 +1,7 @@
 # FILESYSTEM dataset
 resource "truenas_pool_dataset" "test_filesystem" {
   name        = "${var.pool_name}/terraform-test-fs"
-  type        = "VOLUME"
+  type        = "FILESYSTEM"
   comments    = "Test filesystem dataset created by Terraform"
   compression = "LZ4"
   atime       = "OFF"

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -303,83 +302,39 @@ func (r *UserResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["uid"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Uid = types.Int64Value(int64(fv)) }
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["username"]; ok && v != nil {
-			data.Username = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["home"]; ok && v != nil {
-			data.Home = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["shell"]; ok && v != nil {
-			data.Shell = types.StringValue(fmt.Sprintf("%v", v))
+			switch val := v.(type) {
+			case string:
+				data.Username = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Username = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Username = types.StringValue(fmt.Sprintf("%v", v))
+			}
 		}
 		if v, ok := resultMap["full_name"]; ok && v != nil {
-			data.FullName = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["smb"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Smb = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["userns_idmap"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.UsernsIdmap = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["group"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Group = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["groups"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.Groups, _ = types.ListValue(types.StringType, strVals)
+			switch val := v.(type) {
+			case string:
+				data.FullName = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.FullName = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.FullName = types.StringValue(fmt.Sprintf("%v", v))
 			}
 		}
-		if v, ok := resultMap["password_disabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.PasswordDisabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["ssh_password_enabled"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.SshPasswordEnabled = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sshpubkey"]; ok && v != nil {
-			data.Sshpubkey = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["locked"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Locked = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["sudo_commands"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.SudoCommands, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["sudo_commands_nopasswd"]; ok && v != nil {
-			if arr, ok := v.([]interface{}); ok {
-				strVals := make([]attr.Value, len(arr))
-				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
-				data.SudoCommandsNopasswd, _ = types.ListValue(types.StringType, strVals)
-			}
-		}
-		if v, ok := resultMap["email"]; ok && v != nil {
-			data.Email = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["group_create"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.GroupCreate = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["home_create"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.HomeCreate = types.BoolValue(bv) }
-		}
-		if v, ok := resultMap["home_mode"]; ok && v != nil {
-			data.HomeMode = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["password"]; ok && v != nil {
-			data.Password = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["random_password"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.RandomPassword = types.BoolValue(bv) }
-		}
-	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -490,10 +445,11 @@ func (r *UserResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
+	if err != nil {
 		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
 		return
-	}}
+	}
+	id = []interface{}{id, map[string]interface{}{}}
 
 	_, err = r.client.Call("user.delete", id)
 	if err != nil {

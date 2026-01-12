@@ -135,20 +135,27 @@ func (r *VirtVolumeResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["content_type"]; ok && v != nil {
-			data.ContentType = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["size"]; ok && v != nil {
-			if fv, ok := v.(float64); ok { data.Size = types.Int64Value(int64(fv)) }
-		}
-		if v, ok := resultMap["storage_pool"]; ok && v != nil {
-			data.StoragePool = types.StringValue(fmt.Sprintf("%v", v))
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["name"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

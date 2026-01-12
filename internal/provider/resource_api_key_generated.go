@@ -138,20 +138,27 @@ func (r *ApiKeyResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	// Map result back to state
-	if resultMap, ok := result.(map[string]interface{}); ok {
-		if v, ok := resultMap["name"]; ok && v != nil {
-			data.Name = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["username"]; ok && v != nil {
-			data.Username = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["expires_at"]; ok && v != nil {
-			data.ExpiresAt = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["reset"]; ok && v != nil {
-			if bv, ok := v.(bool); ok { data.Reset = types.BoolValue(bv) }
-		}
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
 	}
+
+		if v, ok := resultMap["id"]; ok && v != nil {
+			data.ID = types.StringValue(fmt.Sprintf("%v", v))
+		}
+		if v, ok := resultMap["name"]; ok && v != nil {
+			switch val := v.(type) {
+			case string:
+				data.Name = types.StringValue(val)
+			case map[string]interface{}:
+				if strVal, ok := val["value"]; ok && strVal != nil {
+					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
+				}
+			default:
+				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+			}
+		}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
