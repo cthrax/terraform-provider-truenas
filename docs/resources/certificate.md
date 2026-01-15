@@ -31,7 +31,7 @@ resource "truenas_certificate" "example" {
 - `CSR` (String) - PEM-encoded certificate signing request to import or `null`. Default: `None`
 - `acme_directory_uri` (String) - ACME directory URI to be used for ACME certificate creation. Default: `None`
 - `add_to_trusted_store` (Bool) - Whether to add this certificate to the trusted certificate store. Default: `False`
-- `cert_extensions` (String) - Certificate extensions configuration.
+- `cert_extensions` (String) - Certificate extensions configuration. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({})`
 - `certificate` (String) - PEM-encoded certificate to import or `null`. Default: `None`
 - `city` (String) - City or locality name for certificate subject or `null`. Default: `None`
 - `common` (String) - Common name for certificate subject or `null`. Default: `None`

@@ -62,7 +62,7 @@ resource "truenas_pool_dataset" "example" {
 - `create_ancestors` (Bool) - Whether to create any missing parent datasets. Default: `False`
 - `deduplication` (String) - Deduplication setting. 'ON' enables dedup, 'VERIFY' enables with checksum verification, 'OFF' disables. Default: `INHERIT` Valid values: `ON`, `VERIFY`, `OFF`, `INHERIT`
 - `encryption` (Bool) - Create a ZFS encrypted root dataset for `name` pool. There is 1 case where ZFS encryption is not allowed for a dataset: 1) If the parent dataset is encrypted with a passphrase and `name` is being crea Default: `False`
-- `encryption_options` (String) - Configuration for encryption of dataset for `name` pool.
+- `encryption_options` (String) - Configuration for encryption of dataset for `name` pool. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({generate_key = true, pbkdf2iters = 0, algorithm = "value", ...})`
 - `exec` (String) - Whether files in this dataset can be executed. Default: `INHERIT` Valid values: `ON`, `OFF`, `INHERIT`
 - `force_size` (Bool) - Force creation even if the size is not optimal. **Applies to:** `VOLUME`
 - `inherit_encryption` (Bool) - Whether to inherit encryption settings from the parent dataset. Default: `True`

@@ -29,7 +29,7 @@ resource "truenas_sharing_smb" "example" {
 ### Optional
 
 - `access_based_share_enumeration` (Bool) - If set, the share is only included when an SMB client requests a list of shares on the SMB server if     the share (not filesystem) access control list (see `sharing.smb.getacl`) grants access to the  Default: `False`
-- `audit` (String) - Audit configuration for monitoring SMB share access and operations.
+- `audit` (String) - Audit configuration for monitoring SMB share access and operations. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({enable = true})`
 - `browsable` (Bool) - If set, the share is included when an SMB client requests a list of SMB shares on the TrueNAS server. Default: `True`
 - `comment` (String) - Text field that is seen next to a share when an SMB client requests a list of SMB shares on the TrueNAS     server. Default: ``
 - `enabled` (Bool) - If unset, the SMB share is not available over the SMB protocol. Default: `True`

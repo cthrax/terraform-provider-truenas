@@ -23,7 +23,7 @@ resource "truenas_acme_dns_authenticator" "example" {
 
 ### Required
 
-- `attributes` (String) - Authentication credentials and configuration for the DNS provider.
+- `attributes` (String) - Authentication credentials and configuration for the DNS provider. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({authenticator = "value", cloudflare_email = "value", api_key = "value", ...})`
 - `name` (String) - Human-readable name for the DNS authenticator.
 
 ### Optional

@@ -72,9 +72,9 @@ resource "truenas_replication" "example" {
 - `properties_override` (String) - Object mapping dataset property names to override values during replication. Default: `{}`
 - `readonly` (String) - Controls destination datasets readonly property.  * `SET`: Set all destination datasets to readonly=on after finishing the replication. * `REQUIRE`: Require all existing destination datasets to have r Default: `SET` Valid values: `SET`, `REQUIRE`, `IGNORE`
 - `replicate` (Bool) - Whether to use full ZFS replication. Default: `False`
-- `restrict_schedule` (String) - Restricts when replication task with bound periodic snapshot tasks runs. For example, you can have periodic     snapshot tasks that run every 15 minutes, but only run replication task every hour. Default: `None`
+- `restrict_schedule` (String) - Restricts when replication task with bound periodic snapshot tasks runs. For example, you can have periodic     snapshot tasks that run every 15 minutes, but only run replication task every hour. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})` Default: `None`
 - `retries` (Int64) - Number of retries before considering replication failed. Default: `5`
-- `schedule` (String) - Schedule to run replication task. Only `auto` replication tasks without bound periodic snapshot tasks can have     a schedule. Default: `None`
+- `schedule` (String) - Schedule to run replication task. Only `auto` replication tasks without bound periodic snapshot tasks can have     a schedule. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})` Default: `None`
 - `speed_limit` (Int64) - Limits speed of SSH stream. Available only for SSH transport. Default: `None`
 - `ssh_credentials` (Int64) - Keychain Credential ID of type `SSH_CREDENTIALS`. Default: `None`
 - `sudo` (Bool) - `SSH` and `SSH+NETCAT` transports should use sudo (which is expected to be passwordless) to run `zfs`     command on the remote machine. Default: `False`

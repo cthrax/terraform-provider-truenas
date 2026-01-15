@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"encoding/json"
 	"time"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -210,7 +211,12 @@ func (r *VirtInstanceResource) Create(ctx context.Context, req resource.CreateRe
 		params["instance_type"] = data.InstanceType.ValueString()
 	}
 	if !data.Environment.IsNull() {
-		params["environment"] = data.Environment.ValueString()
+		var environmentObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.Environment.ValueString()), &environmentObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse environment: %s", err))
+			return
+		}
+		params["environment"] = environmentObj
 	}
 	if !data.Autostart.IsNull() {
 		params["autostart"] = data.Autostart.ValueString()
@@ -337,7 +343,12 @@ func (r *VirtInstanceResource) Update(ctx context.Context, req resource.UpdateRe
 
 	params := map[string]interface{}{}
 	if !data.Environment.IsNull() {
-		params["environment"] = data.Environment.ValueString()
+		var environmentObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.Environment.ValueString()), &environmentObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse environment: %s", err))
+			return
+		}
+		params["environment"] = environmentObj
 	}
 	if !data.Autostart.IsNull() {
 		params["autostart"] = data.Autostart.ValueString()

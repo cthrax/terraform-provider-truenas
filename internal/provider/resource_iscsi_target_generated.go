@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -118,7 +119,12 @@ func (r *IscsiTargetResource) Create(ctx context.Context, req resource.CreateReq
 		params["auth_networks"] = auth_networksList
 	}
 	if !data.IscsiParameters.IsNull() {
-		params["iscsi_parameters"] = data.IscsiParameters.ValueString()
+		var iscsi_parametersObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.IscsiParameters.ValueString()), &iscsi_parametersObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse iscsi_parameters: %s", err))
+			return
+		}
+		params["iscsi_parameters"] = iscsi_parametersObj
 	}
 
 	result, err := r.client.Call("iscsi.target.create", params)
@@ -226,7 +232,12 @@ func (r *IscsiTargetResource) Update(ctx context.Context, req resource.UpdateReq
 		params["auth_networks"] = auth_networksList
 	}
 	if !data.IscsiParameters.IsNull() {
-		params["iscsi_parameters"] = data.IscsiParameters.ValueString()
+		var iscsi_parametersObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.IscsiParameters.ValueString()), &iscsi_parametersObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse iscsi_parameters: %s", err))
+			return
+		}
+		params["iscsi_parameters"] = iscsi_parametersObj
 	}
 
 	_, err = r.client.Call("iscsi.target.update", []interface{}{id, params})

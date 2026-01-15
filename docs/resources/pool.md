@@ -24,7 +24,7 @@ resource "truenas_pool" "example" {
 ### Required
 
 - `name` (String) - Name for the new storage pool.
-- `topology` (String) - Physical layout and configuration of vdevs in the pool.
+- `topology` (String) - Physical layout and configuration of vdevs in the pool. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({, ...})`
 
 ### Optional
 
@@ -34,7 +34,7 @@ resource "truenas_pool" "example" {
 - `dedup_table_quota_value` (Int64) - Custom quota value in bytes when `dedup_table_quota` is set to CUSTOM. Default: `None`
 - `deduplication` (String) - Make sure no block of data is duplicated in the pool. If set to `VERIFY` and two blocks have similar     signatures, byte-to-byte comparison is performed to ensure that the blcoks are identical. This  Default: `None` Valid values: `ON`, `VERIFY`, `OFF`, `None`
 - `encryption` (Bool) - If set, create a ZFS encrypted root dataset for this pool. Default: `False`
-- `encryption_options` (String) - Specify configuration for encryption of root dataset.
+- `encryption_options` (String) - Specify configuration for encryption of root dataset. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({generate_key = true, pbkdf2iters = 0, algorithm = "value", ...})`
 
 ### Read-Only
 

@@ -26,7 +26,7 @@ resource "truenas_cloud_backup" "example" {
 
 ### Required
 
-- `attributes` (String) - Additional information for each backup, e.g. bucket name.
+- `attributes` (String) - Additional information for each backup, e.g. bucket name. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({bucket = "value", folder = "value", fast_list = true, ...})`
 - `credentials` (Int64) - ID of the cloud credential to use for each backup.
 - `keep_last` (Int64) - How many of the most recent backup snapshots to keep after each backup.
 - `password` (String) - Password for the remote repository.
@@ -44,7 +44,7 @@ resource "truenas_cloud_backup" "example" {
 - `post_script` (String) - A Bash script to run immediately after every backup if it succeeds. Default: ``
 - `pre_script` (String) - A Bash script to run immediately before every backup. Default: ``
 - `rate_limit` (Int64) - Maximum upload/download rate in KiB/s. Passed to `restic --limit-upload` on `cloud_backup.sync` and     `restic --limit-download` on `cloud_backup.restore`. `null` indicates no rate limit will be impo Default: `None`
-- `schedule` (String) - Cron schedule dictating when the task should run.
+- `schedule` (String) - Cron schedule dictating when the task should run. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})`
 - `snapshot` (Bool) - Whether to create a temporary snapshot of the dataset before every backup. Default: `False`
 - `transfer_setting` (String) - * DEFAULT:     * pack size given by `$RESTIC_PACK_SIZE` (default 16 MiB)     * read concurrency given by `$RESTIC_READ_CONCURRENCY` (default 2 files)  * PERFORMANCE:     * pack size = 29 MiB     * rea Default: `DEFAULT` Valid values: `DEFAULT`, `PERFORMANCE`, `FAST_STORAGE`
 

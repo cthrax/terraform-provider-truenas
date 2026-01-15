@@ -218,11 +218,23 @@ def generate_create_params(properties):
             lines.append(f'\t\tparams["{prop_name}"] = {prop_name}List')
         else:
             # Check if this is a complex object that needs JSON parsing
-            if isinstance(prop_schema, dict) and (
-                "oneOf" in prop_schema
-                or "discriminator" in prop_schema
-                or prop_schema.get("type") == "object"
-            ):
+            needs_json_parse = False
+            if isinstance(prop_schema, dict):
+                # Direct object type
+                if prop_schema.get("type") == "object":
+                    needs_json_parse = True
+                # Check if anyOf/oneOf contains an object variant
+                for key in ["anyOf", "oneOf"]:
+                    if key in prop_schema:
+                        for variant in prop_schema[key]:
+                            if isinstance(variant, dict) and variant.get("type") == "object":
+                                needs_json_parse = True
+                                break
+                # Discriminator indicates complex object
+                if "discriminator" in prop_schema:
+                    needs_json_parse = True
+            
+            if needs_json_parse:
                 lines.append(f"\t\tvar {prop_name}Obj map[string]interface{{}}")
                 lines.append(
                     f"\t\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Obj); err != nil {{"
@@ -242,14 +254,19 @@ def generate_create_params(properties):
     return "\n".join(lines)
 
 
-def generate_read_mapping(properties, skip_id_for_datasource=False, create_only_fields=None, required_fields=None):
+def generate_read_mapping(
+    properties,
+    skip_id_for_datasource=False,
+    create_only_fields=None,
+    required_fields=None,
+):
     """Generate code to map API response to Terraform state."""
     if create_only_fields is None:
         create_only_fields = set()
     if required_fields is None:
         required_fields = set()
     lines = []
-    
+
     # Determine if we'll actually read any fields
     has_fields_to_read = False
     if not skip_id_for_datasource:
@@ -260,30 +277,36 @@ def generate_read_mapping(properties, skip_id_for_datasource=False, create_only_
                 continue
             if prop_name in create_only_fields and prop_name not in ["name", "type"]:
                 continue
-            if required_fields is not None and prop_name not in required_fields and prop_name not in ["name", "type"]:
+            if (
+                required_fields is not None
+                and prop_name not in required_fields
+                and prop_name not in ["name", "type"]
+            ):
                 continue
             has_fields_to_read = True
             break
-    
+
     # Only declare resultMap if we'll use it
     if has_fields_to_read:
-        lines.append('\tresultMap, ok := result.(map[string]interface{})')
-        lines.append('\tif !ok {')
-        lines.append('\t\tresp.Diagnostics.AddError("Parse Error", "Failed to parse API response")')
-        lines.append('\t\treturn')
-        lines.append('\t}')
-        lines.append('')
+        lines.append("\tresultMap, ok := result.(map[string]interface{})")
+        lines.append("\tif !ok {")
+        lines.append(
+            '\t\tresp.Diagnostics.AddError("Parse Error", "Failed to parse API response")'
+        )
+        lines.append("\t\treturn")
+        lines.append("\t}")
+        lines.append("")
     else:
         # If we're not reading any fields, suppress unused variable warning
-        lines.append('\t_ = result // No fields to read')
-        lines.append('')
-    
+        lines.append("\t_ = result // No fields to read")
+        lines.append("")
+
     # Always read back the ID field from API response (if present)
     if not skip_id_for_datasource:
         lines.append('\t\tif v, ok := resultMap["id"]; ok && v != nil {')
         lines.append('\t\t\tdata.ID = types.StringValue(fmt.Sprintf("%v", v))')
-        lines.append('\t\t}')
-    
+        lines.append("\t\t}")
+
     for prop_name, prop_schema in properties.items():
         # Skip reserved names
         if prop_name in ["provider"]:
@@ -301,7 +324,11 @@ def generate_read_mapping(properties, skip_id_for_datasource=False, create_only_
         # For resources: only read back required fields and name/type
         # Optional fields should keep their config value (handled by Terraform)
         # For datasources (required_fields is None): read all fields
-        if required_fields is not None and prop_name not in required_fields and prop_name not in ["name", "type"]:
+        if (
+            required_fields is not None
+            and prop_name not in required_fields
+            and prop_name not in ["name", "type"]
+        ):
             continue
         field_name = prop_name.title().replace("_", "")
         if prop_name == "CSR":
@@ -322,8 +349,12 @@ def generate_read_mapping(properties, skip_id_for_datasource=False, create_only_
             lines.append(f"\t\t\tcase float64:")
             lines.append(f"\t\t\t\tdata.{field_name} = types.Int64Value(int64(val))")
             lines.append(f"\t\t\tcase map[string]interface{{}}:")
-            lines.append(f'\t\t\t\tif parsed, ok := val["parsed"]; ok && parsed != nil {{')
-            lines.append(f"\t\t\t\t\tif fv, ok := parsed.(float64); ok {{ data.{field_name} = types.Int64Value(int64(fv)) }}")
+            lines.append(
+                f'\t\t\t\tif parsed, ok := val["parsed"]; ok && parsed != nil {{'
+            )
+            lines.append(
+                f"\t\t\t\t\tif fv, ok := parsed.(float64); ok {{ data.{field_name} = types.Int64Value(int64(fv)) }}"
+            )
             lines.append(f"\t\t\t\t}}")
             lines.append(f"\t\t\t}}")
         elif tf_type == "Float64":
@@ -346,11 +377,17 @@ def generate_read_mapping(properties, skip_id_for_datasource=False, create_only_
             lines.append(f"\t\t\tcase string:")
             lines.append(f"\t\t\t\tdata.{field_name} = types.StringValue(val)")
             lines.append(f"\t\t\tcase map[string]interface{{}}:")
-            lines.append(f'\t\t\t\tif strVal, ok := val["value"]; ok && strVal != nil {{')
-            lines.append(f'\t\t\t\t\tdata.{field_name} = types.StringValue(fmt.Sprintf("%v", strVal))')
+            lines.append(
+                f'\t\t\t\tif strVal, ok := val["value"]; ok && strVal != nil {{'
+            )
+            lines.append(
+                f'\t\t\t\t\tdata.{field_name} = types.StringValue(fmt.Sprintf("%v", strVal))'
+            )
             lines.append(f"\t\t\t\t}}")
             lines.append(f"\t\t\tdefault:")
-            lines.append(f'\t\t\t\tdata.{field_name} = types.StringValue(fmt.Sprintf("%v", v))')
+            lines.append(
+                f'\t\t\t\tdata.{field_name} = types.StringValue(fmt.Sprintf("%v", v))'
+            )
             lines.append(f"\t\t\t}}")
 
         lines.append("\t\t}")
@@ -363,12 +400,19 @@ def has_complex_objects(properties):
         # Skip reserved names
         if prop_name in ["provider"]:
             continue
-        if isinstance(prop_schema, dict) and (
-            "oneOf" in prop_schema
-            or "discriminator" in prop_schema
-            or prop_schema.get("type") == "object"
-        ):
-            return True
+        if isinstance(prop_schema, dict):
+            # Direct object type
+            if prop_schema.get("type") == "object":
+                return True
+            # Check if anyOf/oneOf contains an object variant
+            for key in ["anyOf", "oneOf"]:
+                if key in prop_schema:
+                    for variant in prop_schema[key]:
+                        if isinstance(variant, dict) and variant.get("type") == "object":
+                            return True
+            # Discriminator indicates complex object
+            if "discriminator" in prop_schema:
+                return True
     return False
 
 
@@ -534,7 +578,7 @@ def generate_resource(base_name, methods_dict):
     # For resources: only required List fields
     # For datasources: all List fields
     has_list = any(
-        get_tf_type(p) == "List" 
+        get_tf_type(p) == "List"
         and (name not in create_only_fields or name in ["name", "type"])
         and (name in required or name in ["name", "type"])
         for name, p in properties.items()
@@ -602,7 +646,11 @@ def generate_resource(base_name, methods_dict):
                 properties, required, has_start, create_only_fields
             ),
             create_params=generate_create_params(properties),
-            read_mapping=generate_read_mapping(properties, create_only_fields=create_only_fields, required_fields=set(required)),
+            read_mapping=generate_read_mapping(
+                properties,
+                create_only_fields=create_only_fields,
+                required_fields=set(required),
+            ),
             lifecycle_code=lifecycle_code,
         )
     else:
@@ -619,7 +667,11 @@ def generate_resource(base_name, methods_dict):
             update_params=generate_create_params(
                 update_properties if update_properties else properties
             ),
-            read_mapping=generate_read_mapping(properties, create_only_fields=create_only_fields, required_fields=set(required)),
+            read_mapping=generate_read_mapping(
+                properties,
+                create_only_fields=create_only_fields,
+                required_fields=set(required),
+            ),
             lifecycle_code=lifecycle_code,
             predelete_code=predelete_code,
             id_read_code=id_read_code,
@@ -640,19 +692,19 @@ def generate_action_resource(method_name, method_spec):
     parts = method_name.split(".")
     if len(parts) < 2:
         return None
-    
+
     base_name = ".".join(parts[:-1])
     action_name = parts[-1]
-    
+
     # Build resource name (e.g., "ActionPoolScrub")
     resource_name = "Action" + "".join(p.title() for p in parts)
     resource_type_name = f"action_{method_name.replace('.', '_')}"
-    
+
     # Get parameters
     accepts = method_spec.get("accepts", [])
     if not accepts:
         return None
-    
+
     # Build schema from parameters
     properties = {}
     for param in accepts:
@@ -660,10 +712,10 @@ def generate_action_resource(method_name, method_spec):
         if not param_name:
             continue
         properties[param_name] = param
-    
+
     if not properties:
         return None
-    
+
     # Generate input fields (without computed outputs)
     input_fields = []
     for prop_name, prop_schema in properties.items():
@@ -673,96 +725,120 @@ def generate_action_resource(method_name, method_spec):
         if tf_type in ["List", "Object"]:
             tf_type = "String"
         input_fields.append(f'\t{field_name} types.{tf_type} `tfsdk:"{prop_name}"`')
-    
+
     fields = "\n".join(input_fields)
-    
+
     # Generate schema attributes for inputs (Required or Optional)
     schema_lines = []
     for prop_name, prop_schema in properties.items():
         field_name = "".join(p.title() for p in prop_name.split("_"))
         tf_type = get_tf_type(prop_schema)
         required = prop_schema.get("_required_", False)
-        description = prop_schema.get("description", "").replace('"', '\\"').replace("\n", " ")[:200]
-        
+        description = (
+            prop_schema.get("description", "")
+            .replace('"', '\\"')
+            .replace("\n", " ")[:200]
+        )
+
         # For List/Object types, use String (JSON) to avoid ElementType complexity
         if tf_type in ["List", "Object"]:
             tf_type = "String"
-        
+
         if required:
             schema_lines.append(f'\t\t\t"{prop_name}": schema.{tf_type}Attribute{{')
-            schema_lines.append(f'\t\t\t\tRequired: true,')
+            schema_lines.append(f"\t\t\t\tRequired: true,")
             schema_lines.append(f'\t\t\t\tMarkdownDescription: "{description}",')
-            schema_lines.append('\t\t\t},')
+            schema_lines.append("\t\t\t},")
         else:
             schema_lines.append(f'\t\t\t"{prop_name}": schema.{tf_type}Attribute{{')
-            schema_lines.append(f'\t\t\t\tOptional: true,')
+            schema_lines.append(f"\t\t\t\tOptional: true,")
             schema_lines.append(f'\t\t\t\tMarkdownDescription: "{description}",')
-            schema_lines.append('\t\t\t},')
-    
+            schema_lines.append("\t\t\t},")
+
     schema_attrs = "\n".join(schema_lines)
-    
+
     # Generate parameter building code
     param_lines = []
     param_lines.append("\t// Build parameters as array (positional)")
     param_lines.append("\tparams := []interface{}{}")
     needs_json = False
-    
+
     for prop_name, prop_schema in properties.items():
         field_name = "".join(p.title() for p in prop_name.split("_"))
         tf_type = get_tf_type(prop_schema)
         required = prop_schema.get("_required_", False)
-        
+
         # For List/Object, we store as String (JSON) and need to parse
         if tf_type in ["List", "Object"]:
             needs_json = True
             if required:
-                param_lines.append(f'\tvar {prop_name}Val interface{{}}')
-                param_lines.append(f'\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{')
-                param_lines.append(f'\t\tparams = append(params, {prop_name}Val)')
-                param_lines.append('\t}')
+                param_lines.append(f"\tvar {prop_name}Val interface{{}}")
+                param_lines.append(
+                    f"\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{"
+                )
+                param_lines.append(f"\t\tparams = append(params, {prop_name}Val)")
+                param_lines.append("\t}")
             else:
-                param_lines.append(f'\tif !data.{field_name}.IsNull() {{')
-                param_lines.append(f'\t\tvar {prop_name}Val interface{{}}')
-                param_lines.append(f'\t\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{')
-                param_lines.append(f'\t\t\tparams = append(params, {prop_name}Val)')
-                param_lines.append('\t\t}')
-                param_lines.append('\t}')
+                param_lines.append(f"\tif !data.{field_name}.IsNull() {{")
+                param_lines.append(f"\t\tvar {prop_name}Val interface{{}}")
+                param_lines.append(
+                    f"\t\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{"
+                )
+                param_lines.append(f"\t\t\tparams = append(params, {prop_name}Val)")
+                param_lines.append("\t\t}")
+                param_lines.append("\t}")
         else:
             if required:
                 if tf_type == "String":
-                    param_lines.append(f'\tparams = append(params, data.{field_name}.ValueString())')
+                    param_lines.append(
+                        f"\tparams = append(params, data.{field_name}.ValueString())"
+                    )
                 elif tf_type == "Int64":
-                    param_lines.append(f'\tparams = append(params, data.{field_name}.ValueInt64())')
+                    param_lines.append(
+                        f"\tparams = append(params, data.{field_name}.ValueInt64())"
+                    )
                 elif tf_type == "Bool":
-                    param_lines.append(f'\tparams = append(params, data.{field_name}.ValueBool())')
+                    param_lines.append(
+                        f"\tparams = append(params, data.{field_name}.ValueBool())"
+                    )
                 elif tf_type == "Float64":
-                    param_lines.append(f'\tparams = append(params, data.{field_name}.ValueFloat64())')
+                    param_lines.append(
+                        f"\tparams = append(params, data.{field_name}.ValueFloat64())"
+                    )
             else:
-                param_lines.append(f'\tif !data.{field_name}.IsNull() {{')
+                param_lines.append(f"\tif !data.{field_name}.IsNull() {{")
                 if tf_type == "String":
-                    param_lines.append(f'\t\tparams = append(params, data.{field_name}.ValueString())')
+                    param_lines.append(
+                        f"\t\tparams = append(params, data.{field_name}.ValueString())"
+                    )
                 elif tf_type == "Int64":
-                    param_lines.append(f'\t\tparams = append(params, data.{field_name}.ValueInt64())')
+                    param_lines.append(
+                        f"\t\tparams = append(params, data.{field_name}.ValueInt64())"
+                    )
                 elif tf_type == "Bool":
-                    param_lines.append(f'\t\tparams = append(params, data.{field_name}.ValueBool())')
+                    param_lines.append(
+                        f"\t\tparams = append(params, data.{field_name}.ValueBool())"
+                    )
                 elif tf_type == "Float64":
-                    param_lines.append(f'\t\tparams = append(params, data.{field_name}.ValueFloat64())')
-                param_lines.append('\t}')
-    
+                    param_lines.append(
+                        f"\t\tparams = append(params, data.{field_name}.ValueFloat64())"
+                    )
+                param_lines.append("\t}")
+
     param_building = "\n".join(param_lines)
-    
+
     # Check if this is a job
     is_job = method_spec.get("job", False)
-    
+
     # Get description
     description = method_spec.get("description") or f"Execute {method_name} action"
     description = description.replace('"', '\\"').replace("\n", " ").split(".")[0][:200]
-    
+
     # Build extra imports
     extra_imports = ""
     if needs_json:
         extra_imports = '\n\t"encoding/json"'
-    
+
     # Generate code from template
     code = ACTION_RESOURCE_TEMPLATE
     code = code.replace("{resource_name}", resource_name)
@@ -774,7 +850,7 @@ def generate_action_resource(method_name, method_spec):
     code = code.replace("{description}", description)
     code = code.replace("{is_job}", "true" if is_job else "false")
     code = code.replace("{extra_imports}", extra_imports)
-    
+
     return code
 
 
@@ -1090,6 +1166,58 @@ def generate_resource_docs(
         desc = prop.get("description", "") if isinstance(prop, dict) else ""
         desc = desc.replace("\n", " ").strip()[:200]
 
+        # Check if this is a JSON object type (only for String types that represent objects)
+        is_json_object = False
+        if tf_type == "String" and isinstance(prop, dict):
+            # Direct object type
+            if prop.get("type") == "object" and "properties" in prop:
+                is_json_object = True
+            # Check if anyOf/oneOf contains an object variant
+            for key in ["anyOf", "oneOf"]:
+                if key in prop:
+                    for variant in prop[key]:
+                        if isinstance(variant, dict) and variant.get("type") == "object":
+                            is_json_object = True
+                            break
+            
+            if is_json_object:
+                desc += " **Note:** This is a JSON object. Use `jsonencode()` to pass structured data."
+
+                # Try to show object structure from anyOf/oneOf
+                obj_schema = None
+                if "anyOf" in prop:
+                    # Find the object variant (skip null)
+                    for variant in prop["anyOf"]:
+                        if variant.get("type") == "object" and "properties" in variant:
+                            obj_schema = variant
+                            break
+                elif "oneOf" in prop:
+                    for variant in prop["oneOf"]:
+                        if variant.get("type") == "object" and "properties" in variant:
+                            obj_schema = variant
+                            break
+                elif prop.get("type") == "object" and "properties" in prop:
+                    obj_schema = prop
+
+                # Add example structure
+                if obj_schema and "properties" in obj_schema:
+                    obj_props = obj_schema["properties"]
+                    if obj_props:
+                        desc += " Example: `jsonencode({"
+                        prop_examples = []
+                        for obj_prop_name, obj_prop in list(obj_props.items())[:3]:
+                            obj_prop_type = obj_prop.get("type", "string")
+                            if obj_prop_type == "string":
+                                prop_examples.append(f'{obj_prop_name} = "value"')
+                            elif obj_prop_type == "integer":
+                                prop_examples.append(f"{obj_prop_name} = 0")
+                            elif obj_prop_type == "boolean":
+                                prop_examples.append(f"{obj_prop_name} = true")
+                        desc += ", ".join(prop_examples)
+                        if len(obj_props) > 3:
+                            desc += ", ..."
+                        desc += "})`"
+
         # Add default value if present
         if isinstance(prop, dict) and "default" in prop:
             desc += f" Default: `{prop['default']}`"
@@ -1222,46 +1350,48 @@ def generate_provider(resources, datasources, actions):
 def generate_action_docs(method_name, properties, description):
     """Generate documentation for action resources"""
     resource_name = f"action_{method_name.replace('.', '_')}"
-    
+
     # Build example
     example_lines = [f'resource "truenas_{resource_name}" "example" {{']
     for prop_name, prop_schema in properties.items():
         tf_type = get_tf_type(prop_schema)
         required = prop_schema.get("_required_", False)
-        
+
         if required:
             if tf_type == "String":
                 example_lines.append(f'  {prop_name} = "value"')
             elif tf_type == "Int64":
-                example_lines.append(f'  {prop_name} = 1')
+                example_lines.append(f"  {prop_name} = 1")
             elif tf_type == "Bool":
-                example_lines.append(f'  {prop_name} = true')
-    example_lines.append('}')
-    example = '\n'.join(example_lines)
-    
+                example_lines.append(f"  {prop_name} = true")
+    example_lines.append("}")
+    example = "\n".join(example_lines)
+
     # Build schema
     schema_lines = []
     for prop_name, prop_schema in properties.items():
         tf_type = get_tf_type(prop_schema)
         required = prop_schema.get("_required_", False)
         prop_desc = prop_schema.get("description", "").replace("\n", " ")[:200]
-        
+
         req_opt = "Required" if required else "Optional"
         schema_lines.append(f"- `{prop_name}` ({tf_type}, {req_opt}) {prop_desc}")
-    
+
     # Add computed outputs
     schema_lines.append("")
     schema_lines.append("### Computed Outputs")
     schema_lines.append("")
-    schema_lines.append("- `action_id` (String) Unique identifier for this action execution")
+    schema_lines.append(
+        "- `action_id` (String) Unique identifier for this action execution"
+    )
     schema_lines.append("- `job_id` (Int64) Background job ID (if applicable)")
     schema_lines.append("- `state` (String) Job state: SUCCESS, FAILED, or RUNNING")
     schema_lines.append("- `progress` (Float64) Job progress percentage (0-100)")
     schema_lines.append("- `result` (String) Action result data")
     schema_lines.append("- `error` (String) Error message if action failed")
-    
-    schema = '\n'.join(schema_lines)
-    
+
+    schema = "\n".join(schema_lines)
+
     doc = f"""---
 page_title: "truenas_{resource_name} Resource - terraform-provider-truenas"
 subcategory: "Actions"
@@ -1295,7 +1425,7 @@ This is an action resource that executes the `{method_name}` operation. Actions 
 - The resource cannot be updated - changes force recreation
 - Destroying the resource does not undo the action
 """
-    
+
     docs_dir = Path("docs/resources")
     docs_dir.mkdir(parents=True, exist_ok=True)
     (docs_dir / f"{resource_name}.md").write_text(doc)
@@ -1310,17 +1440,17 @@ def generate_provider(resources, datasources, actions):
     resource_funcs = [
         f"New{r.replace('.', '_').title().replace('_', '')}Resource" for r in resources
     ]
-    
+
     # Add manual resources (special cases)
     manual_resources = [
         "NewFilesystemPutResource",  # HTTP multipart upload
     ]
-    
+
     # Build action resource list (with Action prefix)
     action_funcs = [
         f"NewAction{''.join(p.title() for p in a.split('.'))}Resource" for a in actions
     ]
-    
+
     # Combine all resources
     all_resource_funcs = resource_funcs + manual_resources + action_funcs
     resource_list = ",\n\t\t".join(all_resource_funcs)
@@ -1424,25 +1554,41 @@ def main():
     print(f"\n✅ Generated {count} resources", file=sys.stderr)
 
     # Generate action resources
-    action_keywords = ["start", "stop", "restart", "run", "sync", "scrub", "backup", "restore", "rollback", "redeploy"]
+    action_keywords = [
+        "start",
+        "stop",
+        "restart",
+        "run",
+        "sync",
+        "scrub",
+        "backup",
+        "restore",
+        "rollback",
+        "redeploy",
+    ]
     action_count = 0
     generated_actions = []
-    
+
     # Skip filesystem.put - it needs special HTTP multipart handling
     skip_actions = {"filesystem.put"}
-    
+
     for method_name, method_spec in methods.items():
         if method_name in skip_actions:
             continue
-            
+
         # Skip CRUD methods
-        if any(method_name.endswith(suffix) for suffix in [".create", ".update", ".delete", ".query", ".get_instance"]):
+        if any(
+            method_name.endswith(suffix)
+            for suffix in [".create", ".update", ".delete", ".query", ".get_instance"]
+        ):
             continue
-        
+
         # Check if it's an action (has job flag or action-like name)
         is_job = method_spec.get("job", False)
-        has_action_name = any(keyword in method_name.split(".")[-1] for keyword in action_keywords)
-        
+        has_action_name = any(
+            keyword in method_name.split(".")[-1] for keyword in action_keywords
+        )
+
         if is_job or has_action_name:
             code = generate_action_resource(method_name, method_spec)
             if code:
@@ -1450,7 +1596,7 @@ def main():
                 (output_dir / filename).write_text(code)
                 generated_actions.append(method_name)
                 action_count += 1
-                
+
                 # Generate documentation
                 accepts = method_spec.get("accepts", [])
                 if accepts:
@@ -1459,11 +1605,14 @@ def main():
                         param_name = param.get("_name_", "")
                         if param_name:
                             properties[param_name] = param
-                    
-                    description = method_spec.get("description") or f"Execute {method_name} action"
+
+                    description = (
+                        method_spec.get("description")
+                        or f"Execute {method_name} action"
+                    )
                     description = description.split("\n")[0][:200]
                     generate_action_docs(method_name, properties, description)
-    
+
     print(f"✅ Generated {action_count} action resources", file=sys.stderr)
 
     # Generate data sources
@@ -1555,7 +1704,9 @@ def main():
 
     # Generate provider.go with all generated resources and actions
     generate_provider(
-        generated_resources, generated_datasources + generated_query_datasources, generated_actions
+        generated_resources,
+        generated_datasources + generated_query_datasources,
+        generated_actions,
     )
 
 

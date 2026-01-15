@@ -30,7 +30,7 @@ resource "truenas_cronjob" "example" {
 
 - `description` (String) - Human-readable description of what this cron job does. Default: ``
 - `enabled` (Bool) - Whether the cron job is active and will be executed. Default: `True`
-- `schedule` (String) - Cron schedule configuration for when the job runs. Default: `{'minute': '00', 'hour': '*', 'dom': '*', 'month': '*', 'dow': '*'}`
+- `schedule` (String) - Cron schedule configuration for when the job runs. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})` Default: `{'minute': '00', 'hour': '*', 'dom': '*', 'month': '*', 'dow': '*'}`
 - `stderr` (Bool) - Whether to IGNORE standard error (if `false`, it will be added to email). Default: `False`
 - `stdout` (Bool) - Whether to IGNORE standard output (if `false`, it will be added to email). Default: `True`
 

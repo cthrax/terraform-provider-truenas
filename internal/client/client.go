@@ -339,10 +339,45 @@ func (c *Client) Call(method string, params interface{}) (interface{}, error) {
 	}
 
 	if response.Error != nil {
-		return nil, fmt.Errorf("%s failed: %v", method, response.Error)
+		cleanErr := formatTrueNASError(response.Error)
+		// Store full error for debug access
+		fullErr := fmt.Sprintf("%v", response.Error)
+		if cleanErr != fullErr {
+			// Log full error for debugging
+			log.Printf("[DEBUG] TrueNAS API full error: %s", fullErr)
+		}
+		return nil, fmt.Errorf("%s failed: %s", method, cleanErr)
 	}
 
 	return response.Result, nil
+}
+
+// formatTrueNASError extracts the meaningful error message from TrueNAS error response
+func formatTrueNASError(err interface{}) string {
+	errMap, ok := err.(map[string]interface{})
+	if !ok {
+		return fmt.Sprintf("%v", err)
+	}
+	
+	// Extract the main error reason
+	if reason, ok := errMap["reason"].(string); ok && reason != "" {
+		return reason
+	}
+	
+	// Extract validation errors from extra field
+	if extra, ok := errMap["extra"].([]interface{}); ok && len(extra) > 0 {
+		if extraList, ok := extra[0].([]interface{}); ok && len(extraList) > 1 {
+			// Format: [field, message, code]
+			if len(extraList) >= 2 {
+				field := fmt.Sprintf("%v", extraList[0])
+				msg := fmt.Sprintf("%v", extraList[1])
+				return fmt.Sprintf("%s: %s", field, msg)
+			}
+		}
+	}
+	
+	// Fallback to full error
+	return fmt.Sprintf("%v", err)
 }
 
 // CallWithJob calls a method that returns a job ID and waits for completion

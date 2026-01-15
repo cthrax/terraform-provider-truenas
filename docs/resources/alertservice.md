@@ -24,7 +24,7 @@ resource "truenas_alertservice" "example" {
 
 ### Required
 
-- `attributes` (String) - Service-specific configuration attributes (credentials, endpoints, etc.).
+- `attributes` (String) - Service-specific configuration attributes (credentials, endpoints, etc.). **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({type = "value", region = "value", topic_arn = "value", ...})`
 - `level` (String) - Minimum alert severity level that triggers notifications through this service. Valid values: `INFO`, `NOTICE`, `WARNING`, `ERROR`, `CRITICAL`, `ALERT`, `EMERGENCY`
 - `name` (String) - Human-readable name for the alert service.
 

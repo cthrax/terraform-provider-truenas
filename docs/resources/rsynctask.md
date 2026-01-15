@@ -45,7 +45,7 @@ resource "truenas_rsynctask" "example" {
 - `remotemodule` (String) - Name of remote module, this attribute should be specified when `mode` is set to MODULE. Default: `None`
 - `remotepath` (String) - Path on the remote system to synchronize with. Default: ``
 - `remoteport` (Int64) - Port number for SSH connection. Only applies when `mode` is SSH. Default: `None`
-- `schedule` (String) - Cron schedule for when the rsync task should run.
+- `schedule` (String) - Cron schedule for when the rsync task should run. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})`
 - `ssh_credentials` (Int64) - Keychain credential ID for SSH authentication. `null` to use user's SSH keys. Default: `None`
 - `ssh_keyscan` (Bool) - Automatically add remote host key to user's known_hosts file. Default: `False`
 - `times` (Bool) - Preserve modification times of files. Default: `True`

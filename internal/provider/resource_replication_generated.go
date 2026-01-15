@@ -447,10 +447,20 @@ func (r *ReplicationResource) Create(ctx context.Context, req resource.CreateReq
 		params["auto"] = data.Auto.ValueBool()
 	}
 	if !data.Schedule.IsNull() {
-		params["schedule"] = data.Schedule.ValueString()
+		var scheduleObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.Schedule.ValueString()), &scheduleObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse schedule: %s", err))
+			return
+		}
+		params["schedule"] = scheduleObj
 	}
 	if !data.RestrictSchedule.IsNull() {
-		params["restrict_schedule"] = data.RestrictSchedule.ValueString()
+		var restrict_scheduleObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.RestrictSchedule.ValueString()), &restrict_scheduleObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse restrict_schedule: %s", err))
+			return
+		}
+		params["restrict_schedule"] = restrict_scheduleObj
 	}
 	if !data.OnlyMatchingSchedule.IsNull() {
 		params["only_matching_schedule"] = data.OnlyMatchingSchedule.ValueBool()
@@ -751,10 +761,20 @@ func (r *ReplicationResource) Update(ctx context.Context, req resource.UpdateReq
 		params["auto"] = data.Auto.ValueBool()
 	}
 	if !data.Schedule.IsNull() {
-		params["schedule"] = data.Schedule.ValueString()
+		var scheduleObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.Schedule.ValueString()), &scheduleObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse schedule: %s", err))
+			return
+		}
+		params["schedule"] = scheduleObj
 	}
 	if !data.RestrictSchedule.IsNull() {
-		params["restrict_schedule"] = data.RestrictSchedule.ValueString()
+		var restrict_scheduleObj map[string]interface{}
+		if err := json.Unmarshal([]byte(data.RestrictSchedule.ValueString()), &restrict_scheduleObj); err != nil {
+			resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse restrict_schedule: %s", err))
+			return
+		}
+		params["restrict_schedule"] = restrict_scheduleObj
 	}
 	if !data.OnlyMatchingSchedule.IsNull() {
 		params["only_matching_schedule"] = data.OnlyMatchingSchedule.ValueBool()

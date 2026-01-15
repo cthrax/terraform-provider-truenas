@@ -33,7 +33,7 @@ resource "truenas_pool_snapshottask" "example" {
 - `lifetime_value` (Int64) - Number of time units to retain snapshots. `lifetime_unit` gives the time unit. Default: `2`
 - `naming_schema` (String) - Naming pattern for generated snapshots using strftime format. Default: `auto-%Y-%m-%d_%H-%M`
 - `recursive` (Bool) - Whether to recursively snapshot child datasets. Default: `False`
-- `schedule` (String) - Cron schedule for when snapshots should be taken.
+- `schedule` (String) - Cron schedule for when snapshots should be taken. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})`
 
 ### Read-Only
 

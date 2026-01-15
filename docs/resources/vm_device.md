@@ -23,7 +23,7 @@ resource "truenas_vm_device" "example" {
 
 ### Required
 
-- `attributes` (String) - Device-specific configuration attributes.
+- `attributes` (String) - Device-specific configuration attributes. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({dtype = "value", path = "value"})`
 - `vm` (Int64) - ID of the virtual machine this device belongs to.
 
 ### Optional

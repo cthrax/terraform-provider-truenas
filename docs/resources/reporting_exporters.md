@@ -24,7 +24,7 @@ resource "truenas_reporting_exporters" "example" {
 
 ### Required
 
-- `attributes` (String) - Specific attributes for the exporter.
+- `attributes` (String) - Specific attributes for the exporter. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({exporter_type = "value", destination_ip = "value", destination_port = 0, ...})`
 - `enabled` (Bool) - Whether this exporter is enabled and active.
 - `name` (String) - User defined name of exporter configuration.
 

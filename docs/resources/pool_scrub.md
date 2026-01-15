@@ -28,7 +28,7 @@ resource "truenas_pool_scrub" "example" {
 
 - `description` (String) - Description or notes for this scrub schedule. Default: ``
 - `enabled` (Bool) - Whether this scrub schedule is enabled. Default: `True`
-- `schedule` (String) - Cron schedule for when scrubs should run.
+- `schedule` (String) - Cron schedule for when scrubs should run. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})`
 - `threshold` (Int64) - Days before a scrub is due when a scrub should automatically start. Default: `35`
 
 ### Read-Only

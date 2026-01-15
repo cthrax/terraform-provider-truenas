@@ -26,7 +26,7 @@ resource "truenas_cloudsync" "example" {
 
 ### Required
 
-- `attributes` (String) - Additional information for each backup, e.g. bucket name.
+- `attributes` (String) - Additional information for each backup, e.g. bucket name. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({bucket = "value", folder = "value", fast_list = true, ...})`
 - `credentials` (Int64) - ID of the cloud credential.
 - `direction` (String) - Direction of the cloud sync operation.  * `PUSH`: Upload local files to cloud storage * `PULL`: Download files from cloud storage to local storage Valid values: `PUSH`, `PULL`
 - `path` (String) - The local path to back up beginning with `/mnt` or `/dev/zvol`.
@@ -48,7 +48,7 @@ resource "truenas_cloudsync" "example" {
 - `include` (List) - Paths to pass to `restic backup --include`.
 - `post_script` (String) - A Bash script to run immediately after every backup if it succeeds. Default: ``
 - `pre_script` (String) - A Bash script to run immediately before every backup. Default: ``
-- `schedule` (String) - Cron schedule dictating when the task should run.
+- `schedule` (String) - Cron schedule dictating when the task should run. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})`
 - `snapshot` (Bool) - Whether to create a temporary snapshot of the dataset before every backup. Default: `False`
 - `transfers` (Int64) - Maximum number of parallel file transfers. `null` for default. Default: `None`
 

@@ -44,7 +44,7 @@ resource "truenas_keychaincredential" "example" {
 
 ### Required
 
-- `attributes` (String) - SSH connection attributes including host, authentication, and connection settings.
+- `attributes` (String) - SSH connection attributes including host, authentication, and connection settings. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({host = "value", port = 0, username = "value", ...})`
 - `name` (String) - Distinguishes this Keychain Credential from others.
 - `type` (String) - Keychain credential type identifier for SSH connection credentials. Valid values: `SSH_CREDENTIALS`, `SSH_KEY_PAIR`
 
