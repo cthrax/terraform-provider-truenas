@@ -399,14 +399,10 @@ func (c *Client) CallWithJob(method string, params interface{}) (interface{}, er
 		return result, nil
 	}
 
-	// Wait for job completion
-	jobResult, err := c.call("core.job_wait", []interface{}{jobID})
+	// Wait for job completion using WebSocket events
+	jobResult, err := c.WaitForJob(jobID, 5*time.Minute)
 	if err != nil {
 		return nil, fmt.Errorf("job wait failed: %v", err)
-	}
-
-	if jobResult.Error != nil {
-		return nil, fmt.Errorf("job %d failed: %v", jobID, jobResult.Error)
 	}
 
 	return jobResult.Result, nil
