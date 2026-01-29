@@ -57,11 +57,13 @@ def get_tf_type(prop_schema):
     if not isinstance(prop_schema, dict):
         return "String"
 
-    # Handle anyOf/oneOf - check for integer type
+    # Handle anyOf/oneOf - check for actual type (nullable types)
     if "anyOf" in prop_schema:
         for variant in prop_schema["anyOf"]:
             if variant.get("type") == "integer":
                 return "Int64"
+            if variant.get("type") == "boolean":
+                return "Bool"
         return "String"
 
     json_type = prop_schema.get("type")

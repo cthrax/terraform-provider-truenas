@@ -47,7 +47,7 @@ resource "truenas_replication" "example" {
 - `embed` (Bool) - Enable embedded block support for ZFS send streams. Default: `False`
 - `enabled` (Bool) - Whether this replication task is enabled. Default: `True`
 - `encryption` (Bool) - Whether to enable encryption for the replicated datasets. Default: `False`
-- `encryption_inherit` (String) - Whether replicated datasets should inherit encryption from parent. `null` if encryption is disabled. Default: `None`
+- `encryption_inherit` (Bool) - Whether replicated datasets should inherit encryption from parent. `null` if encryption is disabled. Default: `None`
 - `encryption_key` (String) - Encryption key for replicated datasets. `null` if not specified. Default: `None`
 - `encryption_key_format` (String) - Format of the encryption key.  * `HEX`: Hexadecimal-encoded key * `PASSPHRASE`: Text passphrase * `null`: Not applicable when encryption is disabled Default: `None`
 - `encryption_key_location` (String) - Filesystem path where encryption key is stored. `null` if not using key file. Default: `None`

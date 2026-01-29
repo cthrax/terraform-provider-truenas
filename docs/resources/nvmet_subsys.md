@@ -27,9 +27,9 @@ resource "truenas_nvmet_subsys" "example" {
 ### Optional
 
 - `allow_any_host` (Bool) - Any host can access the storage associated with this subsystem (i.e. no access control). Default: `False`
-- `ana` (String) - If set to either `True` or `False`, then *override* the global `ana` setting from `nvmet.global.config` for this     subsystem only.  If `null`, then the global `ana` setting will take effect. Default: `None`
+- `ana` (Bool) - If set to either `True` or `False`, then *override* the global `ana` setting from `nvmet.global.config` for this     subsystem only.  If `null`, then the global `ana` setting will take effect. Default: `None`
 - `ieee_oui` (String) - IEEE Organizationally Unique Identifier for the subsystem. Default: `None`
-- `pi_enable` (String) - Enable Protection Information (PI) for data integrity checking. Default: `None`
+- `pi_enable` (Bool) - Enable Protection Information (PI) for data integrity checking. Default: `None`
 - `qid_max` (Int64) - Maximum number of queue IDs allowed for this subsystem. Default: `None`
 - `subnqn` (String) - NVMe Qualified Name (NQN) for the subsystem.  Must be a valid NQN format if provided. Default: `None`
 

@@ -33,7 +33,7 @@ type PoolDatasetsItemModel struct {
 	Pool types.String `tfsdk:"pool"`
 	Encrypted types.Bool `tfsdk:"encrypted"`
 	EncryptionRoot types.String `tfsdk:"encryption_root"`
-	KeyLoaded types.String `tfsdk:"key_loaded"`
+	KeyLoaded types.Bool `tfsdk:"key_loaded"`
 	UserProperties types.String `tfsdk:"user_properties"`
 	Locked types.Bool `tfsdk:"locked"`
 	Comments types.String `tfsdk:"comments"`
@@ -114,7 +114,7 @@ func (d *PoolDatasetsDataSource) Schema(ctx context.Context, req datasource.Sche
 				Computed: true,
 				Description: "The root dataset where encryption is enabled. `null` if the dataset is not encrypted.",
 			},
-			"key_loaded": schema.StringAttribute{
+			"key_loaded": schema.BoolAttribute{
 				Computed: true,
 				Description: "Whether the encryption key is currently loaded for encrypted datasets. `null` for unencrypted datase",
 			},
@@ -357,7 +357,7 @@ func (d *PoolDatasetsDataSource) Read(ctx context.Context, req datasource.ReadRe
 			itemModel.EncryptionRoot = types.StringValue(fmt.Sprintf("%v", v))
 		}
 		if v, ok := resultMap["key_loaded"]; ok && v != nil {
-			itemModel.KeyLoaded = types.StringValue(fmt.Sprintf("%v", v))
+			if bv, ok := v.(bool); ok { itemModel.KeyLoaded = types.BoolValue(bv) }
 		}
 		if v, ok := resultMap["user_properties"]; ok && v != nil {
 			itemModel.UserProperties = types.StringValue(fmt.Sprintf("%v", v))
@@ -515,7 +515,7 @@ func (d *PoolDatasetsDataSource) Read(ctx context.Context, req datasource.ReadRe
 			"exec": types.StringType,
 			"id": types.StringType,
 			"key_format": types.StringType,
-			"key_loaded": types.StringType,
+			"key_loaded": types.BoolType,
 			"locked": types.BoolType,
 			"managedby": types.StringType,
 			"mountpoint": types.StringType,

@@ -28,7 +28,7 @@ type PoolDatasetDataSourceModel struct {
 	Pool types.String `tfsdk:"pool"`
 	Encrypted types.Bool `tfsdk:"encrypted"`
 	EncryptionRoot types.String `tfsdk:"encryption_root"`
-	KeyLoaded types.String `tfsdk:"key_loaded"`
+	KeyLoaded types.Bool `tfsdk:"key_loaded"`
 	Children types.List `tfsdk:"children"`
 	UserProperties types.String `tfsdk:"user_properties"`
 	Locked types.Bool `tfsdk:"locked"`
@@ -105,7 +105,7 @@ func (d *PoolDatasetDataSource) Schema(ctx context.Context, req datasource.Schem
 				Computed: true,
 				Description: "The root dataset where encryption is enabled. `null` if the dataset is not encrypted.",
 			},
-			"key_loaded": schema.StringAttribute{
+			"key_loaded": schema.BoolAttribute{
 				Computed: true,
 				Description: "Whether the encryption key is currently loaded for encrypted datasets. `null` for unencrypted datase",
 			},

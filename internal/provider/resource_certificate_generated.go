@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -44,7 +45,7 @@ type CertificateResourceModel struct {
 	CertExtensions types.String `tfsdk:"cert_extensions"`
 	AcmeDirectoryUri types.String `tfsdk:"acme_directory_uri"`
 	CsrId types.Int64 `tfsdk:"csr_id"`
-	Tos types.String `tfsdk:"tos"`
+	Tos types.Bool `tfsdk:"tos"`
 	DnsMapping types.String `tfsdk:"dns_mapping"`
 	RenewDays types.Int64 `tfsdk:"renew_days"`
 }
@@ -196,11 +197,11 @@ func (r *CertificateResource) Schema(ctx context.Context, req resource.SchemaReq
 				Description: "CSR to be used for ACME certificate creation.",
 				PlanModifiers: []planmodifier.Int64{int64planmodifier.RequiresReplace()},
 			},
-			"tos": schema.StringAttribute{
+			"tos": schema.BoolAttribute{
 				Required: false,
 				Optional: true,
 				Description: "Set this when creating an ACME certificate to accept terms of service of the ACME service.",
-				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
+				PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
 			},
 			"dns_mapping": schema.StringAttribute{
 				Required: false,
@@ -311,7 +312,7 @@ func (r *CertificateResource) Create(ctx context.Context, req resource.CreateReq
 		params["csr_id"] = data.CsrId.ValueInt64()
 	}
 	if !data.Tos.IsNull() {
-		params["tos"] = data.Tos.ValueString()
+		params["tos"] = data.Tos.ValueBool()
 	}
 	if !data.DnsMapping.IsNull() {
 		var dns_mappingObj map[string]interface{}

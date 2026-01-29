@@ -50,7 +50,7 @@ resource "truenas_certificate" "example" {
 - `renew_days` (Int64) - Number of days before the certificate expiration date to attempt certificate renewal. If certificate renewal     fails, renewal will be reattempted every day until expiration. Default: `10`
 - `san` (List) - Subject alternative names for the certificate.
 - `state` (String) - State or province name for certificate subject or `null`. Default: `None`
-- `tos` (String) - Set this when creating an ACME certificate to accept terms of service of the ACME service. Default: `None`
+- `tos` (Bool) - Set this when creating an ACME certificate to accept terms of service of the ACME service. Default: `None`
 
 ### Read-Only
 

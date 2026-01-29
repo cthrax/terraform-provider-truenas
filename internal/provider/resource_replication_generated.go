@@ -39,7 +39,7 @@ type ReplicationResourceModel struct {
 	PropertiesOverride types.String `tfsdk:"properties_override"`
 	Replicate types.Bool `tfsdk:"replicate"`
 	Encryption types.Bool `tfsdk:"encryption"`
-	EncryptionInherit types.String `tfsdk:"encryption_inherit"`
+	EncryptionInherit types.Bool `tfsdk:"encryption_inherit"`
 	EncryptionKey types.String `tfsdk:"encryption_key"`
 	EncryptionKeyFormat types.String `tfsdk:"encryption_key_format"`
 	EncryptionKeyLocation types.String `tfsdk:"encryption_key_location"`
@@ -183,7 +183,7 @@ func (r *ReplicationResource) Schema(ctx context.Context, req resource.SchemaReq
 				Optional: true,
 				Description: "Whether to enable encryption for the replicated datasets.",
 			},
-			"encryption_inherit": schema.StringAttribute{
+			"encryption_inherit": schema.BoolAttribute{
 				Required: false,
 				Optional: true,
 				Description: "Whether replicated datasets should inherit encryption from parent. `null` if encryption is disabled.",
@@ -415,7 +415,7 @@ func (r *ReplicationResource) Create(ctx context.Context, req resource.CreateReq
 		params["encryption"] = data.Encryption.ValueBool()
 	}
 	if !data.EncryptionInherit.IsNull() {
-		params["encryption_inherit"] = data.EncryptionInherit.ValueString()
+		params["encryption_inherit"] = data.EncryptionInherit.ValueBool()
 	}
 	if !data.EncryptionKey.IsNull() {
 		params["encryption_key"] = data.EncryptionKey.ValueString()
@@ -740,7 +740,7 @@ func (r *ReplicationResource) Update(ctx context.Context, req resource.UpdateReq
 		params["encryption"] = data.Encryption.ValueBool()
 	}
 	if !data.EncryptionInherit.IsNull() {
-		params["encryption_inherit"] = data.EncryptionInherit.ValueString()
+		params["encryption_inherit"] = data.EncryptionInherit.ValueBool()
 	}
 	if !data.EncryptionKey.IsNull() {
 		params["encryption_key"] = data.EncryptionKey.ValueString()

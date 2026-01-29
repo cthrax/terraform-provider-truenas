@@ -32,7 +32,7 @@ type VirtInstanceResourceModel struct {
 	Remote types.String `tfsdk:"remote"`
 	InstanceType types.String `tfsdk:"instance_type"`
 	Environment types.String `tfsdk:"environment"`
-	Autostart types.String `tfsdk:"autostart"`
+	Autostart types.Bool `tfsdk:"autostart"`
 	Cpu types.String `tfsdk:"cpu"`
 	Devices types.String `tfsdk:"devices"`
 	Memory types.Int64 `tfsdk:"memory"`
@@ -112,7 +112,7 @@ func (r *VirtInstanceResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional: true,
 				Description: "Environment variables to set inside the instance.",
 			},
-			"autostart": schema.StringAttribute{
+			"autostart": schema.BoolAttribute{
 				Required: false,
 				Optional: true,
 				Description: "Whether the instance should automatically start when the host boots.",
@@ -220,7 +220,7 @@ func (r *VirtInstanceResource) Create(ctx context.Context, req resource.CreateRe
 		params["environment"] = environmentObj
 	}
 	if !data.Autostart.IsNull() {
-		params["autostart"] = data.Autostart.ValueString()
+		params["autostart"] = data.Autostart.ValueBool()
 	}
 	if !data.Cpu.IsNull() {
 		params["cpu"] = data.Cpu.ValueString()
@@ -363,7 +363,7 @@ func (r *VirtInstanceResource) Update(ctx context.Context, req resource.UpdateRe
 		params["environment"] = environmentObj
 	}
 	if !data.Autostart.IsNull() {
-		params["autostart"] = data.Autostart.ValueString()
+		params["autostart"] = data.Autostart.ValueBool()
 	}
 	if !data.Cpu.IsNull() {
 		params["cpu"] = data.Cpu.ValueString()

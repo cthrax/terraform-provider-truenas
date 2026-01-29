@@ -43,7 +43,7 @@ data "truenas_pool_dataset" "example" {
 - `encryption_root` (String) - The root dataset where encryption is enabled. `null` if the dataset is not encrypted.
 - `exec` (String) - Whether files in this dataset can be executed.
 - `key_format` (String) - Format of the encryption key (hex/raw/passphrase). Only relevant for encrypted datasets.
-- `key_loaded` (String) - Whether the encryption key is currently loaded for encrypted datasets. `null` for unencrypted datasets.
+- `key_loaded` (Bool) - Whether the encryption key is currently loaded for encrypted datasets. `null` for unencrypted datasets.
 - `locked` (Bool) - Whether an encrypted dataset is currently locked (key not loaded).
 - `managedby` (String) - Identifies which service or system manages this dataset.
 - `mountpoint` (String) - Filesystem path where this dataset is mounted. Null for unmounted datasets or volumes.

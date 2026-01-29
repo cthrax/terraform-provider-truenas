@@ -30,7 +30,7 @@ resource "truenas_virt_instance" "example" {
 ### Optional
 
 - `start_on_create` (Bool) - Start the resource immediately after creation. Default: `true`
-- `autostart` (String) - Whether the instance should automatically start when the host boots. Default: `True`
+- `autostart` (Bool) - Whether the instance should automatically start when the host boots. Default: `True`
 - `cpu` (String) - CPU allocation specification or `null` for automatic allocation. Default: `None`
 - `devices` (String) - Array of devices to attach to the instance. Default: `None`
 - `environment` (String) - Environment variables to set inside the instance. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Default: `None`
