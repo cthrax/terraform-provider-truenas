@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"strconv"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"encoding/json"
@@ -552,6 +553,11 @@ func (r *ReplicationResource) Read(ctx context.Context, req resource.ReadRequest
 
 	result, err := r.client.Call("replication.get_instance", id)
 	if err != nil {
+		// Check if resource was deleted outside Terraform (ENOENT = entity not found)
+		if strings.Contains(err.Error(), "[ENOENT]") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Read Error", fmt.Sprintf("Unable to read replication: %s", err))
 		return
 	}

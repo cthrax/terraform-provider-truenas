@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"strconv"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -133,6 +134,11 @@ func (r *ReportingExportersResource) Read(ctx context.Context, req resource.Read
 
 	result, err := r.client.Call("reporting.exporters.get_instance", id)
 	if err != nil {
+		// Check if resource was deleted outside Terraform (ENOENT = entity not found)
+		if strings.Contains(err.Error(), "[ENOENT]") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Read Error", fmt.Sprintf("Unable to read reporting_exporters: %s", err))
 		return
 	}

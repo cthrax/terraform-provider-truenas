@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -312,6 +313,11 @@ func (r *InterfaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 	result, err := r.client.Call("interface.get_instance", id)
 	if err != nil {
+		// Check if resource was deleted outside Terraform (ENOENT = entity not found)
+		if strings.Contains(err.Error(), "[ENOENT]") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Read Error", fmt.Sprintf("Unable to read interface: %s", err))
 		return
 	}

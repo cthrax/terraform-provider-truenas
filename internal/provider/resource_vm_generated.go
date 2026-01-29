@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"strconv"
 	"time"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -376,6 +377,11 @@ func (r *VmResource) Read(ctx context.Context, req resource.ReadRequest, resp *r
 
 	result, err := r.client.Call("vm.get_instance", id)
 	if err != nil {
+		// Check if resource was deleted outside Terraform (ENOENT = entity not found)
+		if strings.Contains(err.Error(), "[ENOENT]") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Read Error", fmt.Sprintf("Unable to read vm: %s", err))
 		return
 	}

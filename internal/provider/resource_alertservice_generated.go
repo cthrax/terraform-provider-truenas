@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"strconv"
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -142,6 +143,11 @@ func (r *AlertserviceResource) Read(ctx context.Context, req resource.ReadReques
 
 	result, err := r.client.Call("alertservice.get_instance", id)
 	if err != nil {
+		// Check if resource was deleted outside Terraform (ENOENT = entity not found)
+		if strings.Contains(err.Error(), "[ENOENT]") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError("Read Error", fmt.Sprintf("Unable to read alertservice: %s", err))
 		return
 	}
