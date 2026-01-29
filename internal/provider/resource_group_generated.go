@@ -144,9 +144,15 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 
 	// Extract ID from result
 	if resultMap, ok := result.(map[string]interface{}); ok {
-		if id, exists := resultMap["id"]; exists {
+		if id, exists := resultMap["id"]; exists && id != nil {
 			data.ID = types.StringValue(fmt.Sprintf("%v", id))
 		}
+	}
+
+	// Validate ID was set
+	if data.ID.IsNull() || data.ID.ValueString() == "" {
+		resp.Diagnostics.AddError("Create Error", "API did not return a valid ID")
+		return
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
