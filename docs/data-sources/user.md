@@ -39,7 +39,7 @@ data "truenas_user" "example" {
 - `password_age` (Int64) - The age in days of the password for local user accounts.
 - `password_change_required` (Bool) - Password change for local user account is required on next login.
 - `password_disabled` (Bool) - If set to `true` password authentication for the user account is disabled.  NOTE: Users with password authentication disabled may still authenticate to the TrueNAS server by other methods,     such as
-- `password_history` (String) - This contains hashes of the ten most recent passwords used by local user accounts, and is     for enforcing password history requirements as defined in system.security.
+- `password_history` (List) - This contains hashes of the ten most recent passwords used by local user accounts, and is     for enforcing password history requirements as defined in system.security.
 - `roles` (List) - Array of roles assigned to this user's groups. Roles control administrative access to TrueNAS through     the web UI and API.
 - `shell` (String) - Available choices can be retrieved with `user.shell_choices`.
 - `sid` (String) - The Security Identifier (SID) of the user if the account an `smb` account. The SMB server uses     this value to check share access and for other purposes.

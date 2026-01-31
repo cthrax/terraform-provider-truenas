@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"strconv"
+
 	"encoding/json"
 	"time"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -34,7 +34,7 @@ type VirtInstanceResourceModel struct {
 	Environment types.String `tfsdk:"environment"`
 	Autostart types.Bool `tfsdk:"autostart"`
 	Cpu types.String `tfsdk:"cpu"`
-	Devices types.String `tfsdk:"devices"`
+	Devices types.List `tfsdk:"devices"`
 	Memory types.Int64 `tfsdk:"memory"`
 	PrivilegedMode types.Bool `tfsdk:"privileged_mode"`
 	VncPort types.Int64 `tfsdk:"vnc_port"`
@@ -122,11 +122,11 @@ func (r *VirtInstanceResource) Schema(ctx context.Context, req resource.SchemaRe
 				Optional: true,
 				Description: "CPU allocation specification or `null` for automatic allocation.",
 			},
-			"devices": schema.StringAttribute{
+			"devices": schema.ListAttribute{
 				Required: false,
 				Optional: true,
+				ElementType: types.StringType,
 				Description: "Array of devices to attach to the instance.",
-				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"memory": schema.Int64Attribute{
 				Required: false,
@@ -226,7 +226,9 @@ func (r *VirtInstanceResource) Create(ctx context.Context, req resource.CreateRe
 		params["cpu"] = data.Cpu.ValueString()
 	}
 	if !data.Devices.IsNull() {
-		params["devices"] = data.Devices.ValueString()
+		var devicesList []string
+		data.Devices.ElementsAs(ctx, &devicesList, false)
+		params["devices"] = devicesList
 	}
 	if !data.Memory.IsNull() {
 		params["memory"] = data.Memory.ValueInt64()
@@ -275,12 +277,7 @@ func (r *VirtInstanceResource) Create(ctx context.Context, req resource.CreateRe
 		startOnCreate = data.StartOnCreate.ValueBool()
 	}
 	if startOnCreate {
-		vmID, err := strconv.Atoi(data.ID.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
-			return
-		}
-		_, err = r.client.Call("virt.instance.start", vmID)
+		_, err = r.client.Call("virt.instance.start", data.ID.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddWarning("Start Failed", fmt.Sprintf("Resource created but failed to start: %s", err.Error()))
 		}
@@ -417,14 +414,9 @@ func (r *VirtInstanceResource) Delete(ctx context.Context, req resource.DeleteRe
 	var err error
 	id = data.ID.ValueString()
 
-	// Stop VM before deletion if running
-	vmID, err := strconv.Atoi(data.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
-		return
-	}
-	_, _ = r.client.Call("virt.instance.stop", vmID)  // Ignore errors - VM might already be stopped
-	time.Sleep(2 * time.Second)  // Wait for VM to stop
+	// Stop app before deletion if running
+	_, _ = r.client.Call("virt.instance.stop", data.ID.ValueString())  // Ignore errors - app might already be stopped
+	time.Sleep(2 * time.Second)  // Wait for app to stop
 
 	_, err = r.client.CallWithJob("virt.instance.delete", id)
 	if err != nil {

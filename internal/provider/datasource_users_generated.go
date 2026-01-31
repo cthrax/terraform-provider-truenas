@@ -50,7 +50,6 @@ type UsersItemModel struct {
 	Sid types.String `tfsdk:"sid"`
 	LastPasswordChange types.String `tfsdk:"last_password_change"`
 	PasswordAge types.Int64 `tfsdk:"password_age"`
-	PasswordHistory types.String `tfsdk:"password_history"`
 	PasswordChangeRequired types.Bool `tfsdk:"password_change_required"`
 }
 
@@ -155,10 +154,6 @@ func (d *UsersDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 			"password_age": schema.Int64Attribute{
 				Computed: true,
 				Description: "The age in days of the password for local user accounts.",
-			},
-			"password_history": schema.StringAttribute{
-				Computed: true,
-				Description: "This contains hashes of the ten most recent passwords used by local user accounts, and is     for en",
 			},
 			"password_change_required": schema.BoolAttribute{
 				Computed: true,
@@ -277,9 +272,6 @@ func (d *UsersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		if v, ok := resultMap["password_age"]; ok && v != nil {
 			if fv, ok := v.(float64); ok { itemModel.PasswordAge = types.Int64Value(int64(fv)) }
 		}
-		if v, ok := resultMap["password_history"]; ok && v != nil {
-			itemModel.PasswordHistory = types.StringValue(fmt.Sprintf("%v", v))
-		}
 		if v, ok := resultMap["password_change_required"]; ok && v != nil {
 			if bv, ok := v.(bool); ok { itemModel.PasswordChangeRequired = types.BoolValue(bv) }
 		}
@@ -302,7 +294,6 @@ func (d *UsersDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 			"password_age": types.Int64Type,
 			"password_change_required": types.BoolType,
 			"password_disabled": types.BoolType,
-			"password_history": types.StringType,
 			"shell": types.StringType,
 			"sid": types.StringType,
 			"smb": types.BoolType,

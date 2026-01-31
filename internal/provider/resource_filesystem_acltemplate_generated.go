@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"strconv"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -20,7 +21,7 @@ type FilesystemAcltemplateResourceModel struct {
 	ID types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
 	Acltype types.String `tfsdk:"acltype"`
-	Acl types.String `tfsdk:"acl"`
+	Acl types.List `tfsdk:"acl"`
 	Comment types.String `tfsdk:"comment"`
 }
 
@@ -51,9 +52,10 @@ func (r *FilesystemAcltemplateResource) Schema(ctx context.Context, req resource
 				Optional: false,
 				Description: "ACL type this template provides.",
 			},
-			"acl": schema.StringAttribute{
+			"acl": schema.ListAttribute{
 				Required: true,
 				Optional: false,
+				ElementType: types.StringType,
 				Description: "Array of Access Control Entries defined by this template.",
 			},
 			"comment": schema.StringAttribute{
@@ -92,7 +94,9 @@ func (r *FilesystemAcltemplateResource) Create(ctx context.Context, req resource
 		params["acltype"] = data.Acltype.ValueString()
 	}
 	if !data.Acl.IsNull() {
-		params["acl"] = data.Acl.ValueString()
+		var aclList []string
+		data.Acl.ElementsAs(ctx, &aclList, false)
+		params["acl"] = aclList
 	}
 	if !data.Comment.IsNull() {
 		params["comment"] = data.Comment.ValueString()
@@ -181,15 +185,10 @@ func (r *FilesystemAcltemplateResource) Read(ctx context.Context, req resource.R
 			}
 		}
 		if v, ok := resultMap["acl"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Acl = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Acl = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Acl = types.StringValue(fmt.Sprintf("%v", v))
+			if arr, ok := v.([]interface{}); ok {
+				strVals := make([]attr.Value, len(arr))
+				for i, item := range arr { strVals[i] = types.StringValue(fmt.Sprintf("%v", item)) }
+				data.Acl, _ = types.ListValue(types.StringType, strVals)
 			}
 		}
 
@@ -225,7 +224,9 @@ func (r *FilesystemAcltemplateResource) Update(ctx context.Context, req resource
 		params["acltype"] = data.Acltype.ValueString()
 	}
 	if !data.Acl.IsNull() {
-		params["acl"] = data.Acl.ValueString()
+		var aclList []string
+		data.Acl.ElementsAs(ctx, &aclList, false)
+		params["acl"] = aclList
 	}
 	if !data.Comment.IsNull() {
 		params["comment"] = data.Comment.ValueString()

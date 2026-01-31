@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"strconv"
+
 	"encoding/json"
 	"time"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -23,7 +23,6 @@ type AppResource struct {
 
 type AppResourceModel struct {
 	ID types.String `tfsdk:"id"`
-	StartOnCreate types.Bool `tfsdk:"start_on_create"`
 	CustomApp types.Bool `tfsdk:"custom_app"`
 	Values types.String `tfsdk:"values"`
 	CustomComposeConfig types.String `tfsdk:"custom_compose_config"`
@@ -51,7 +50,6 @@ func (r *AppResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 		MarkdownDescription: "Create an app with `app_name` using `catalog_app` with `train` and `version`.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
-			"start_on_create": schema.BoolAttribute{Optional: true, Description: "Start the resource immediately after creation (default: true)"},
 			"custom_app": schema.BoolAttribute{
 				Required: false,
 				Optional: true,
@@ -175,22 +173,6 @@ func (r *AppResource) Create(ctx context.Context, req resource.CreateRequest, re
 		return
 	}
 
-	// Handle lifecycle action - start on create if requested
-	startOnCreate := true  // default when not specified
-	if !data.StartOnCreate.IsNull() {
-		startOnCreate = data.StartOnCreate.ValueBool()
-	}
-	if startOnCreate {
-		vmID, err := strconv.Atoi(data.ID.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
-			return
-		}
-		_, err = r.client.Call("app.start", vmID)
-		if err != nil {
-			resp.Diagnostics.AddWarning("Start Failed", fmt.Sprintf("Resource created but failed to start: %s", err.Error()))
-		}
-	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
@@ -289,14 +271,9 @@ func (r *AppResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 	var err error
 	id = []interface{}{data.ID.ValueString(), map[string]interface{}{}}
 
-	// Stop VM before deletion if running
-	vmID, err := strconv.Atoi(data.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
-		return
-	}
-	_, _ = r.client.Call("app.stop", vmID)  // Ignore errors - VM might already be stopped
-	time.Sleep(2 * time.Second)  // Wait for VM to stop
+	// Stop app before deletion if running
+	_, _ = r.client.Call("app.stop", data.ID.ValueString())  // Ignore errors - app might already be stopped
+	time.Sleep(2 * time.Second)  // Wait for app to stop
 
 	_, err = r.client.CallWithJob("app.delete", id)
 	if err != nil {

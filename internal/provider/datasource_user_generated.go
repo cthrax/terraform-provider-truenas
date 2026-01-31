@@ -49,7 +49,7 @@ type UserDataSourceModel struct {
 	Sid types.String `tfsdk:"sid"`
 	LastPasswordChange types.String `tfsdk:"last_password_change"`
 	PasswordAge types.Int64 `tfsdk:"password_age"`
-	PasswordHistory types.String `tfsdk:"password_history"`
+	PasswordHistory types.List `tfsdk:"password_history"`
 	PasswordChangeRequired types.Bool `tfsdk:"password_change_required"`
 	Roles types.List `tfsdk:"roles"`
 	ApiKeys types.List `tfsdk:"api_keys"`
@@ -167,8 +167,9 @@ func (d *UserDataSource) Schema(ctx context.Context, req datasource.SchemaReques
 				Computed: true,
 				Description: "The age in days of the password for local user accounts.",
 			},
-			"password_history": schema.StringAttribute{
+			"password_history": schema.ListAttribute{
 				Computed: true,
+				ElementType: types.StringType,
 				Description: "This contains hashes of the ten most recent passwords used by local user accounts, and is     for en",
 			},
 			"password_change_required": schema.BoolAttribute{

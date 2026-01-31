@@ -64,6 +64,8 @@ def get_tf_type(prop_schema):
                 return "Int64"
             if variant.get("type") == "boolean":
                 return "Bool"
+            if variant.get("type") == "array":
+                return "List"
         return "String"
 
     json_type = prop_schema.get("type")
@@ -426,7 +428,8 @@ def generate_resource(base_name, methods_dict):
     read_method = f"{base_name}.get_instance"
 
     # Check for lifecycle actions
-    has_start = f"{base_name}.start" in methods_dict
+    # Note: app.create already starts the app, so don't add start_on_create for apps
+    has_start = f"{base_name}.start" in methods_dict and base_name != "app"
     has_stop = f"{base_name}.stop" in methods_dict
 
     # Check if methods are jobs
@@ -555,7 +558,21 @@ def generate_resource(base_name, methods_dict):
     # Generate lifecycle code if has start action
     lifecycle_code = ""
     if has_start:
-        lifecycle_code = f"""
+        if id_is_string:
+            lifecycle_code = f"""
+\t// Handle lifecycle action - start on create if requested
+\tstartOnCreate := true  // default when not specified
+\tif !data.StartOnCreate.IsNull() {{
+\t\tstartOnCreate = data.StartOnCreate.ValueBool()
+\t}}
+\tif startOnCreate {{
+\t\t_, err = r.client.Call("{api_name}.start", data.ID.ValueString())
+\t\tif err != nil {{
+\t\t\tresp.Diagnostics.AddWarning("Start Failed", fmt.Sprintf("Resource created but failed to start: %s", err.Error()))
+\t\t}}
+\t}}"""
+        else:
+            lifecycle_code = f"""
 \t// Handle lifecycle action - start on create if requested
 \tstartOnCreate := true  // default when not specified
 \tif !data.StartOnCreate.IsNull() {{
@@ -573,8 +590,9 @@ def generate_resource(base_name, methods_dict):
 \t\t}}
 \t}}"""
 
-    # Determine if strconv import is needed (for int IDs or lifecycle code)
-    extra_imports = '\t"strconv"' if (not id_is_string or has_start) else ""
+    # Determine if strconv import is needed (for int IDs or lifecycle/predelete code with int IDs)
+    needs_strconv = (not id_is_string) or (has_start and not id_is_string) or (has_stop and not id_is_string)
+    extra_imports = '\t"strconv"' if needs_strconv else ""
 
     # Check if any List fields exist that will be used in read mapping
     # For resources: only required List fields
@@ -626,7 +644,14 @@ def generate_resource(base_name, methods_dict):
     # Generate pre-delete code if has stop action
     predelete_code = ""
     if has_stop:
-        predelete_code = f"""
+        if id_is_string:
+            predelete_code = f"""
+\t// Stop app before deletion if running
+\t_, _ = r.client.Call("{api_name}.stop", data.ID.ValueString())  // Ignore errors - app might already be stopped
+\ttime.Sleep(2 * time.Second)  // Wait for app to stop
+"""
+        else:
+            predelete_code = f"""
 \t// Stop VM before deletion if running
 \tvmID, err := strconv.Atoi(data.ID.ValueString())
 \tif err != nil {{

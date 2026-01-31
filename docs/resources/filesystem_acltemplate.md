@@ -14,7 +14,7 @@ Create a new filesystem ACL template.
 
 ```terraform
 resource "truenas_filesystem_acltemplate" "example" {
-  acl = "example-value"
+  acl = ["item1"]
   acltype = "example-value"
   name = "example-value"
 }
@@ -24,7 +24,7 @@ resource "truenas_filesystem_acltemplate" "example" {
 
 ### Required
 
-- `acl` (String) - Array of Access Control Entries defined by this template.
+- `acl` (List) - Array of Access Control Entries defined by this template.
 - `acltype` (String) - ACL type this template provides. Valid values: `NFS4`, `POSIX1E`
 - `name` (String) - Human-readable name for the ACL template.
 
