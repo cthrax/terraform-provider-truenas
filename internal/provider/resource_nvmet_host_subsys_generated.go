@@ -3,13 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"strings"
-	"strconv"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
+	"strconv"
+	"strings"
 )
 
 type NvmetHostSubsysResource struct {
@@ -17,9 +17,9 @@ type NvmetHostSubsysResource struct {
 }
 
 type NvmetHostSubsysResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	HostId types.Int64 `tfsdk:"host_id"`
-	SubsysId types.Int64 `tfsdk:"subsys_id"`
+	ID       types.String `tfsdk:"id"`
+	HostId   types.Int64  `tfsdk:"host_id"`
+	SubsysId types.Int64  `tfsdk:"subsys_id"`
 }
 
 func NewNvmetHostSubsysResource() resource.Resource {
@@ -40,13 +40,13 @@ func (r *NvmetHostSubsysResource) Schema(ctx context.Context, req resource.Schem
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"host_id": schema.Int64Attribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "ID of the NVMe-oF host to authorize.",
 			},
 			"subsys_id": schema.Int64Attribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "ID of the NVMe-oF subsystem to grant access to.",
 			},
 		},
@@ -112,10 +112,12 @@ func (r *NvmetHostSubsysResource) Read(ctx context.Context, req resource.ReadReq
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	result, err := r.client.Call("nvmet.host_subsys.get_instance", id)
 	if err != nil {
@@ -135,29 +137,33 @@ func (r *NvmetHostSubsysResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-		if v, ok := resultMap["id"]; ok && v != nil {
-			data.ID = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["host_id"]; ok && v != nil {
-			switch val := v.(type) {
-			case float64:
-				data.HostId = types.Int64Value(int64(val))
-			case map[string]interface{}:
-				if parsed, ok := val["parsed"]; ok && parsed != nil {
-					if fv, ok := parsed.(float64); ok { data.HostId = types.Int64Value(int64(fv)) }
+	if v, ok := resultMap["id"]; ok && v != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["host_id"]; ok && v != nil {
+		switch val := v.(type) {
+		case float64:
+			data.HostId = types.Int64Value(int64(val))
+		case map[string]interface{}:
+			if parsed, ok := val["parsed"]; ok && parsed != nil {
+				if fv, ok := parsed.(float64); ok {
+					data.HostId = types.Int64Value(int64(fv))
 				}
 			}
 		}
-		if v, ok := resultMap["subsys_id"]; ok && v != nil {
-			switch val := v.(type) {
-			case float64:
-				data.SubsysId = types.Int64Value(int64(val))
-			case map[string]interface{}:
-				if parsed, ok := val["parsed"]; ok && parsed != nil {
-					if fv, ok := parsed.(float64); ok { data.SubsysId = types.Int64Value(int64(fv)) }
+	}
+	if v, ok := resultMap["subsys_id"]; ok && v != nil {
+		switch val := v.(type) {
+		case float64:
+			data.SubsysId = types.Int64Value(int64(val))
+		case map[string]interface{}:
+			if parsed, ok := val["parsed"]; ok && parsed != nil {
+				if fv, ok := parsed.(float64); ok {
+					data.SubsysId = types.Int64Value(int64(fv))
 				}
 			}
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -178,10 +184,12 @@ func (r *NvmetHostSubsysResource) Update(ctx context.Context, req resource.Updat
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	params := map[string]interface{}{}
 	if !data.HostId.IsNull() {
@@ -211,10 +219,12 @@ func (r *NvmetHostSubsysResource) Delete(ctx context.Context, req resource.Delet
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	_, err = r.client.Call("nvmet.host_subsys.delete", id)
 	if err != nil {

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolDatasetExport_KeyResource struct {
@@ -16,8 +16,8 @@ type ActionPoolDatasetExport_KeyResource struct {
 }
 
 type ActionPoolDatasetExport_KeyResourceModel struct {
-	Id types.String `tfsdk:"id"`
-	Download types.Bool `tfsdk:"download"`
+	Id       types.String `tfsdk:"id"`
+	Download types.Bool   `tfsdk:"download"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -40,11 +40,11 @@ func (r *ActionPoolDatasetExport_KeyResource) Schema(ctx context.Context, req re
 		MarkdownDescription: "Export own encryption key for dataset `id`",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "The dataset ID (full path) to export the encryption key from.",
 			},
 			"download": schema.BoolAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Whether to prepare the key for download as a file.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionPoolDatasetExport_KeyResource) Create(ctx context.Context, req re
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

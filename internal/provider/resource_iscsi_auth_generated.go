@@ -3,13 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"strings"
-	"strconv"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
+	"strconv"
+	"strings"
 )
 
 type IscsiAuthResource struct {
@@ -17,12 +17,12 @@ type IscsiAuthResource struct {
 }
 
 type IscsiAuthResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	Tag types.Int64 `tfsdk:"tag"`
-	User types.String `tfsdk:"user"`
-	Secret types.String `tfsdk:"secret"`
-	Peeruser types.String `tfsdk:"peeruser"`
-	Peersecret types.String `tfsdk:"peersecret"`
+	ID            types.String `tfsdk:"id"`
+	Tag           types.Int64  `tfsdk:"tag"`
+	User          types.String `tfsdk:"user"`
+	Secret        types.String `tfsdk:"secret"`
+	Peeruser      types.String `tfsdk:"peeruser"`
+	Peersecret    types.String `tfsdk:"peersecret"`
 	DiscoveryAuth types.String `tfsdk:"discovery_auth"`
 }
 
@@ -44,33 +44,33 @@ func (r *IscsiAuthResource) Schema(ctx context.Context, req resource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"tag": schema.Int64Attribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Numeric tag used to associate this credential with iSCSI targets.",
 			},
 			"user": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Username for iSCSI CHAP authentication.",
 			},
 			"secret": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Password/secret for iSCSI CHAP authentication.",
 			},
 			"peeruser": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Username for mutual CHAP authentication or empty string if not configured.",
 			},
 			"peersecret": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Password/secret for mutual CHAP authentication or empty string if not configured.",
 			},
 			"discovery_auth": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Authentication method for target discovery. If \"CHAP_MUTUAL\" is selected for target discovery, it is",
 			},
 		},
@@ -148,10 +148,12 @@ func (r *IscsiAuthResource) Read(ctx context.Context, req resource.ReadRequest, 
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	result, err := r.client.Call("iscsi.auth.get_instance", id)
 	if err != nil {
@@ -171,43 +173,45 @@ func (r *IscsiAuthResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-		if v, ok := resultMap["id"]; ok && v != nil {
-			data.ID = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["tag"]; ok && v != nil {
-			switch val := v.(type) {
-			case float64:
-				data.Tag = types.Int64Value(int64(val))
-			case map[string]interface{}:
-				if parsed, ok := val["parsed"]; ok && parsed != nil {
-					if fv, ok := parsed.(float64); ok { data.Tag = types.Int64Value(int64(fv)) }
+	if v, ok := resultMap["id"]; ok && v != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["tag"]; ok && v != nil {
+		switch val := v.(type) {
+		case float64:
+			data.Tag = types.Int64Value(int64(val))
+		case map[string]interface{}:
+			if parsed, ok := val["parsed"]; ok && parsed != nil {
+				if fv, ok := parsed.(float64); ok {
+					data.Tag = types.Int64Value(int64(fv))
 				}
 			}
 		}
-		if v, ok := resultMap["user"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.User = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.User = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.User = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["user"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.User = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.User = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.User = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["secret"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Secret = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Secret = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Secret = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["secret"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Secret = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Secret = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Secret = types.StringValue(fmt.Sprintf("%v", v))
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -228,10 +232,12 @@ func (r *IscsiAuthResource) Update(ctx context.Context, req resource.UpdateReque
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	params := map[string]interface{}{}
 	if !data.Tag.IsNull() {
@@ -273,10 +279,12 @@ func (r *IscsiAuthResource) Delete(ctx context.Context, req resource.DeleteReque
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	_, err = r.client.Call("iscsi.auth.delete", id)
 	if err != nil {

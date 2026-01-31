@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolDatasetDestroy_SnapshotsResource struct {
@@ -16,7 +16,7 @@ type ActionPoolDatasetDestroy_SnapshotsResource struct {
 }
 
 type ActionPoolDatasetDestroy_SnapshotsResourceModel struct {
-	Name types.String `tfsdk:"name"`
+	Name      types.String `tfsdk:"name"`
 	Snapshots types.String `tfsdk:"snapshots"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionPoolDatasetDestroy_SnapshotsResource) Schema(ctx context.Context,
 		MarkdownDescription: "Destroy specified snapshots of a given dataset",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "The dataset name to destroy snapshots for.",
 			},
 			"snapshots": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Specification of which snapshots to destroy (all, specific ones, or ranges).",
 			},
 			"action_id": schema.StringAttribute{
@@ -111,7 +111,7 @@ func (r *ActionPoolDatasetDestroy_SnapshotsResource) Create(ctx context.Context,
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

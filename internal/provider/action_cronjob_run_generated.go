@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionCronjobRunResource struct {
@@ -16,8 +16,8 @@ type ActionCronjobRunResource struct {
 }
 
 type ActionCronjobRunResourceModel struct {
-	Id types.Int64 `tfsdk:"id"`
-	SkipDisabled types.Bool `tfsdk:"skip_disabled"`
+	Id           types.Int64 `tfsdk:"id"`
+	SkipDisabled types.Bool  `tfsdk:"skip_disabled"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -40,11 +40,11 @@ func (r *ActionCronjobRunResource) Schema(ctx context.Context, req resource.Sche
 		MarkdownDescription: "Job to run cronjob task of `id`",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "ID of the cron job to run immediately.",
 			},
 			"skip_disabled": schema.BoolAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Whether to skip execution if the cron job is disabled.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionCronjobRunResource) Create(ctx context.Context, req resource.Crea
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

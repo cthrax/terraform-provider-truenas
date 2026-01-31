@@ -2,15 +2,15 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"strings"
-	"strconv"
 	"encoding/json"
+	"fmt"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
+	"strconv"
+	"strings"
 )
 
 type IscsiTargetResource struct {
@@ -18,12 +18,12 @@ type IscsiTargetResource struct {
 }
 
 type IscsiTargetResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
-	Alias types.String `tfsdk:"alias"`
-	Mode types.String `tfsdk:"mode"`
-	Groups types.List `tfsdk:"groups"`
-	AuthNetworks types.List `tfsdk:"auth_networks"`
+	ID              types.String `tfsdk:"id"`
+	Name            types.String `tfsdk:"name"`
+	Alias           types.String `tfsdk:"alias"`
+	Mode            types.String `tfsdk:"mode"`
+	Groups          types.List   `tfsdk:"groups"`
+	AuthNetworks    types.List   `tfsdk:"auth_networks"`
 	IscsiParameters types.String `tfsdk:"iscsi_parameters"`
 }
 
@@ -45,35 +45,35 @@ func (r *IscsiTargetResource) Schema(ctx context.Context, req resource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"name": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Name of the iSCSI target (maximum 120 characters).",
 			},
 			"alias": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Optional alias name for the iSCSI target.",
 			},
 			"mode": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Protocol mode for the target.  * `ISCSI`: iSCSI protocol only * `FC`: Fibre Channel protocol only * ",
 			},
 			"groups": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "Array of portal-initiator group associations for this target.",
 			},
 			"auth_networks": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "Array of network addresses allowed to access this target.",
 			},
 			"iscsi_parameters": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Optional iSCSI-specific parameters for this target.",
 			},
 		},
@@ -112,7 +112,16 @@ func (r *IscsiTargetResource) Create(ctx context.Context, req resource.CreateReq
 	if !data.Groups.IsNull() {
 		var groupsList []string
 		data.Groups.ElementsAs(ctx, &groupsList, false)
-		params["groups"] = groupsList
+		var groupsObjs []map[string]interface{}
+		for _, jsonStr := range groupsList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse groups item: %s", err))
+				return
+			}
+			groupsObjs = append(groupsObjs, obj)
+		}
+		params["groups"] = groupsObjs
 	}
 	if !data.AuthNetworks.IsNull() {
 		var auth_networksList []string
@@ -160,10 +169,12 @@ func (r *IscsiTargetResource) Read(ctx context.Context, req resource.ReadRequest
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	result, err := r.client.Call("iscsi.target.get_instance", id)
 	if err != nil {
@@ -183,21 +194,21 @@ func (r *IscsiTargetResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-		if v, ok := resultMap["id"]; ok && v != nil {
-			data.ID = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["name"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Name = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+	if v, ok := resultMap["id"]; ok && v != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["name"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Name = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Name = types.StringValue(fmt.Sprintf("%v", v))
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -218,10 +229,12 @@ func (r *IscsiTargetResource) Update(ctx context.Context, req resource.UpdateReq
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	params := map[string]interface{}{}
 	if !data.Name.IsNull() {
@@ -236,7 +249,16 @@ func (r *IscsiTargetResource) Update(ctx context.Context, req resource.UpdateReq
 	if !data.Groups.IsNull() {
 		var groupsList []string
 		data.Groups.ElementsAs(ctx, &groupsList, false)
-		params["groups"] = groupsList
+		var groupsObjs []map[string]interface{}
+		for _, jsonStr := range groupsList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse groups item: %s", err))
+				return
+			}
+			groupsObjs = append(groupsObjs, obj)
+		}
+		params["groups"] = groupsObjs
 	}
 	if !data.AuthNetworks.IsNull() {
 		var auth_networksList []string

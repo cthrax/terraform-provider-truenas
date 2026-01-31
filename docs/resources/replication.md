@@ -56,7 +56,7 @@ resource "truenas_replication" "example" {
 - `large_block` (Bool) - Enable large block support for ZFS send streams. Default: `True`
 - `lifetime_unit` (String) - Time unit for snapshot retention for custom retention policy. Only applies when `retention_policy` is CUSTOM. Default: `None`
 - `lifetime_value` (Int64) - Number of time units to retain snapshots for custom retention policy. Only applies when `retention_policy` is     CUSTOM. Default: `None`
-- `lifetimes` (List) - Array of different retention schedules with their own cron schedules and lifetime settings. Default: `[]`
+- `lifetimes` (List) - Array of different retention schedules with their own cron schedules and lifetime settings. Default: `[]` **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({lifetime_value = 0, lifetime_unit = "..."})]`
 - `logging_level` (String) - Log level for replication task execution. Controls verbosity of replication logs. Default: `None`
 - `name_regex` (String) - Replicate all snapshots which names match specified regular expression. Default: `None`
 - `naming_schema` (List) - List of naming schemas for pull replication. Default: `[]`

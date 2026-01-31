@@ -3,13 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"strings"
-	"strconv"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
+	"strconv"
+	"strings"
 )
 
 type StaticrouteResource struct {
@@ -17,9 +17,9 @@ type StaticrouteResource struct {
 }
 
 type StaticrouteResourceModel struct {
-	ID types.String `tfsdk:"id"`
+	ID          types.String `tfsdk:"id"`
 	Destination types.String `tfsdk:"destination"`
-	Gateway types.String `tfsdk:"gateway"`
+	Gateway     types.String `tfsdk:"gateway"`
 	Description types.String `tfsdk:"description"`
 }
 
@@ -41,18 +41,18 @@ func (r *StaticrouteResource) Schema(ctx context.Context, req resource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"destination": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Destination network or host for this static route.",
 			},
 			"gateway": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Gateway IP address for this static route.",
 			},
 			"description": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Optional description for this static route.",
 			},
 		},
@@ -121,10 +121,12 @@ func (r *StaticrouteResource) Read(ctx context.Context, req resource.ReadRequest
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	result, err := r.client.Call("staticroute.get_instance", id)
 	if err != nil {
@@ -144,33 +146,33 @@ func (r *StaticrouteResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-		if v, ok := resultMap["id"]; ok && v != nil {
-			data.ID = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["destination"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Destination = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Destination = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Destination = types.StringValue(fmt.Sprintf("%v", v))
+	if v, ok := resultMap["id"]; ok && v != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["destination"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Destination = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Destination = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Destination = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["gateway"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Gateway = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Gateway = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Gateway = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["gateway"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Gateway = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Gateway = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Gateway = types.StringValue(fmt.Sprintf("%v", v))
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -191,10 +193,12 @@ func (r *StaticrouteResource) Update(ctx context.Context, req resource.UpdateReq
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	params := map[string]interface{}{}
 	if !data.Destination.IsNull() {
@@ -227,10 +231,12 @@ func (r *StaticrouteResource) Delete(ctx context.Context, req resource.DeleteReq
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	_, err = r.client.Call("staticroute.delete", id)
 	if err != nil {

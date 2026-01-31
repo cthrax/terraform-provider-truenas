@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionVirtVolumeImport_IsoResource struct {
@@ -39,7 +39,7 @@ func (r *ActionVirtVolumeImport_IsoResource) Schema(ctx context.Context, req res
 		MarkdownDescription: "Execute virt",
 		Attributes: map[string]schema.Attribute{
 			"virt_volume_import_iso": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "VirtVolumeImportIsoArgs parameters.",
 			},
 			"action_id": schema.StringAttribute{
@@ -105,7 +105,7 @@ func (r *ActionVirtVolumeImport_IsoResource) Create(ctx context.Context, req res
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

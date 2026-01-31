@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionBootSet_Scrub_IntervalResource struct {
@@ -39,7 +39,7 @@ func (r *ActionBootSet_Scrub_IntervalResource) Schema(ctx context.Context, req r
 		MarkdownDescription: "Set Automatic Scrub Interval value in days",
 		Attributes: map[string]schema.Attribute{
 			"interval": schema.Int64Attribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Scrub interval in days (must be a positive integer).",
 			},
 			"action_id": schema.StringAttribute{
@@ -105,7 +105,7 @@ func (r *ActionBootSet_Scrub_IntervalResource) Create(ctx context.Context, req r
 	if jobID, ok := result.(float64); ok && false {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

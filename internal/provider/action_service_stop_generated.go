@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionServiceStopResource struct {
@@ -40,11 +40,11 @@ func (r *ActionServiceStopResource) Schema(ctx context.Context, req resource.Sch
 		MarkdownDescription: "Stop the service specified by `service`",
 		Attributes: map[string]schema.Attribute{
 			"service": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Name of the service to stop.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for controlling the stop operation behavior.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionServiceStopResource) Create(ctx context.Context, req resource.Cre
 	if jobID, ok := result.(float64); ok && false {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

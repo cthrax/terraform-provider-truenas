@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolDatasetUnlockResource struct {
@@ -16,7 +16,7 @@ type ActionPoolDatasetUnlockResource struct {
 }
 
 type ActionPoolDatasetUnlockResourceModel struct {
-	Id types.String `tfsdk:"id"`
+	Id      types.String `tfsdk:"id"`
 	Options types.String `tfsdk:"options"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionPoolDatasetUnlockResource) Schema(ctx context.Context, req resour
 		MarkdownDescription: "Unlock dataset `id` (and its children if `unlock_options",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "The dataset ID (full path) to unlock.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for unlocking including force settings, recursion, and dataset-specific keys.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionPoolDatasetUnlockResource) Create(ctx context.Context, req resour
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

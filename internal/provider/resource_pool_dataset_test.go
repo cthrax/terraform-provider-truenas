@@ -17,8 +17,8 @@ func TestPoolDatasetResource_Schema(t *testing.T) {
 
 func TestPoolDatasetResource_FilesystemType(t *testing.T) {
 	model := PoolDatasetResourceModel{
-		Name: types.StringValue("tank/mydata"),
-		Type: types.StringValue("FILESYSTEM"),
+		Name:  types.StringValue("tank/mydata"),
+		Type:  types.StringValue("FILESYSTEM"),
 		Quota: types.Int64Value(107374182400), // 100GB
 		Atime: types.StringValue("on"),
 	}

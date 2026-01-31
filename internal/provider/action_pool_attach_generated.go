@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolAttachResource struct {
@@ -16,7 +16,7 @@ type ActionPoolAttachResource struct {
 }
 
 type ActionPoolAttachResourceModel struct {
-	Oid types.Int64 `tfsdk:"oid"`
+	Oid     types.Int64  `tfsdk:"oid"`
 	Options types.String `tfsdk:"options"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionPoolAttachResource) Schema(ctx context.Context, req resource.Sche
 		MarkdownDescription: "`target_vdev` is the GUID of the vdev where the disk needs to be attached",
 		Attributes: map[string]schema.Attribute{
 			"oid": schema.Int64Attribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "ID of the pool to attach a disk to.",
 			},
 			"options": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Configuration for the disk attachment operation.",
 			},
 			"action_id": schema.StringAttribute{
@@ -111,7 +111,7 @@ func (r *ActionPoolAttachResource) Create(ctx context.Context, req resource.Crea
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

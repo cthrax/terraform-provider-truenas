@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type PoolSnapshotResource struct {
@@ -21,16 +21,16 @@ type PoolSnapshotResource struct {
 }
 
 type PoolSnapshotResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	Dataset types.String `tfsdk:"dataset"`
-	Recursive types.Bool `tfsdk:"recursive"`
-	Exclude types.List `tfsdk:"exclude"`
-	VmwareSync types.Bool `tfsdk:"vmware_sync"`
-	Properties types.String `tfsdk:"properties"`
-	Name types.String `tfsdk:"name"`
-	NamingSchema types.String `tfsdk:"naming_schema"`
-	UserPropertiesUpdate types.List `tfsdk:"user_properties_update"`
-	UserPropertiesRemove types.List `tfsdk:"user_properties_remove"`
+	ID                   types.String `tfsdk:"id"`
+	Dataset              types.String `tfsdk:"dataset"`
+	Recursive            types.Bool   `tfsdk:"recursive"`
+	Exclude              types.List   `tfsdk:"exclude"`
+	VmwareSync           types.Bool   `tfsdk:"vmware_sync"`
+	Properties           types.String `tfsdk:"properties"`
+	Name                 types.String `tfsdk:"name"`
+	NamingSchema         types.String `tfsdk:"naming_schema"`
+	UserPropertiesUpdate types.List   `tfsdk:"user_properties_update"`
+	UserPropertiesRemove types.List   `tfsdk:"user_properties_remove"`
 }
 
 func NewPoolSnapshotResource() resource.Resource {
@@ -51,55 +51,55 @@ func (r *PoolSnapshotResource) Schema(ctx context.Context, req resource.SchemaRe
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"dataset": schema.StringAttribute{
-				Required: true,
-				Optional: false,
-				Description: "Name of the dataset to create a snapshot of.",
+				Required:      true,
+				Optional:      false,
+				Description:   "Name of the dataset to create a snapshot of.",
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"recursive": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
-				Description: "Whether to recursively snapshot child datasets.",
+				Required:      false,
+				Optional:      true,
+				Description:   "Whether to recursively snapshot child datasets.",
 				PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
 			},
 			"exclude": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "Array of dataset patterns to exclude from recursive snapshots.",
 			},
 			"vmware_sync": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
-				Description: "Whether to sync VMware VMs before taking the snapshot.",
+				Required:      false,
+				Optional:      true,
+				Description:   "Whether to sync VMware VMs before taking the snapshot.",
 				PlanModifiers: []planmodifier.Bool{boolplanmodifier.RequiresReplace()},
 			},
 			"properties": schema.StringAttribute{
-				Required: false,
-				Optional: true,
-				Description: "Object mapping ZFS property names to values to set on the snapshot.",
+				Required:      false,
+				Optional:      true,
+				Description:   "Object mapping ZFS property names to values to set on the snapshot.",
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"name": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Explicit name for the snapshot.",
 			},
 			"naming_schema": schema.StringAttribute{
-				Required: false,
-				Optional: true,
-				Description: "Naming schema pattern to generate the snapshot name automatically.",
+				Optional:      true,
+				Computed:      true,
+				Description:   "Naming schema pattern to generate the snapshot name automatically.",
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"user_properties_update": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "Properties to update.",
 			},
 			"user_properties_remove": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "Properties to remove.",
 			},
@@ -158,7 +158,16 @@ func (r *PoolSnapshotResource) Create(ctx context.Context, req resource.CreateRe
 	if !data.UserPropertiesUpdate.IsNull() {
 		var user_properties_updateList []string
 		data.UserPropertiesUpdate.ElementsAs(ctx, &user_properties_updateList, false)
-		params["user_properties_update"] = user_properties_updateList
+		var user_properties_updateObjs []map[string]interface{}
+		for _, jsonStr := range user_properties_updateList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse user_properties_update item: %s", err))
+				return
+			}
+			user_properties_updateObjs = append(user_properties_updateObjs, obj)
+		}
+		params["user_properties_update"] = user_properties_updateObjs
 	}
 	if !data.UserPropertiesRemove.IsNull() {
 		var user_properties_removeList []string
@@ -217,21 +226,21 @@ func (r *PoolSnapshotResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-		if v, ok := resultMap["id"]; ok && v != nil {
-			data.ID = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["name"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Name = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+	if v, ok := resultMap["id"]; ok && v != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["name"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Name = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Name = types.StringValue(fmt.Sprintf("%v", v))
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -257,7 +266,16 @@ func (r *PoolSnapshotResource) Update(ctx context.Context, req resource.UpdateRe
 	if !data.UserPropertiesUpdate.IsNull() {
 		var user_properties_updateList []string
 		data.UserPropertiesUpdate.ElementsAs(ctx, &user_properties_updateList, false)
-		params["user_properties_update"] = user_properties_updateList
+		var user_properties_updateObjs []map[string]interface{}
+		for _, jsonStr := range user_properties_updateList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse user_properties_update item: %s", err))
+				return
+			}
+			user_properties_updateObjs = append(user_properties_updateObjs, obj)
+		}
+		params["user_properties_update"] = user_properties_updateObjs
 	}
 	if !data.UserPropertiesRemove.IsNull() {
 		var user_properties_removeList []string

@@ -26,15 +26,15 @@ resource "truenas_interface" "example" {
 
 ### Optional
 
-- `aliases` (List) - List of IP address aliases to configure on the interface. Default: `[]`
+- `aliases` (List) - List of IP address aliases to configure on the interface. Default: `[]` **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({type = "..." (optional), address = "...", netmask = 0})]`
 - `bridge_members` (List) - List of interfaces to add as members of this bridge. Default: `[]`
 - `description` (String) - Human-readable description of the interface. Default: ``
 - `enable_learning` (Bool) - Enable MAC address learning for bridge interfaces. When enabled, the bridge learns MAC addresses     from incoming frames and builds a forwarding table to optimize traffic flow. Default: `True`
-- `failover_aliases` (List) - List of IP aliases for failover configuration. These IPs are assigned to the interface during normal     operation and migrate during failover. Default: `[]`
+- `failover_aliases` (List) - List of IP aliases for failover configuration. These IPs are assigned to the interface during normal     operation and migrate during failover. Default: `[]` **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({type = "..." (optional), address = "..."})]`
 - `failover_critical` (Bool) - Whether this interface is critical for failover functionality. Critical interfaces are monitored for     failover events and can trigger failover when they fail. Default: `False`
 - `failover_group` (Int64) - Failover group identifier for clustering. Interfaces in the same group fail over together during     failover events.
 - `failover_vhid` (Int64) - Virtual Host ID for VRRP failover configuration. Must be unique within the VRRP group and match     between failover nodes.
-- `failover_virtual_aliases` (List) - List of virtual IP aliases for failover configuration. These are shared IPs that float between nodes     during failover events. Default: `[]`
+- `failover_virtual_aliases` (List) - List of virtual IP aliases for failover configuration. These are shared IPs that float between nodes     during failover events. Default: `[]` **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({type = "..." (optional), address = "..."})]`
 - `ipv4_dhcp` (Bool) - Enable IPv4 DHCP for automatic IP address assignment. Default: `False`
 - `ipv6_auto` (Bool) - Enable IPv6 autoconfiguration. Default: `False`
 - `lacpdu_rate` (String) - LACP data unit transmission rate. SLOW sends LACPDUs every 30 seconds, FAST sends every 1 second for     quicker link failure detection. Default: `None` Valid values: `SLOW`, `FAST`, `None`

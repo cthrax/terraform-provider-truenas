@@ -35,7 +35,7 @@ resource "truenas_cloudsync" "example" {
 ### Optional
 
 - `args` (String) - (Slated for removal). Default: ``
-- `bwlimit` (List) - Schedule of bandwidth limits.
+- `bwlimit` (List) - Schedule of bandwidth limits. **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({time = "...", bandwidth = "..."})]`
 - `create_empty_src_dirs` (Bool) - Whether to create empty directories in the destination that exist in the source. Default: `False`
 - `description` (String) - The name of the task to display in the UI. Default: ``
 - `enabled` (Bool) - Can enable/disable the task. Default: `True`

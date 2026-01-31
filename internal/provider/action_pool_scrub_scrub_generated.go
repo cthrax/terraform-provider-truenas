@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolScrubScrubResource struct {
@@ -16,7 +16,7 @@ type ActionPoolScrubScrubResource struct {
 }
 
 type ActionPoolScrubScrubResourceModel struct {
-	Name types.String `tfsdk:"name"`
+	Name   types.String `tfsdk:"name"`
 	Action types.String `tfsdk:"action"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionPoolScrubScrubResource) Schema(ctx context.Context, req resource.
 		MarkdownDescription: "Start/Stop/Pause a scrub on pool `name`",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Name of the pool to perform scrub action on.",
 			},
 			"action": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "The scrub action to perform on the pool.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionPoolScrubScrubResource) Create(ctx context.Context, req resource.
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

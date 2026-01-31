@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionServiceControlResource struct {
@@ -16,7 +16,7 @@ type ActionServiceControlResource struct {
 }
 
 type ActionServiceControlResourceModel struct {
-	Verb types.String `tfsdk:"verb"`
+	Verb    types.String `tfsdk:"verb"`
 	Service types.String `tfsdk:"service"`
 	Options types.String `tfsdk:"options"`
 	// Computed outputs
@@ -41,15 +41,15 @@ func (r *ActionServiceControlResource) Schema(ctx context.Context, req resource.
 		MarkdownDescription: "Execute service",
 		Attributes: map[string]schema.Attribute{
 			"verb": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "The service operation to perform.",
 			},
 			"service": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Name of the service to control.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for controlling the service operation behavior.",
 			},
 			"action_id": schema.StringAttribute{
@@ -119,7 +119,7 @@ func (r *ActionServiceControlResource) Create(ctx context.Context, req resource.
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

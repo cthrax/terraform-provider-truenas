@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionUpdateRunResource struct {
@@ -39,7 +39,7 @@ func (r *ActionUpdateRunResource) Schema(ctx context.Context, req resource.Schem
 		MarkdownDescription: "Downloads (if not already in cache) and apply an update",
 		Attributes: map[string]schema.Attribute{
 			"attrs": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Attributes controlling the system update execution process.",
 			},
 			"action_id": schema.StringAttribute{
@@ -107,7 +107,7 @@ func (r *ActionUpdateRunResource) Create(ctx context.Context, req resource.Creat
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"encoding/json"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type InterfaceResource struct {
@@ -19,29 +20,29 @@ type InterfaceResource struct {
 }
 
 type InterfaceResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
-	Description types.String `tfsdk:"description"`
-	Type types.String `tfsdk:"type"`
-	Ipv4Dhcp types.Bool `tfsdk:"ipv4_dhcp"`
-	Ipv6Auto types.Bool `tfsdk:"ipv6_auto"`
-	Aliases types.List `tfsdk:"aliases"`
-	FailoverCritical types.Bool `tfsdk:"failover_critical"`
-	FailoverGroup types.Int64 `tfsdk:"failover_group"`
-	FailoverVhid types.Int64 `tfsdk:"failover_vhid"`
-	FailoverAliases types.List `tfsdk:"failover_aliases"`
-	FailoverVirtualAliases types.List `tfsdk:"failover_virtual_aliases"`
-	BridgeMembers types.List `tfsdk:"bridge_members"`
-	EnableLearning types.Bool `tfsdk:"enable_learning"`
-	Stp types.Bool `tfsdk:"stp"`
-	LagProtocol types.String `tfsdk:"lag_protocol"`
-	XmitHashPolicy types.String `tfsdk:"xmit_hash_policy"`
-	LacpduRate types.String `tfsdk:"lacpdu_rate"`
-	LagPorts types.List `tfsdk:"lag_ports"`
-	VlanParentInterface types.String `tfsdk:"vlan_parent_interface"`
-	VlanTag types.Int64 `tfsdk:"vlan_tag"`
-	VlanPcp types.Int64 `tfsdk:"vlan_pcp"`
-	Mtu types.Int64 `tfsdk:"mtu"`
+	ID                     types.String `tfsdk:"id"`
+	Name                   types.String `tfsdk:"name"`
+	Description            types.String `tfsdk:"description"`
+	Type                   types.String `tfsdk:"type"`
+	Ipv4Dhcp               types.Bool   `tfsdk:"ipv4_dhcp"`
+	Ipv6Auto               types.Bool   `tfsdk:"ipv6_auto"`
+	Aliases                types.List   `tfsdk:"aliases"`
+	FailoverCritical       types.Bool   `tfsdk:"failover_critical"`
+	FailoverGroup          types.Int64  `tfsdk:"failover_group"`
+	FailoverVhid           types.Int64  `tfsdk:"failover_vhid"`
+	FailoverAliases        types.List   `tfsdk:"failover_aliases"`
+	FailoverVirtualAliases types.List   `tfsdk:"failover_virtual_aliases"`
+	BridgeMembers          types.List   `tfsdk:"bridge_members"`
+	EnableLearning         types.Bool   `tfsdk:"enable_learning"`
+	Stp                    types.Bool   `tfsdk:"stp"`
+	LagProtocol            types.String `tfsdk:"lag_protocol"`
+	XmitHashPolicy         types.String `tfsdk:"xmit_hash_policy"`
+	LacpduRate             types.String `tfsdk:"lacpdu_rate"`
+	LagPorts               types.List   `tfsdk:"lag_ports"`
+	VlanParentInterface    types.String `tfsdk:"vlan_parent_interface"`
+	VlanTag                types.Int64  `tfsdk:"vlan_tag"`
+	VlanPcp                types.Int64  `tfsdk:"vlan_pcp"`
+	Mtu                    types.Int64  `tfsdk:"mtu"`
 }
 
 func NewInterfaceResource() resource.Resource {
@@ -62,119 +63,119 @@ func (r *InterfaceResource) Schema(ctx context.Context, req resource.SchemaReque
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"name": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Optional:    true,
+				Computed:    true,
 				Description: "Generate a name if not provided based on `type`, e.g. \"br0\", \"bond1\", \"vlan0\".",
 			},
 			"description": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Human-readable description of the interface.",
 			},
 			"type": schema.StringAttribute{
-				Required: true,
-				Optional: false,
-				Description: "Type of interface to create.",
+				Required:      true,
+				Optional:      false,
+				Description:   "Type of interface to create.",
 				PlanModifiers: []planmodifier.String{stringplanmodifier.RequiresReplace()},
 			},
 			"ipv4_dhcp": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Enable IPv4 DHCP for automatic IP address assignment.",
 			},
 			"ipv6_auto": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Enable IPv6 autoconfiguration.",
 			},
 			"aliases": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "List of IP address aliases to configure on the interface.",
 			},
 			"failover_critical": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Whether this interface is critical for failover functionality. Critical interfaces are monitored for",
 			},
 			"failover_group": schema.Int64Attribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Failover group identifier for clustering. Interfaces in the same group fail over together during    ",
 			},
 			"failover_vhid": schema.Int64Attribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Virtual Host ID for VRRP failover configuration. Must be unique within the VRRP group and match     ",
 			},
 			"failover_aliases": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "List of IP aliases for failover configuration. These IPs are assigned to the interface during normal",
 			},
 			"failover_virtual_aliases": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "List of virtual IP aliases for failover configuration. These are shared IPs that float between nodes",
 			},
 			"bridge_members": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "List of interfaces to add as members of this bridge.",
 			},
 			"enable_learning": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Enable MAC address learning for bridge interfaces. When enabled, the bridge learns MAC addresses    ",
 			},
 			"stp": schema.BoolAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Enable Spanning Tree Protocol for bridge interfaces. STP prevents network loops by blocking redundan",
 			},
 			"lag_protocol": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Link aggregation protocol to use for bonding interfaces. LACP uses 802.3ad dynamic negotiation,     ",
 			},
 			"xmit_hash_policy": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Transmit hash policy for load balancing in link aggregation. LAYER2 uses MAC addresses, LAYER2+3 add",
 			},
 			"lacpdu_rate": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "LACP data unit transmission rate. SLOW sends LACPDUs every 30 seconds, FAST sends every 1 second for",
 			},
 			"lag_ports": schema.ListAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				ElementType: types.StringType,
 				Description: "List of interface names to include in the link aggregation group.",
 			},
 			"vlan_parent_interface": schema.StringAttribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Parent interface for VLAN configuration.",
 			},
 			"vlan_tag": schema.Int64Attribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "VLAN tag number (1-4094).",
 			},
 			"vlan_pcp": schema.Int64Attribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Priority Code Point for VLAN traffic prioritization (0-7). Values 0-7 map to different QoS priority ",
 			},
 			"mtu": schema.Int64Attribute{
-				Required: false,
-				Optional: true,
+				Required:    false,
+				Optional:    true,
 				Description: "Maximum transmission unit size for the interface (68-9216 bytes).",
 			},
 		},
@@ -219,7 +220,16 @@ func (r *InterfaceResource) Create(ctx context.Context, req resource.CreateReque
 	if !data.Aliases.IsNull() {
 		var aliasesList []string
 		data.Aliases.ElementsAs(ctx, &aliasesList, false)
-		params["aliases"] = aliasesList
+		var aliasesObjs []map[string]interface{}
+		for _, jsonStr := range aliasesList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse aliases item: %s", err))
+				return
+			}
+			aliasesObjs = append(aliasesObjs, obj)
+		}
+		params["aliases"] = aliasesObjs
 	}
 	if !data.FailoverCritical.IsNull() {
 		params["failover_critical"] = data.FailoverCritical.ValueBool()
@@ -233,12 +243,30 @@ func (r *InterfaceResource) Create(ctx context.Context, req resource.CreateReque
 	if !data.FailoverAliases.IsNull() {
 		var failover_aliasesList []string
 		data.FailoverAliases.ElementsAs(ctx, &failover_aliasesList, false)
-		params["failover_aliases"] = failover_aliasesList
+		var failover_aliasesObjs []map[string]interface{}
+		for _, jsonStr := range failover_aliasesList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse failover_aliases item: %s", err))
+				return
+			}
+			failover_aliasesObjs = append(failover_aliasesObjs, obj)
+		}
+		params["failover_aliases"] = failover_aliasesObjs
 	}
 	if !data.FailoverVirtualAliases.IsNull() {
 		var failover_virtual_aliasesList []string
 		data.FailoverVirtualAliases.ElementsAs(ctx, &failover_virtual_aliasesList, false)
-		params["failover_virtual_aliases"] = failover_virtual_aliasesList
+		var failover_virtual_aliasesObjs []map[string]interface{}
+		for _, jsonStr := range failover_virtual_aliasesList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse failover_virtual_aliases item: %s", err))
+				return
+			}
+			failover_virtual_aliasesObjs = append(failover_virtual_aliasesObjs, obj)
+		}
+		params["failover_virtual_aliases"] = failover_virtual_aliasesObjs
 	}
 	if !data.BridgeMembers.IsNull() {
 		var bridge_membersList []string
@@ -329,33 +357,33 @@ func (r *InterfaceResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-		if v, ok := resultMap["id"]; ok && v != nil {
-			data.ID = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["name"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Name = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+	if v, ok := resultMap["id"]; ok && v != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["name"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Name = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Name = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["type"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Type = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Type = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Type = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["type"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Type = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Type = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Type = types.StringValue(fmt.Sprintf("%v", v))
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -393,7 +421,16 @@ func (r *InterfaceResource) Update(ctx context.Context, req resource.UpdateReque
 	if !data.Aliases.IsNull() {
 		var aliasesList []string
 		data.Aliases.ElementsAs(ctx, &aliasesList, false)
-		params["aliases"] = aliasesList
+		var aliasesObjs []map[string]interface{}
+		for _, jsonStr := range aliasesList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse aliases item: %s", err))
+				return
+			}
+			aliasesObjs = append(aliasesObjs, obj)
+		}
+		params["aliases"] = aliasesObjs
 	}
 	if !data.FailoverCritical.IsNull() {
 		params["failover_critical"] = data.FailoverCritical.ValueBool()
@@ -407,12 +444,30 @@ func (r *InterfaceResource) Update(ctx context.Context, req resource.UpdateReque
 	if !data.FailoverAliases.IsNull() {
 		var failover_aliasesList []string
 		data.FailoverAliases.ElementsAs(ctx, &failover_aliasesList, false)
-		params["failover_aliases"] = failover_aliasesList
+		var failover_aliasesObjs []map[string]interface{}
+		for _, jsonStr := range failover_aliasesList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse failover_aliases item: %s", err))
+				return
+			}
+			failover_aliasesObjs = append(failover_aliasesObjs, obj)
+		}
+		params["failover_aliases"] = failover_aliasesObjs
 	}
 	if !data.FailoverVirtualAliases.IsNull() {
 		var failover_virtual_aliasesList []string
 		data.FailoverVirtualAliases.ElementsAs(ctx, &failover_virtual_aliasesList, false)
-		params["failover_virtual_aliases"] = failover_virtual_aliasesList
+		var failover_virtual_aliasesObjs []map[string]interface{}
+		for _, jsonStr := range failover_virtual_aliasesList {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {
+				resp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse failover_virtual_aliases item: %s", err))
+				return
+			}
+			failover_virtual_aliasesObjs = append(failover_virtual_aliasesObjs, obj)
+		}
+		params["failover_virtual_aliases"] = failover_virtual_aliasesObjs
 	}
 	if !data.BridgeMembers.IsNull() {
 		var bridge_membersList []string

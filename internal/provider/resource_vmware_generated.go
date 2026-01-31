@@ -3,13 +3,13 @@ package provider
 import (
 	"context"
 	"fmt"
-	"strings"
-	"strconv"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
+	"strconv"
+	"strings"
 )
 
 type VmwareResource struct {
@@ -17,12 +17,12 @@ type VmwareResource struct {
 }
 
 type VmwareResourceModel struct {
-	ID types.String `tfsdk:"id"`
-	Datastore types.String `tfsdk:"datastore"`
+	ID         types.String `tfsdk:"id"`
+	Datastore  types.String `tfsdk:"datastore"`
 	Filesystem types.String `tfsdk:"filesystem"`
-	Hostname types.String `tfsdk:"hostname"`
-	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
+	Hostname   types.String `tfsdk:"hostname"`
+	Username   types.String `tfsdk:"username"`
+	Password   types.String `tfsdk:"password"`
 }
 
 func NewVmwareResource() resource.Resource {
@@ -43,28 +43,28 @@ func (r *VmwareResource) Schema(ctx context.Context, req resource.SchemaRequest,
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"datastore": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Valid datastore name which exists on the VMWare host.",
 			},
 			"filesystem": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "ZFS filesystem or dataset to use for VMware storage.",
 			},
 			"hostname": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Valid IP address / hostname of a VMWare host. When clustering, this is the vCenter server for the cl",
 			},
 			"username": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Credentials used to authorize access to the VMWare host.",
 			},
 			"password": schema.StringAttribute{
-				Required: true,
-				Optional: false,
+				Required:    true,
+				Optional:    false,
 				Description: "Password for VMware host authentication.",
 			},
 		},
@@ -139,10 +139,12 @@ func (r *VmwareResource) Read(ctx context.Context, req resource.ReadRequest, res
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	result, err := r.client.Call("vmware.get_instance", id)
 	if err != nil {
@@ -162,69 +164,69 @@ func (r *VmwareResource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 
-		if v, ok := resultMap["id"]; ok && v != nil {
-			data.ID = types.StringValue(fmt.Sprintf("%v", v))
-		}
-		if v, ok := resultMap["datastore"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Datastore = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Datastore = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Datastore = types.StringValue(fmt.Sprintf("%v", v))
+	if v, ok := resultMap["id"]; ok && v != nil {
+		data.ID = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["datastore"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Datastore = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Datastore = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Datastore = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["filesystem"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Filesystem = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Filesystem = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Filesystem = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["filesystem"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Filesystem = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Filesystem = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Filesystem = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["hostname"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Hostname = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Hostname = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Hostname = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["hostname"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Hostname = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Hostname = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Hostname = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["username"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Username = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Username = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Username = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["username"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Username = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Username = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Username = types.StringValue(fmt.Sprintf("%v", v))
 		}
-		if v, ok := resultMap["password"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Password = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Password = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Password = types.StringValue(fmt.Sprintf("%v", v))
+	}
+	if v, ok := resultMap["password"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Password = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Password = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Password = types.StringValue(fmt.Sprintf("%v", v))
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -245,10 +247,12 @@ func (r *VmwareResource) Update(ctx context.Context, req resource.UpdateRequest,
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	params := map[string]interface{}{}
 	if !data.Datastore.IsNull() {
@@ -287,10 +291,12 @@ func (r *VmwareResource) Delete(ctx context.Context, req resource.DeleteRequest,
 	var id interface{}
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
-	if err != nil {{
-		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-		return
-	}}
+	if err != nil {
+		{
+			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+			return
+		}
+	}
 
 	_, err = r.client.Call("vmware.delete", id)
 	if err != nil {

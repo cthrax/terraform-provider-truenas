@@ -107,7 +107,6 @@ func TestVmResource_StartOnCreateTrue(t *testing.T) {
 	}
 }
 
-
 // Acceptance Tests - require TF_ACC=1 and real TrueNAS
 
 func TestAccVmResource_basic(t *testing.T) {

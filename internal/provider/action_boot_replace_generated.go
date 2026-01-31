@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionBootReplaceResource struct {
@@ -17,7 +17,7 @@ type ActionBootReplaceResource struct {
 
 type ActionBootReplaceResourceModel struct {
 	Label types.String `tfsdk:"label"`
-	Dev types.String `tfsdk:"dev"`
+	Dev   types.String `tfsdk:"dev"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -40,11 +40,11 @@ func (r *ActionBootReplaceResource) Schema(ctx context.Context, req resource.Sch
 		MarkdownDescription: "Replace device `label` on boot pool with `dev`",
 		Attributes: map[string]schema.Attribute{
 			"label": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Label of the disk in the boot pool to replace.",
 			},
 			"dev": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Device name or path of the replacement disk.",
 			},
 			"action_id": schema.StringAttribute{
@@ -111,7 +111,7 @@ func (r *ActionBootReplaceResource) Create(ctx context.Context, req resource.Cre
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

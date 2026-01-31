@@ -26,6 +26,8 @@ fetch-spec:
 generate:
 	@echo "Generating provider code..."
 	python3 generate.py
+	@echo "Formatting generated code..."
+	go fmt ./...
 
 build:
 	@echo "Building provider..."

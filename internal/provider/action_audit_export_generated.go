@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionAuditExportResource struct {
@@ -39,7 +39,7 @@ func (r *ActionAuditExportResource) Schema(ctx context.Context, req resource.Sch
 		MarkdownDescription: "Generate an audit report based on the specified `query-filters` and `query-options` for the specified `services` in the specified `export_format`",
 		Attributes: map[string]schema.Attribute{
 			"data": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Audit export configuration specifying services, filters, and format.",
 			},
 			"action_id": schema.StringAttribute{
@@ -107,7 +107,7 @@ func (r *ActionAuditExportResource) Create(ctx context.Context, req resource.Cre
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

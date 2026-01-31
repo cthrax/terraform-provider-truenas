@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionFilesystemPutResource struct {
@@ -16,7 +16,7 @@ type ActionFilesystemPutResource struct {
 }
 
 type ActionFilesystemPutResourceModel struct {
-	Path types.String `tfsdk:"path"`
+	Path    types.String `tfsdk:"path"`
 	Options types.String `tfsdk:"options"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionFilesystemPutResource) Schema(ctx context.Context, req resource.S
 		MarkdownDescription: "Job to put contents to `path`",
 		Attributes: map[string]schema.Attribute{
 			"path": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Path where the file should be written.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options controlling file writing behavior.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionFilesystemPutResource) Create(ctx context.Context, req resource.C
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

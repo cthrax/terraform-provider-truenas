@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionCloud_BackupSyncResource struct {
@@ -16,7 +16,7 @@ type ActionCloud_BackupSyncResource struct {
 }
 
 type ActionCloud_BackupSyncResourceModel struct {
-	Id types.Int64 `tfsdk:"id"`
+	Id      types.Int64  `tfsdk:"id"`
 	Options types.String `tfsdk:"options"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionCloud_BackupSyncResource) Schema(ctx context.Context, req resourc
 		MarkdownDescription: "Run the cloud backup job `id`",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "The cloud backup task ID.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Sync options.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionCloud_BackupSyncResource) Create(ctx context.Context, req resourc
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

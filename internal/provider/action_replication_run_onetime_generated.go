@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionReplicationRun_OnetimeResource struct {
@@ -39,7 +39,7 @@ func (r *ActionReplicationRun_OnetimeResource) Schema(ctx context.Context, req r
 		MarkdownDescription: "Run replication task without creating it",
 		Attributes: map[string]schema.Attribute{
 			"replication_run_onetime": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "ReplicationRunOnetimeArgs parameters.",
 			},
 			"action_id": schema.StringAttribute{
@@ -105,7 +105,7 @@ func (r *ActionReplicationRun_OnetimeResource) Create(ctx context.Context, req r
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolDdt_PruneResource struct {
@@ -39,7 +39,7 @@ func (r *ActionPoolDdt_PruneResource) Schema(ctx context.Context, req resource.S
 		MarkdownDescription: "Prune DDT entries in pool `pool_name` based on the specified options",
 		Attributes: map[string]schema.Attribute{
 			"options": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "PoolDdtPruneArgs parameters.",
 			},
 			"action_id": schema.StringAttribute{
@@ -105,7 +105,7 @@ func (r *ActionPoolDdt_PruneResource) Create(ctx context.Context, req resource.C
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

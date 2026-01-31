@@ -305,7 +305,7 @@ func (c *Client) call(method string, params interface{}) (*DDPResponse, error) {
 func (c *Client) Call(method string, params interface{}) (interface{}, error) {
 	// For DDP protocol, params should be wrapped in array unless already an array
 	var ddpParams interface{}
-	
+
 	// Check if params is already an array
 	if _, isSlice := params.([]interface{}); isSlice {
 		// Already an array, use as-is
@@ -358,12 +358,12 @@ func formatTrueNASError(err interface{}) string {
 	if !ok {
 		return fmt.Sprintf("%v", err)
 	}
-	
+
 	// Extract the main error reason
 	if reason, ok := errMap["reason"].(string); ok && reason != "" {
 		return reason
 	}
-	
+
 	// Extract validation errors from extra field
 	if extra, ok := errMap["extra"].([]interface{}); ok && len(extra) > 0 {
 		if extraList, ok := extra[0].([]interface{}); ok && len(extraList) > 1 {
@@ -375,7 +375,7 @@ func formatTrueNASError(err interface{}) string {
 			}
 		}
 	}
-	
+
 	// Fallback to full error
 	return fmt.Sprintf("%v", err)
 }
@@ -530,11 +530,11 @@ func (c *Client) WaitForJob(jobID int, timeout time.Duration) (*JobResult, error
 				} else if idField, ok := event.Fields["id"].(int); ok {
 					eventJobID = idField
 				}
-				
+
 				if eventJobID != jobID {
 					continue // Not our job, skip
 				}
-				
+
 				state, _ := event.Fields["state"].(string)
 				progress, _ := event.Fields["progress"].(map[string]interface{})
 				progressPct := 0.0

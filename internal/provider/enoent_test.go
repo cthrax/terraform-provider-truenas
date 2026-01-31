@@ -8,9 +8,9 @@ import (
 // TestENOENTDetection verifies that only [ENOENT] errors trigger resource removal
 func TestENOENTDetection(t *testing.T) {
 	tests := []struct {
-		name           string
-		errorMsg       string
-		shouldRemove   bool
+		name         string
+		errorMsg     string
+		shouldRemove bool
 	}{
 		{
 			name:         "ENOENT error should remove resource",
@@ -53,7 +53,7 @@ func TestENOENTDetection(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// This mirrors the logic in the generated Read function
 			shouldRemove := strings.Contains(tt.errorMsg, "[ENOENT]")
-			
+
 			if shouldRemove != tt.shouldRemove {
 				t.Errorf("Error %q: got shouldRemove=%v, want %v", tt.errorMsg, shouldRemove, tt.shouldRemove)
 			}

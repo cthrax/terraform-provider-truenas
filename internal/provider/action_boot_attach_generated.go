@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionBootAttachResource struct {
@@ -16,7 +16,7 @@ type ActionBootAttachResource struct {
 }
 
 type ActionBootAttachResourceModel struct {
-	Dev types.String `tfsdk:"dev"`
+	Dev     types.String `tfsdk:"dev"`
 	Options types.String `tfsdk:"options"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionBootAttachResource) Schema(ctx context.Context, req resource.Sche
 		MarkdownDescription: "Attach a disk to the boot pool, turning a stripe into a mirror",
 		Attributes: map[string]schema.Attribute{
 			"dev": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Device name or path to attach to the boot pool.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for the attach operation.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionBootAttachResource) Create(ctx context.Context, req resource.Crea
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

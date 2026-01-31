@@ -73,9 +73,9 @@ func TestUserResource_BuildParams_OptionalFieldWithValue(t *testing.T) {
 
 func TestUserResource_BuildParams_BooleanFields(t *testing.T) {
 	data := UserResourceModel{
-		Username:       types.StringValue("testuser"),
-		FullName:       types.StringValue("Test User"),
-		Locked:         types.BoolValue(false),
+		Username:         types.StringValue("testuser"),
+		FullName:         types.StringValue("Test User"),
+		Locked:           types.BoolValue(false),
 		PasswordDisabled: types.BoolValue(true),
 	}
 
@@ -94,7 +94,6 @@ func TestUserResource_BuildParams_BooleanFields(t *testing.T) {
 		t.Errorf("Expected password_disabled true, got %v", params["password_disabled"])
 	}
 }
-
 
 // Acceptance Tests - require TF_ACC=1 and real TrueNAS
 

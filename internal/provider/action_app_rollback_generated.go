@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionAppRollbackResource struct {
@@ -40,11 +40,11 @@ func (r *ActionAppRollbackResource) Schema(ctx context.Context, req resource.Sch
 		MarkdownDescription: "Rollback `app_name` app to previous version",
 		Attributes: map[string]schema.Attribute{
 			"app_name": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Name of the application to rollback.",
 			},
 			"options": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Rollback options.",
 			},
 			"action_id": schema.StringAttribute{
@@ -111,7 +111,7 @@ func (r *ActionAppRollbackResource) Create(ctx context.Context, req resource.Cre
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"encoding/json"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionIpmiSelElistResource struct {
@@ -41,11 +41,11 @@ func (r *ActionIpmiSelElistResource) Schema(ctx context.Context, req resource.Sc
 		MarkdownDescription: "Query IPMI System Event Log (SEL) extended list",
 		Attributes: map[string]schema.Attribute{
 			"filters": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "List of filters for query results. See API documentation for \"Query Methods\" for more guidance.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Query options including pagination, ordering, and additional parameters.",
 			},
 			"action_id": schema.StringAttribute{
@@ -119,7 +119,7 @@ func (r *ActionIpmiSelElistResource) Create(ctx context.Context, req resource.Cr
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

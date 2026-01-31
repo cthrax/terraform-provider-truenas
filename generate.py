@@ -134,8 +134,20 @@ def generate_schema_attrs(
         if not has_start and not required:  # datasource mode
             attrs.append(f"\t\t\t\tComputed: true,")
         else:  # resource mode
-            attrs.append(f"\t\t\t\tRequired: {str(is_req).lower()},")
-            attrs.append(f"\t\t\t\tOptional: {str(not is_req).lower()},")
+            # Check if field is auto-generated (optional + description mentions "generate")
+            is_auto_generated = (
+                not is_req 
+                and isinstance(prop, dict) 
+                and "generate" in prop.get("description", "").lower()
+            )
+            
+            if is_auto_generated:
+                # Optional + Computed for auto-generated fields
+                attrs.append(f"\t\t\t\tOptional: true,")
+                attrs.append(f"\t\t\t\tComputed: true,")
+            else:
+                attrs.append(f"\t\t\t\tRequired: {str(is_req).lower()},")
+                attrs.append(f"\t\t\t\tOptional: {str(not is_req).lower()},")
 
         if tf_type == "List":
             attrs.append(f"\t\t\t\tElementType: types.StringType,")
@@ -215,11 +227,41 @@ def generate_create_params(properties):
                 f'\t\tparams["{prop_name}"] = data.{field_name}.ValueFloat64()'
             )
         elif tf_type == "List":
-            lines.append(f"\t\tvar {prop_name}List []string")
-            lines.append(
-                f"\t\tdata.{field_name}.ElementsAs(ctx, &{prop_name}List, false)"
-            )
-            lines.append(f'\t\tparams["{prop_name}"] = {prop_name}List')
+            # Check if array contains complex objects
+            array_has_objects = False
+            if isinstance(prop_schema, dict):
+                items = prop_schema.get("items")
+                if items:
+                    # items can be a list (tuple validation) or dict (single schema)
+                    item_schema = items[0] if isinstance(items, list) else items
+                    if isinstance(item_schema, dict) and item_schema.get("type") == "object":
+                        array_has_objects = True
+            
+            if array_has_objects:
+                # Array of complex objects - expect JSON-encoded strings per element
+                lines.append(f"\t\tvar {prop_name}List []string")
+                lines.append(
+                    f"\t\tdata.{field_name}.ElementsAs(ctx, &{prop_name}List, false)"
+                )
+                lines.append(f"\t\tvar {prop_name}Objs []map[string]interface{{}}")
+                lines.append(f"\t\tfor _, jsonStr := range {prop_name}List {{")
+                lines.append(f"\t\t\tvar obj map[string]interface{{}}")
+                lines.append(f"\t\t\tif err := json.Unmarshal([]byte(jsonStr), &obj); err != nil {{")
+                lines.append(
+                    f'\t\t\t\tresp.Diagnostics.AddError("JSON Parse Error", fmt.Sprintf("Failed to parse {prop_name} item: %s", err))'
+                )
+                lines.append(f"\t\t\t\treturn")
+                lines.append(f"\t\t\t}}")
+                lines.append(f"\t\t\t{prop_name}Objs = append({prop_name}Objs, obj)")
+                lines.append(f"\t\t}}")
+                lines.append(f'\t\tparams["{prop_name}"] = {prop_name}Objs')
+            else:
+                # Array of primitives
+                lines.append(f"\t\tvar {prop_name}List []string")
+                lines.append(
+                    f"\t\tdata.{field_name}.ElementsAs(ctx, &{prop_name}List, false)"
+                )
+                lines.append(f'\t\tparams["{prop_name}"] = {prop_name}List')
         else:
             # Check if this is a complex object that needs JSON parsing
             needs_json_parse = False
@@ -417,6 +459,13 @@ def has_complex_objects(properties):
             # Discriminator indicates complex object
             if "discriminator" in prop_schema:
                 return True
+            # Check for arrays of complex objects
+            if prop_schema.get("type") == "array":
+                items = prop_schema.get("items")
+                if items:
+                    item_schema = items[0] if isinstance(items, list) else items
+                    if isinstance(item_schema, dict) and item_schema.get("type") == "object":
+                        return True
     return False
 
 
@@ -1172,6 +1221,20 @@ def generate_resource_docs(
             elif tf_type == "Float64":
                 example_lines.append(f"  {name} = 1.0")
             elif tf_type == "List":
+                # Check if array contains complex objects
+                if isinstance(prop, dict):
+                    items = prop.get("items")
+                    if items:
+                        item_schema = items[0] if isinstance(items, list) else items
+                        if isinstance(item_schema, dict) and item_schema.get("type") == "object":
+                            # Array of complex objects - show jsonencode example
+                            example_lines.append(f"  {name} = [")
+                            example_lines.append(f"    jsonencode({{")
+                            example_lines.append(f"      # Configure object fields")
+                            example_lines.append(f"    }})")
+                            example_lines.append(f"  ]")
+                            continue
+                # Simple array
                 example_lines.append(f'  {name} = ["item1"]')
 
     if has_start and len(example_lines) < 8:
@@ -1248,6 +1311,36 @@ def generate_resource_docs(
         # Add default value if present
         if isinstance(prop, dict) and "default" in prop:
             desc += f" Default: `{prop['default']}`"
+
+        # Add note for arrays of complex objects
+        if tf_type == "List" and isinstance(prop, dict):
+            items = prop.get("items")
+            if items:
+                item_schema = items[0] if isinstance(items, list) else items
+                if isinstance(item_schema, dict) and item_schema.get("type") == "object":
+                    desc += " **Note:** Each element must be a JSON-encoded object."
+                    
+                    # Show object structure from item schema
+                    if "properties" in item_schema:
+                        obj_props = item_schema["properties"]
+                        obj_required = set(item_schema.get("required", []))
+                        if obj_props:
+                            desc += " Example: `[jsonencode({"
+                            prop_examples = []
+                            for obj_prop_name, obj_prop in list(obj_props.items())[:4]:
+                                is_req = obj_prop_name in obj_required
+                                req_marker = "" if is_req else " (optional)"
+                                obj_prop_type = obj_prop.get("type", "string")
+                                if obj_prop_type == "string":
+                                    prop_examples.append(f'{obj_prop_name} = "..."{req_marker}')
+                                elif obj_prop_type == "integer":
+                                    prop_examples.append(f'{obj_prop_name} = 0{req_marker}')
+                                elif obj_prop_type == "boolean":
+                                    prop_examples.append(f'{obj_prop_name} = true{req_marker}')
+                            desc += ", ".join(prop_examples)
+                            if len(obj_props) > 4:
+                                desc += ", ..."
+                            desc += "})]`"
 
         # Add enum values if present
         if isinstance(prop, dict) and "enum" in prop:

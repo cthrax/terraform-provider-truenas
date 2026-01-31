@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionTruenasSet_ProductionResource struct {
@@ -16,7 +16,7 @@ type ActionTruenasSet_ProductionResource struct {
 }
 
 type ActionTruenasSet_ProductionResourceModel struct {
-	Production types.Bool `tfsdk:"production"`
+	Production  types.Bool `tfsdk:"production"`
 	AttachDebug types.Bool `tfsdk:"attach_debug"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionTruenasSet_ProductionResource) Schema(ctx context.Context, req re
 		MarkdownDescription: "Sets system production state and optionally sends initial debug",
 		Attributes: map[string]schema.Attribute{
 			"production": schema.BoolAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Whether to configure the system for production use.",
 			},
 			"attach_debug": schema.BoolAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Whether to attach debug information when transitioning to production mode.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionTruenasSet_ProductionResource) Create(ctx context.Context, req re
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

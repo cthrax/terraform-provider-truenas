@@ -84,7 +84,7 @@ resource "truenas_pool_dataset" "example" {
 - `special_small_block_size` (Int64) - Size threshold below which blocks are stored on special vdevs.
 - `sync` (String) - Synchronous write behavior for the dataset. Default: `INHERIT` Valid values: `STANDARD`, `ALWAYS`, `DISABLED`, `INHERIT`
 - `type` (String) - Type of dataset to create - volume (zvol). Default: `VOLUME` Valid values: `FILESYSTEM`, `VOLUME`
-- `user_properties` (List) - Custom user-defined properties to set on the dataset. Default: `[]`
+- `user_properties` (List) - Custom user-defined properties to set on the dataset. Default: `[]` **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({key = "...", value = "..."})]`
 - `volblocksize` (String) - Defaults to `128K` if the parent pool is a DRAID pool or `16K` otherwise. Valid values: `512`, `512B`, `1K`, `2K`, `4K`, `8K`, `16K`, `32K`, `64K`, `128K` **Applies to:** `VOLUME`
 - `volsize` (Int64) - The volume size in bytes; supposed to be a multiple of the block size. **Applies to:** `VOLUME`
 

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionReplicationRestoreResource struct {
@@ -16,7 +16,7 @@ type ActionReplicationRestoreResource struct {
 }
 
 type ActionReplicationRestoreResourceModel struct {
-	Id types.Int64 `tfsdk:"id"`
+	Id                 types.Int64  `tfsdk:"id"`
 	ReplicationRestore types.String `tfsdk:"replication_restore"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionReplicationRestoreResource) Schema(ctx context.Context, req resou
 		MarkdownDescription: "Create the opposite of replication task `id` (PULL if it was PUSH and vice versa)",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "ID of the replication task to restore.",
 			},
 			"replication_restore": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Configuration options for restoring the replication task.",
 			},
 			"action_id": schema.StringAttribute{
@@ -111,7 +111,7 @@ func (r *ActionReplicationRestoreResource) Create(ctx context.Context, req resou
 	if jobID, ok := result.(float64); ok && false {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

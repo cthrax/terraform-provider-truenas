@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionUpdateFileResource struct {
@@ -39,7 +39,7 @@ func (r *ActionUpdateFileResource) Schema(ctx context.Context, req resource.Sche
 		MarkdownDescription: "Updates the system using the uploaded ",
 		Attributes: map[string]schema.Attribute{
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for controlling the manual update file upload process.",
 			},
 			"action_id": schema.StringAttribute{
@@ -107,7 +107,7 @@ func (r *ActionUpdateFileResource) Create(ctx context.Context, req resource.Crea
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

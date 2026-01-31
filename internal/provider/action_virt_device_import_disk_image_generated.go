@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionVirtDeviceImport_Disk_ImageResource struct {
@@ -39,7 +39,7 @@ func (r *ActionVirtDeviceImport_Disk_ImageResource) Schema(ctx context.Context, 
 		MarkdownDescription: "Imports a specified disk image",
 		Attributes: map[string]schema.Attribute{
 			"virt_device_import_disk_image": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "VirtDeviceImportDiskImageArgs parameters.",
 			},
 			"action_id": schema.StringAttribute{
@@ -105,7 +105,7 @@ func (r *ActionVirtDeviceImport_Disk_ImageResource) Create(ctx context.Context, 
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

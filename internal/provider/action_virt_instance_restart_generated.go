@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionVirtInstanceRestartResource struct {
@@ -16,7 +16,7 @@ type ActionVirtInstanceRestartResource struct {
 }
 
 type ActionVirtInstanceRestartResourceModel struct {
-	Id types.String `tfsdk:"id"`
+	Id       types.String `tfsdk:"id"`
 	StopArgs types.String `tfsdk:"stop_args"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionVirtInstanceRestartResource) Schema(ctx context.Context, req reso
 		MarkdownDescription: "Restart an instance",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "ID of the virtual instance to stop.",
 			},
 			"stop_args": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Arguments controlling how the instance is stopped.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionVirtInstanceRestartResource) Create(ctx context.Context, req reso
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

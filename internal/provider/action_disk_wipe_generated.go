@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionDiskWipeResource struct {
@@ -16,9 +16,9 @@ type ActionDiskWipeResource struct {
 }
 
 type ActionDiskWipeResourceModel struct {
-	Dev types.String `tfsdk:"dev"`
-	Mode types.String `tfsdk:"mode"`
-	Synccache types.Bool `tfsdk:"synccache"`
+	Dev       types.String `tfsdk:"dev"`
+	Mode      types.String `tfsdk:"mode"`
+	Synccache types.Bool   `tfsdk:"synccache"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -41,15 +41,15 @@ func (r *ActionDiskWipeResource) Schema(ctx context.Context, req resource.Schema
 		MarkdownDescription: "Performs a wipe of a disk `dev`",
 		Attributes: map[string]schema.Attribute{
 			"dev": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "The device to perform the disk wipe operation on. May be passed as /dev/sda or just sda.",
 			},
 			"mode": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "* QUICK: Write zeros to the first and last 32MB of device. * FULL: Write whole disk with zeros. * FULL_RANDOM: Write whole disk with random bytes.",
 			},
 			"synccache": schema.BoolAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Synchronize the device with the database.",
 			},
 			"action_id": schema.StringAttribute{
@@ -119,7 +119,7 @@ func (r *ActionDiskWipeResource) Create(ctx context.Context, req resource.Create
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

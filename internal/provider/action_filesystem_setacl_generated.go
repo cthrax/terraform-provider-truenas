@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionFilesystemSetaclResource struct {
@@ -39,7 +39,7 @@ func (r *ActionFilesystemSetaclResource) Schema(ctx context.Context, req resourc
 		MarkdownDescription: "Set ACL of a given path",
 		Attributes: map[string]schema.Attribute{
 			"filesystem_acl": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "FilesystemSetaclArgs parameters.",
 			},
 			"action_id": schema.StringAttribute{
@@ -105,7 +105,7 @@ func (r *ActionFilesystemSetaclResource) Create(ctx context.Context, req resourc
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

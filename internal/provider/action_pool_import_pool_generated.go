@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolImport_PoolResource struct {
@@ -39,7 +39,7 @@ func (r *ActionPoolImport_PoolResource) Schema(ctx context.Context, req resource
 		MarkdownDescription: "Import a pool found with `pool",
 		Attributes: map[string]schema.Attribute{
 			"pool_import": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "PoolImportPoolArgs parameters.",
 			},
 			"action_id": schema.StringAttribute{
@@ -105,7 +105,7 @@ func (r *ActionPoolImport_PoolResource) Create(ctx context.Context, req resource
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

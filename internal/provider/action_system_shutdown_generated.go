@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionSystemShutdownResource struct {
@@ -16,7 +16,7 @@ type ActionSystemShutdownResource struct {
 }
 
 type ActionSystemShutdownResourceModel struct {
-	Reason types.String `tfsdk:"reason"`
+	Reason  types.String `tfsdk:"reason"`
 	Options types.String `tfsdk:"options"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionSystemShutdownResource) Schema(ctx context.Context, req resource.
 		MarkdownDescription: "Shuts down the operating system",
 		Attributes: map[string]schema.Attribute{
 			"reason": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Reason for the system shutdown.",
 			},
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for controlling the shutdown process.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionSystemShutdownResource) Create(ctx context.Context, req resource.
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"strconv"
-	
+
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
@@ -23,11 +23,11 @@ type ServiceDataSource struct {
 }
 
 type ServiceDataSourceModel struct {
-	ID types.String `tfsdk:"id"`
+	ID      types.String `tfsdk:"id"`
 	Service types.String `tfsdk:"service"`
-	Enable types.Bool `tfsdk:"enable"`
-	State types.String `tfsdk:"state"`
-	Pids types.List `tfsdk:"pids"`
+	Enable  types.Bool   `tfsdk:"enable"`
+	State   types.String `tfsdk:"state"`
+	Pids    types.List   `tfsdk:"pids"`
 }
 
 func (d *ServiceDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -40,19 +40,19 @@ func (d *ServiceDataSource) Schema(ctx context.Context, req datasource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Required: true, Description: "Resource ID"},
 			"service": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Name of the system service.",
 			},
 			"enable": schema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Whether the service is enabled to start on boot.",
 			},
 			"state": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Current state of the service (e.g., 'RUNNING', 'STOPPED').",
 			},
 			"pids": schema.ListAttribute{
-				Computed: true,
+				Computed:    true,
 				ElementType: types.StringType,
 				Description: "Array of process IDs associated with this service.",
 			},
@@ -86,7 +86,6 @@ func (d *ServiceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	}
 
 	_ = result // No fields to read
-
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

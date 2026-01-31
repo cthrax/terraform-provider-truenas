@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionCloudsyncRestoreResource struct {
@@ -16,7 +16,7 @@ type ActionCloudsyncRestoreResource struct {
 }
 
 type ActionCloudsyncRestoreResourceModel struct {
-	Id types.Int64 `tfsdk:"id"`
+	Id   types.Int64  `tfsdk:"id"`
 	Opts types.String `tfsdk:"opts"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionCloudsyncRestoreResource) Schema(ctx context.Context, req resourc
 		MarkdownDescription: "Create the opposite of cloud sync task `id` (PULL if it was PUSH and vice versa)",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.Int64Attribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "ID of the cloud sync task to restore from.",
 			},
 			"opts": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Restore operation configuration options.",
 			},
 			"action_id": schema.StringAttribute{
@@ -111,7 +111,7 @@ func (r *ActionCloudsyncRestoreResource) Create(ctx context.Context, req resourc
 	if jobID, ok := result.(float64); ok && false {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

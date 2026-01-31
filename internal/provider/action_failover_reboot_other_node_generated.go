@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionFailoverRebootOther_NodeResource struct {
@@ -39,7 +39,7 @@ func (r *ActionFailoverRebootOther_NodeResource) Schema(ctx context.Context, req
 		MarkdownDescription: "Reboot the other node and wait for it to come back online",
 		Attributes: map[string]schema.Attribute{
 			"options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for rebooting the other node.",
 			},
 			"action_id": schema.StringAttribute{
@@ -107,7 +107,7 @@ func (r *ActionFailoverRebootOther_NodeResource) Create(ctx context.Context, req
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

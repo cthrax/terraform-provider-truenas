@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type AppUpgradeSummaryActionResource struct {
@@ -16,10 +16,10 @@ type AppUpgradeSummaryActionResource struct {
 }
 
 type AppUpgradeSummaryActionResourceModel struct {
-	ID types.String `tfsdk:"id"`
+	ID         types.String `tfsdk:"id"`
 	ResourceID types.String `tfsdk:"resource_id"`
-	AppName types.String `tfsdk:"app_name"`
-	Options types.String `tfsdk:"options"`
+	AppName    types.String `tfsdk:"app_name"`
+	Options    types.String `tfsdk:"options"`
 }
 
 func NewAppUpgradeSummaryActionResource() resource.Resource {
@@ -38,7 +38,7 @@ func (r *AppUpgradeSummaryActionResource) Schema(ctx context.Context, req resour
 				Computed: true,
 			},
 			"resource_id": schema.StringAttribute{
-				Required: true,
+				Required:    true,
 				Description: "ID of the resource to perform action on",
 			},
 			"app_name": schema.StringAttribute{
@@ -71,12 +71,12 @@ func (r *AppUpgradeSummaryActionResource) Create(ctx context.Context, req resour
 	}
 
 	params := map[string]interface{}{}
-		if !data.AppName.IsNull() {
-			params["app_name"] = data.AppName.ValueString()
-		}
-		if !data.Options.IsNull() {
-			params["options"] = data.Options.ValueString()
-		}
+	if !data.AppName.IsNull() {
+		params["app_name"] = data.AppName.ValueString()
+	}
+	if !data.Options.IsNull() {
+		params["options"] = data.Options.ValueString()
+	}
 
 	_, err := r.client.Call("app/upgrade_summary", data.ResourceID.ValueString())
 	if err != nil {
@@ -104,12 +104,12 @@ func (r *AppUpgradeSummaryActionResource) Update(ctx context.Context, req resour
 	}
 
 	params := map[string]interface{}{}
-		if !data.AppName.IsNull() {
-			params["app_name"] = data.AppName.ValueString()
-		}
-		if !data.Options.IsNull() {
-			params["options"] = data.Options.ValueString()
-		}
+	if !data.AppName.IsNull() {
+		params["app_name"] = data.AppName.ValueString()
+	}
+	if !data.Options.IsNull() {
+		params["options"] = data.Options.ValueString()
+	}
 
 	_, err := r.client.Call("app/upgrade_summary", data.ResourceID.ValueString())
 	if err != nil {

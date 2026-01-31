@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"strconv"
-	
+
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
@@ -23,31 +23,31 @@ type PoolDataSource struct {
 }
 
 type PoolDataSourceModel struct {
-	ID types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
-	Guid types.String `tfsdk:"guid"`
-	Status types.String `tfsdk:"status"`
-	Path types.String `tfsdk:"path"`
-	Scan types.String `tfsdk:"scan"`
-	Expand types.String `tfsdk:"expand"`
-	IsUpgraded types.Bool `tfsdk:"is_upgraded"`
-	Healthy types.Bool `tfsdk:"healthy"`
-	Warning types.Bool `tfsdk:"warning"`
-	StatusCode types.String `tfsdk:"status_code"`
-	StatusDetail types.String `tfsdk:"status_detail"`
-	Size types.Int64 `tfsdk:"size"`
-	Allocated types.Int64 `tfsdk:"allocated"`
-	Free types.Int64 `tfsdk:"free"`
-	Freeing types.Int64 `tfsdk:"freeing"`
-	DedupTableSize types.Int64 `tfsdk:"dedup_table_size"`
+	ID              types.String `tfsdk:"id"`
+	Name            types.String `tfsdk:"name"`
+	Guid            types.String `tfsdk:"guid"`
+	Status          types.String `tfsdk:"status"`
+	Path            types.String `tfsdk:"path"`
+	Scan            types.String `tfsdk:"scan"`
+	Expand          types.String `tfsdk:"expand"`
+	IsUpgraded      types.Bool   `tfsdk:"is_upgraded"`
+	Healthy         types.Bool   `tfsdk:"healthy"`
+	Warning         types.Bool   `tfsdk:"warning"`
+	StatusCode      types.String `tfsdk:"status_code"`
+	StatusDetail    types.String `tfsdk:"status_detail"`
+	Size            types.Int64  `tfsdk:"size"`
+	Allocated       types.Int64  `tfsdk:"allocated"`
+	Free            types.Int64  `tfsdk:"free"`
+	Freeing         types.Int64  `tfsdk:"freeing"`
+	DedupTableSize  types.Int64  `tfsdk:"dedup_table_size"`
 	DedupTableQuota types.String `tfsdk:"dedup_table_quota"`
-	Fragmentation types.String `tfsdk:"fragmentation"`
-	SizeStr types.String `tfsdk:"size_str"`
-	AllocatedStr types.String `tfsdk:"allocated_str"`
-	FreeStr types.String `tfsdk:"free_str"`
-	FreeingStr types.String `tfsdk:"freeing_str"`
-	Autotrim types.String `tfsdk:"autotrim"`
-	Topology types.String `tfsdk:"topology"`
+	Fragmentation   types.String `tfsdk:"fragmentation"`
+	SizeStr         types.String `tfsdk:"size_str"`
+	AllocatedStr    types.String `tfsdk:"allocated_str"`
+	FreeStr         types.String `tfsdk:"free_str"`
+	FreeingStr      types.String `tfsdk:"freeing_str"`
+	Autotrim        types.String `tfsdk:"autotrim"`
+	Topology        types.String `tfsdk:"topology"`
 }
 
 func (d *PoolDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -60,99 +60,99 @@ func (d *PoolDataSource) Schema(ctx context.Context, req datasource.SchemaReques
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Required: true, Description: "Resource ID"},
 			"name": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Name of the storage pool.",
 			},
 			"guid": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Globally unique identifier (GUID) for this pool.",
 			},
 			"status": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Current status of the pool.",
 			},
 			"path": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Filesystem path where the pool is mounted.",
 			},
 			"scan": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Information about any active scrub or resilver operation. `null` if no operation is running.",
 			},
 			"expand": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Information about any active pool expansion operation. `null` if no expansion is running.",
 			},
 			"is_upgraded": schema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Whether this pool has been upgraded to the latest feature flags.",
 			},
 			"healthy": schema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Whether the pool is in a healthy state with no errors or warnings.",
 			},
 			"warning": schema.BoolAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Whether the pool has warning conditions that require attention.",
 			},
 			"status_code": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Detailed status code for the pool condition. `null` if not applicable.",
 			},
 			"status_detail": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Human-readable description of the pool status. `null` if not available.",
 			},
 			"size": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Total size of the pool in bytes. `null` if not available.",
 			},
 			"allocated": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Amount of space currently allocated in the pool in bytes. `null` if not available.",
 			},
 			"free": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Amount of free space available in the pool in bytes. `null` if not available.",
 			},
 			"freeing": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Amount of space being freed (in bytes) by ongoing operations. `null` if not available.",
 			},
 			"dedup_table_size": schema.Int64Attribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Size of the deduplication table in bytes. `null` if deduplication is not enabled.",
 			},
 			"dedup_table_quota": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Quota limit for the deduplication table. `null` if no quota is set.",
 			},
 			"fragmentation": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Percentage of pool fragmentation as a string. `null` if not available.",
 			},
 			"size_str": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Human-readable string representation of the pool size. `null` if not available.",
 			},
 			"allocated_str": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Human-readable string representation of allocated space. `null` if not available.",
 			},
 			"free_str": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Human-readable string representation of free space. `null` if not available.",
 			},
 			"freeing_str": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Human-readable string representation of space being freed. `null` if not available.",
 			},
 			"autotrim": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Auto-trim configuration for the pool indicating whether automatic TRIM operations are enabled.",
 			},
 			"topology": schema.StringAttribute{
-				Computed: true,
+				Computed:    true,
 				Description: "Physical topology and structure of the pool including vdevs. `null` if not available.",
 			},
 		},
@@ -190,18 +190,18 @@ func (d *PoolDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-		if v, ok := resultMap["name"]; ok && v != nil {
-			switch val := v.(type) {
-			case string:
-				data.Name = types.StringValue(val)
-			case map[string]interface{}:
-				if strVal, ok := val["value"]; ok && strVal != nil {
-					data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
-				}
-			default:
-				data.Name = types.StringValue(fmt.Sprintf("%v", v))
+	if v, ok := resultMap["name"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Name = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Name = types.StringValue(fmt.Sprintf("%v", strVal))
 			}
+		default:
+			data.Name = types.StringValue(fmt.Sprintf("%v", v))
 		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

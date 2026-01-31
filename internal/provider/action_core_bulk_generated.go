@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"encoding/json"
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionCoreBulkResource struct {
@@ -17,8 +17,8 @@ type ActionCoreBulkResource struct {
 }
 
 type ActionCoreBulkResourceModel struct {
-	Method types.String `tfsdk:"method"`
-	Params types.String `tfsdk:"params"`
+	Method      types.String `tfsdk:"method"`
+	Params      types.String `tfsdk:"params"`
 	Description types.String `tfsdk:"description"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -42,15 +42,15 @@ func (r *ActionCoreBulkResource) Schema(ctx context.Context, req resource.Schema
 		MarkdownDescription: "Will sequentially call `method` with arguments from the `params` list",
 		Attributes: map[string]schema.Attribute{
 			"method": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Method name to execute for each parameter set.",
 			},
 			"params": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Array of parameter arrays, each representing one method call.",
 			},
 			"description": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Format string for job progress (e.g. \"Deleting snapshot {0[dataset]}@{0[name]}\").",
 			},
 			"action_id": schema.StringAttribute{
@@ -123,7 +123,7 @@ func (r *ActionCoreBulkResource) Create(ctx context.Context, req resource.Create
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

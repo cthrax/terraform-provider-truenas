@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionPoolScrubRunResource struct {
@@ -16,8 +16,8 @@ type ActionPoolScrubRunResource struct {
 }
 
 type ActionPoolScrubRunResourceModel struct {
-	Name types.String `tfsdk:"name"`
-	Threshold types.Int64 `tfsdk:"threshold"`
+	Name      types.String `tfsdk:"name"`
+	Threshold types.Int64  `tfsdk:"threshold"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -40,11 +40,11 @@ func (r *ActionPoolScrubRunResource) Schema(ctx context.Context, req resource.Sc
 		MarkdownDescription: "Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Name of the pool to run scrub on.",
 			},
 			"threshold": schema.Int64Attribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Days before a scrub is due when the scrub should start.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionPoolScrubRunResource) Create(ctx context.Context, req resource.Cr
 	if jobID, ok := result.(float64); ok && false {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

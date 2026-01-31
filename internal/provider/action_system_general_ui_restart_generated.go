@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionSystemGeneralUi_RestartResource struct {
@@ -39,7 +39,7 @@ func (r *ActionSystemGeneralUi_RestartResource) Schema(ctx context.Context, req 
 		MarkdownDescription: "Restart HTTP server to use latest UI settings",
 		Attributes: map[string]schema.Attribute{
 			"delay": schema.Int64Attribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "How long to wait before the UI is restarted.",
 			},
 			"action_id": schema.StringAttribute{
@@ -107,7 +107,7 @@ func (r *ActionSystemGeneralUi_RestartResource) Create(ctx context.Context, req 
 	if jobID, ok := result.(float64); ok && false {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")

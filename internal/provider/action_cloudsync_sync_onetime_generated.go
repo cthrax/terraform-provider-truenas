@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 )
 
 type ActionCloudsyncSync_OnetimeResource struct {
@@ -16,7 +16,7 @@ type ActionCloudsyncSync_OnetimeResource struct {
 }
 
 type ActionCloudsyncSync_OnetimeResourceModel struct {
-	CloudSyncSyncOnetime types.String `tfsdk:"cloud_sync_sync_onetime"`
+	CloudSyncSyncOnetime        types.String `tfsdk:"cloud_sync_sync_onetime"`
 	CloudSyncSyncOnetimeOptions types.String `tfsdk:"cloud_sync_sync_onetime_options"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
@@ -40,11 +40,11 @@ func (r *ActionCloudsyncSync_OnetimeResource) Schema(ctx context.Context, req re
 		MarkdownDescription: "Run cloud sync task without creating it",
 		Attributes: map[string]schema.Attribute{
 			"cloud_sync_sync_onetime": schema.StringAttribute{
-				Required: true,
+				Required:            true,
 				MarkdownDescription: "Cloud sync task configuration for one-time execution.",
 			},
 			"cloud_sync_sync_onetime_options": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
 				MarkdownDescription: "Options for the one-time sync operation.",
 			},
 			"action_id": schema.StringAttribute{
@@ -113,7 +113,7 @@ func (r *ActionCloudsyncSync_OnetimeResource) Create(ctx context.Context, req re
 	if jobID, ok := result.(float64); ok && true {
 		// Background job - wait for completion
 		data.JobID = types.Int64Value(int64(jobID))
-		
+
 		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
 		if err != nil {
 			data.State = types.StringValue("FAILED")
