@@ -3,6 +3,7 @@
 Generate Terraform provider from TrueNAS native method specifications.
 Replaces OpenAPI-based generator with native core.get_methods approach.
 """
+import copy
 import json
 import sys
 from pathlib import Path
@@ -136,11 +137,11 @@ def generate_schema_attrs(
         else:  # resource mode
             # Check if field is auto-generated (optional + description mentions "generate")
             is_auto_generated = (
-                not is_req 
-                and isinstance(prop, dict) 
+                not is_req
+                and isinstance(prop, dict)
                 and "generate" in prop.get("description", "").lower()
             )
-            
+
             if is_auto_generated:
                 # Optional + Computed for auto-generated fields
                 attrs.append(f"\t\t\t\tOptional: true,")
@@ -236,7 +237,7 @@ def generate_create_params(properties):
                     item_schema = items[0] if isinstance(items, list) else items
                     if isinstance(item_schema, dict) and item_schema.get("type") == "object":
                         array_has_objects = True
-            
+
             if array_has_objects:
                 # Array of complex objects - expect JSON-encoded strings per element
                 lines.append(f"\t\tvar {prop_name}List []string")
@@ -279,7 +280,7 @@ def generate_create_params(properties):
                 # Discriminator indicates complex object
                 if "discriminator" in prop_schema:
                     needs_json_parse = True
-            
+
             if needs_json_parse:
                 lines.append(f"\t\tvar {prop_name}Obj map[string]interface{{}}")
                 lines.append(
@@ -469,12 +470,19 @@ def has_complex_objects(properties):
     return False
 
 
-def generate_resource(base_name, methods_dict):
+def generate_resource(base_name, methods_dict, not_generated):
     """Generate resource file from method specs."""
     create_method = f"{base_name}.create"
     update_method = f"{base_name}.update"
     delete_method = f"{base_name}.delete"
     read_method = f"{base_name}.get_instance"
+
+    if create_method in not_generated:
+        del not_generated[create_method]
+    if update_method in not_generated:
+        del not_generated[update_method]
+    if delete_method in not_generated:
+        del not_generated[delete_method]
 
     # Check for lifecycle actions
     # Note: app.create already starts the app, so don't add start_on_create for apps
@@ -762,7 +770,7 @@ def generate_resource(base_name, methods_dict):
     return code
 
 
-def generate_action_resource(method_name, method_spec):
+def generate_action_resource(method_name, method_spec, not_generated):
     """Generate action resource from method spec."""
     # Parse method name (e.g., "pool.scrub" -> "pool", "scrub")
     parts = method_name.split(".")
@@ -775,6 +783,9 @@ def generate_action_resource(method_name, method_spec):
     # Build resource name (e.g., "ActionPoolScrub")
     resource_name = "Action" + "".join(p.title() for p in parts)
     resource_type_name = f"action_{method_name.replace('.', '_')}"
+
+    if method_name in not_generated:
+        del not_generated[method_name]
 
     # Get parameters
     accepts = method_spec.get("accepts", [])
@@ -956,9 +967,12 @@ def generate_attr_types(properties):
     return "\n".join(lines)
 
 
-def generate_query_datasource(base_name, methods_dict):
+def generate_query_datasource(base_name, methods_dict, not_generated):
     """Generate query data source for listing multiple resources."""
     query_method = f"{base_name}.query"
+
+    if query_method in not_generated:
+        del not_generated[query_method]
 
     query_spec = methods_dict.get(query_method, {})
     if not query_spec:
@@ -1055,9 +1069,12 @@ def generate_query_datasource(base_name, methods_dict):
     return code
 
 
-def generate_datasource(base_name, methods_dict):
+def generate_datasource(base_name, methods_dict, not_generated: dict):
     """Generate data source file from method specs."""
     get_method = f"{base_name}.get_instance"
+
+    if get_method in not_generated:
+        del not_generated[get_method]
 
     get_spec = methods_dict.get(get_method, {})
     if not get_spec:
@@ -1269,7 +1286,7 @@ def generate_resource_docs(
                         if isinstance(variant, dict) and variant.get("type") == "object":
                             is_json_object = True
                             break
-            
+
             if is_json_object:
                 desc += " **Note:** This is a JSON object. Use `jsonencode()` to pass structured data."
 
@@ -1319,7 +1336,7 @@ def generate_resource_docs(
                 item_schema = items[0] if isinstance(items, list) else items
                 if isinstance(item_schema, dict) and item_schema.get("type") == "object":
                     desc += " **Note:** Each element must be a JSON-encoded object."
-                    
+
                     # Show object structure from item schema
                     if "properties" in item_schema:
                         obj_props = item_schema["properties"]
@@ -1603,6 +1620,7 @@ def main():
     print(f"Version: {metadata.get('truenas_version')}", file=sys.stderr)
     print(f"Methods: {len(methods)}", file=sys.stderr)
 
+    not_generated = copy.deepcopy(methods)
     # Find resources
     resources = {}
     for method_name in methods.keys():
@@ -1625,7 +1643,7 @@ def main():
     for base_name in resources.keys():
         if base_name in skip_resources:
             continue
-        code = generate_resource(base_name, methods)
+        code = generate_resource(base_name, methods, not_generated)
         if code:
             filename = f"resource_{base_name.replace('.', '_')}_generated.go"
             (output_dir / filename).write_text(code)
@@ -1710,7 +1728,7 @@ def main():
         )
 
         if is_job or has_action_name:
-            code = generate_action_resource(method_name, method_spec)
+            code = generate_action_resource(method_name, method_spec, not_generated)
             if code:
                 filename = f"action_{method_name.replace('.', '_')}_generated.go"
                 (output_dir / filename).write_text(code)
@@ -1753,7 +1771,7 @@ def main():
     for base_name in datasource_candidates:
         if f"{base_name}.get_instance" not in methods:
             continue
-        code = generate_datasource(base_name, methods)
+        code = generate_datasource(base_name, methods, not_generated)
         if code:
             filename = f"datasource_{base_name.replace('.', '_')}_generated.go"
             (datasource_dir / filename).write_text(code)
@@ -1792,7 +1810,7 @@ def main():
     for base_name in query_candidates:
         if f"{base_name}.query" not in methods:
             continue
-        code = generate_query_datasource(base_name, methods)
+        code = generate_query_datasource(base_name, methods, not_generated)
         if code:
             filename = f"datasource_{base_name.replace('.', '_')}s_generated.go"
             (query_dir / filename).write_text(code)
@@ -1828,6 +1846,15 @@ def main():
         generated_datasources + generated_query_datasources,
         generated_actions,
     )
+
+    # filesystem.put is created manually
+    skip_manual = ["filesystem.put"]
+
+    print("\nNot Generating the following API methods:")
+    for keyname in not_generated.keys():
+        if keyname in skip_manual:
+            continue
+        print(keyname)
 
 
 if __name__ == "__main__":
