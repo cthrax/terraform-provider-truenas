@@ -14,7 +14,7 @@ Create a new device for the VM of id `vm`.
 
 ```terraform
 resource "truenas_vm_device" "example" {
-  attributes = "example-value"
+  attributes = "example"
   vm = 1
 }
 ```

@@ -37,16 +37,10 @@ func (r *ActionCloudsyncRestoreResource) Metadata(ctx context.Context, req resou
 
 func (r *ActionCloudsyncRestoreResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Create the opposite of cloud sync task `id` (PULL if it was PUSH and vice versa)",
+		MarkdownDescription: "Create the opposite of cloud sync task `id` (PULL if it was PUSH and vice versa).",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the cloud sync task to restore from.",
-			},
-			"opts": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Restore operation configuration options.",
-			},
+			"id":   schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the cloud sync task to restore from."},
+			"opts": schema.StringAttribute{Required: true, MarkdownDescription: "Restore operation configuration options."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionCloudsyncRestoreResource) Create(ctx context.Context, req resourc
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	params = append(params, data.Opts.ValueString())

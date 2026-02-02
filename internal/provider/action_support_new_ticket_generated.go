@@ -36,12 +36,9 @@ func (r *ActionSupportNew_TicketResource) Metadata(ctx context.Context, req reso
 
 func (r *ActionSupportNew_TicketResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Creates a new ticket for support",
+		MarkdownDescription: "Creates a new ticket for support. This is done using the support proxy API. For TrueNAS Community Edition it will be created on JIRA and for TrueNAS Enterprise on Salesforce.  For Community Edition, `",
 		Attributes: map[string]schema.Attribute{
-			"data": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Support ticket data for either enterprise or community support.",
-			},
+			"data": schema.StringAttribute{Required: true, MarkdownDescription: "Support ticket data for either enterprise or community support."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionSupportNew_TicketResource) Create(ctx context.Context, req resour
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Data.ValueString())
 

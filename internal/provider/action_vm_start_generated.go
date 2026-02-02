@@ -37,16 +37,10 @@ func (r *ActionVmStartResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *ActionVmStartResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Start a VM",
+		MarkdownDescription: "Start a VM.  options.overcommit defaults to false, meaning VMs are not allowed to start if there is not enough available memory to hold all configured VMs. If true, VM starts even if there is not enou",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the virtual machine to start.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options controlling the VM start process.",
-			},
+			"id":      schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the virtual machine to start."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options controlling the VM start process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionVmStartResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	if !data.Options.IsNull() {

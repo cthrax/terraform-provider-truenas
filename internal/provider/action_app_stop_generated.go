@@ -36,12 +36,9 @@ func (r *ActionAppStopResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *ActionAppStopResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stop `app_name` app",
+		MarkdownDescription: "Stop `app_name` app.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the application to stop.",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the application to stop."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAppStopResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 

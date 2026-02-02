@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_remove Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Remove a disk from pool of id `id`.
+  Remove a disk from pool of id `id`.  `label` is the vdev guid or device name.  Error codes:      EZFS_NOSPC(2032): out of space to remove a device     EZFS_NODEVICE(2017): no such device in pool     EZFS_NOREPLICAS(2019): no valid replicas
 ---
 
 # truenas_action_pool_remove (Resource)
 
-Remove a disk from pool of id `id`.
+Remove a disk from pool of id `id`.  `label` is the vdev guid or device name.  Error codes:      EZFS_NOSPC(2032): out of space to remove a device     EZFS_NODEVICE(2017): no such device in pool     EZFS_NOREPLICAS(2019): no valid replicas
 
 This is an action resource that executes the `pool.remove` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

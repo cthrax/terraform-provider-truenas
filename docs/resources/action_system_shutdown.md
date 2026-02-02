@@ -2,12 +2,12 @@
 page_title: "truenas_action_system_shutdown Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Shuts down the operating system.
+  Shuts down the operating system.  An "added" event of name "system" and id "shutdown" is emitted when shutdown is initiated.
 ---
 
 # truenas_action_system_shutdown (Resource)
 
-Shuts down the operating system.
+Shuts down the operating system.  An "added" event of name "system" and id "shutdown" is emitted when shutdown is initiated.
 
 This is an action resource that executes the `system.shutdown` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

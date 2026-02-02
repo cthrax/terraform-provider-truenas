@@ -39,20 +39,11 @@ func (r *ActionCoreBulkResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *ActionCoreBulkResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Will sequentially call `method` with arguments from the `params` list",
+		MarkdownDescription: "Will sequentially call `method` with arguments from the `params` list. For example, running      call(\"core.bulk\", \"zfs.snapshot.delete\", [[\"tank@snap-1\", true], [\"tank@snap-2\", false]])  will",
 		Attributes: map[string]schema.Attribute{
-			"method": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Method name to execute for each parameter set.",
-			},
-			"params": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Array of parameter arrays, each representing one method call.",
-			},
-			"description": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Format string for job progress (e.g. \"Deleting snapshot {0[dataset]}@{0[name]}\").",
-			},
+			"method":      schema.StringAttribute{Required: true, MarkdownDescription: "Method name to execute for each parameter set."},
+			"params":      schema.StringAttribute{Required: true, MarkdownDescription: "Array of parameter arrays, each representing one method call."},
+			"description": schema.StringAttribute{Optional: true, MarkdownDescription: "Format string for job progress (e.g. \"Deleting snapshot {0[dataset]}@{0[name]}\")."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -101,7 +92,6 @@ func (r *ActionCoreBulkResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Method.ValueString())
 	var paramsVal interface{}

@@ -37,16 +37,10 @@ func (r *ActionAppUpgradeResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionAppUpgradeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Upgrade `app_name` app to `app_version`",
+		MarkdownDescription: "Upgrade `app_name` app to `app_version`.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the application to upgrade.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options controlling the upgrade process including target version and snapshot behavior.",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the application to upgrade."},
+			"options":  schema.StringAttribute{Optional: true, MarkdownDescription: "Options controlling the upgrade process including target version and snapshot behavior."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionAppUpgradeResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 	if !data.Options.IsNull() {

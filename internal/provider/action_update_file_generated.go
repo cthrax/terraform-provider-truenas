@@ -36,12 +36,9 @@ func (r *ActionUpdateFileResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionUpdateFileResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Updates the system using the uploaded ",
+		MarkdownDescription: "Updates the system using the uploaded .tar file.",
 		Attributes: map[string]schema.Attribute{
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the manual update file upload process.",
-			},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the manual update file upload process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionUpdateFileResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Options.IsNull() {
 		params = append(params, data.Options.ValueString())

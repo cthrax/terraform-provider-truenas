@@ -1,0 +1,151 @@
+package provider
+
+import (
+	"context"
+	"encoding/base64"
+{extra_imports}
+	"fmt"
+
+	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+type {resource_name}Resource struct {
+	client *client.Client
+}
+
+type {resource_name}ResourceModel struct {
+	ID types.String `tfsdk:"id"`
+{fields}
+	FileContent types.String `tfsdk:"file_content"`
+}
+
+func New{resource_name}Resource() resource.Resource {
+	return &{resource_name}Resource{}
+}
+
+func (r *{resource_name}Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_{resource_type_name}"
+}
+
+func (r *{resource_name}Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		MarkdownDescription: "{description}",
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Resource identifier",
+			},
+{schema_attrs}
+			"file_content": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Base64-encoded file content for upload (optional, only needed for key file uploads)",
+			},
+		},
+	}
+}
+
+func (r *{resource_name}Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+	client, ok := req.ProviderData.(*client.Client)
+	if !ok {
+		resp.Diagnostics.AddError("Unexpected Resource Configure Type", "Expected *client.Client")
+		return
+	}
+	r.client = client
+}
+
+func (r *{resource_name}Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data {resource_name}ResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Build parameters
+{param_building}
+
+	// Decode file content if provided
+	var fileContent []byte
+	if !data.FileContent.IsNull() && data.FileContent.ValueString() != "" {
+		var err error
+		fileContent, err = base64.StdEncoding.DecodeString(data.FileContent.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid File Content", fmt.Sprintf("Failed to decode base64: %s", err.Error()))
+			return
+		}
+	}
+
+	// Execute via HTTP multipart upload
+	endpoint := "/api/v2.0/{endpoint_path}"
+	_, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
+	if err != nil {
+		resp.Diagnostics.AddError("Upload Failed", fmt.Sprintf("Failed to execute {method_name}: %s", err.Error()))
+		return
+	}
+
+	// Note: Upload returns job ID but we don't wait - job completes in background
+
+	// Set ID
+{id_generation}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *{resource_name}Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data {resource_name}ResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	// File upload resources are write-only, state is maintained
+}
+
+func (r *{resource_name}Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data {resource_name}ResourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	
+	// Get ID from state
+	var state {resource_name}ResourceModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	data.ID = state.ID
+
+	// Build parameters
+{param_building}
+
+	// Decode file content if provided
+	var fileContent []byte
+	if !data.FileContent.IsNull() && data.FileContent.ValueString() != "" {
+		var err error
+		fileContent, err = base64.StdEncoding.DecodeString(data.FileContent.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid File Content", fmt.Sprintf("Failed to decode base64: %s", err.Error()))
+			return
+		}
+	}
+
+	// Execute via HTTP multipart upload
+	endpoint := "/api/v2.0/{endpoint_path}"
+	_, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
+	if err != nil {
+		resp.Diagnostics.AddError("Upload Failed", fmt.Sprintf("Failed to execute {method_name}: %s", err.Error()))
+		return
+	}
+
+	// Note: Upload returns job ID but we don't wait - job completes in background
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+func (r *{resource_name}Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// Note: TrueNAS does not provide an API method to delete files
+	// The uploaded file will remain on the filesystem after destroy
+	// Manual cleanup required if needed
+}

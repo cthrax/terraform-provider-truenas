@@ -37,16 +37,10 @@ func (r *ActionPoolSnapshotRollbackResource) Metadata(ctx context.Context, req r
 
 func (r *ActionPoolSnapshotRollbackResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Execute pool",
+		MarkdownDescription: "Execute pool.snapshot.rollback",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "ID of the snapshot to rollback to.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling snapshot rollback behavior.",
-			},
+			"id":      schema.StringAttribute{Required: true, MarkdownDescription: "ID of the snapshot to rollback to."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling snapshot rollback behavior."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolSnapshotRollbackResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueString())
 	if !data.Options.IsNull() {

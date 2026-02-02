@@ -14,8 +14,8 @@ Create a NVMe target namespace in a subsystem (`subsys`).
 
 ```terraform
 resource "truenas_nvmet_namespace" "example" {
-  device_path = "example-value"
-  device_type = "example-value"
+  device_path = "example"
+  device_type = "example"
   subsys_id = 1
 }
 ```
@@ -25,7 +25,7 @@ resource "truenas_nvmet_namespace" "example" {
 ### Required
 
 - `device_path` (String) - Normalized path to the device or file for the namespace.
-- `device_type` (String) - Type of device (or file) used to implement the namespace. Valid values: `ZVOL`, `FILE`
+- `device_type` (String) - Type of device (or file) used to implement the namespace.  Valid values: `ZVOL`, `FILE`
 - `subsys_id` (Int64) - ID of the NVMe-oF subsystem to contain this namespace.
 
 ### Optional

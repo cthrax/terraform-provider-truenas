@@ -36,12 +36,9 @@ func (r *ActionFilesystemGetResource) Metadata(ctx context.Context, req resource
 
 func (r *ActionFilesystemGetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Job to get contents of `path`",
+		MarkdownDescription: "Job to get contents of `path`.",
 		Attributes: map[string]schema.Attribute{
-			"path": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Path of the file to read.",
-			},
+			"path": schema.StringAttribute{Required: true, MarkdownDescription: "Path of the file to read."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionFilesystemGetResource) Create(ctx context.Context, req resource.C
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Path.ValueString())
 

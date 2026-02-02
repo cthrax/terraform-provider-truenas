@@ -14,8 +14,8 @@ Create a Rsync Task.
 
 ```terraform
 resource "truenas_rsynctask" "example" {
-  path = "example-value"
-  user = "example-value"
+  path = "example"
+  user = "example"
 }
 ```
 

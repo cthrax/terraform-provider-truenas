@@ -37,16 +37,10 @@ func (r *ActionPoolDatasetExport_KeyResource) Metadata(ctx context.Context, req 
 
 func (r *ActionPoolDatasetExport_KeyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Export own encryption key for dataset `id`",
+		MarkdownDescription: "Export own encryption key for dataset `id`. If `download` is `true`, key will be downloaded in a json file where the same file can be used to unlock the dataset, otherwise it will be returned as strin",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The dataset ID (full path) to export the encryption key from.",
-			},
-			"download": schema.BoolAttribute{
-				Optional:            true,
-				MarkdownDescription: "Whether to prepare the key for download as a file.",
-			},
+			"id":       schema.StringAttribute{Required: true, MarkdownDescription: "The dataset ID (full path) to export the encryption key from."},
+			"download": schema.BoolAttribute{Optional: true, MarkdownDescription: "Whether to prepare the key for download as a file."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolDatasetExport_KeyResource) Create(ctx context.Context, req re
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueString())
 	if !data.Download.IsNull() {

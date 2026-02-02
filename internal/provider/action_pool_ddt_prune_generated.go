@@ -36,12 +36,9 @@ func (r *ActionPoolDdt_PruneResource) Metadata(ctx context.Context, req resource
 
 func (r *ActionPoolDdt_PruneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Prune DDT entries in pool `pool_name` based on the specified options",
+		MarkdownDescription: "Prune DDT entries in pool `pool_name` based on the specified options.  `percentage` is the percentage of DDT entries to prune.  `days` is the number of days to prune DDT entries.",
 		Attributes: map[string]schema.Attribute{
-			"options": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "PoolDdtPruneArgs parameters.",
-			},
+			"options": schema.StringAttribute{Required: true, MarkdownDescription: "PoolDdtPruneArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionPoolDdt_PruneResource) Create(ctx context.Context, req resource.C
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Options.ValueString())
 

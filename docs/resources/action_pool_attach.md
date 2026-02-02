@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_attach Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  `target_vdev` is the GUID of the vdev where the disk needs to be attached. In case of STRIPED vdev, this
+  `target_vdev` is the GUID of the vdev where the disk needs to be attached. In case of STRIPED vdev, this is the STRIPED disk GUID which will be converted to mirror. If `target_vdev` is mirror, it will be converted into a n-way mirror.
 ---
 
 # truenas_action_pool_attach (Resource)
 
-`target_vdev` is the GUID of the vdev where the disk needs to be attached. In case of STRIPED vdev, this
+`target_vdev` is the GUID of the vdev where the disk needs to be attached. In case of STRIPED vdev, this is the STRIPED disk GUID which will be converted to mirror. If `target_vdev` is mirror, it will be converted into a n-way mirror.
 
 This is an action resource that executes the `pool.attach` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

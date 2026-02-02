@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_ddt_prune Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Prune DDT entries in pool `pool_name` based on the specified options.
+  Prune DDT entries in pool `pool_name` based on the specified options.  `percentage` is the percentage of DDT entries to prune.  `days` is the number of days to prune DDT entries.
 ---
 
 # truenas_action_pool_ddt_prune (Resource)
 
-Prune DDT entries in pool `pool_name` based on the specified options.
+Prune DDT entries in pool `pool_name` based on the specified options.  `percentage` is the percentage of DDT entries to prune.  `days` is the number of days to prune DDT entries.
 
 This is an action resource that executes the `pool.ddt_prune` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

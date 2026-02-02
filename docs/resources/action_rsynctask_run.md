@@ -2,12 +2,12 @@
 page_title: "truenas_action_rsynctask_run Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Job to run rsync task of `id`.
+  Job to run rsync task of `id`.  Output is saved to job log excerpt (not syslog).
 ---
 
 # truenas_action_rsynctask_run (Resource)
 
-Job to run rsync task of `id`.
+Job to run rsync task of `id`.  Output is saved to job log excerpt (not syslog).
 
 This is an action resource that executes the `rsynctask.run` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

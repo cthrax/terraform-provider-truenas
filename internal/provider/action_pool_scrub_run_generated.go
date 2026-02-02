@@ -37,16 +37,10 @@ func (r *ActionPoolScrubRunResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionPoolScrubRunResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before",
+		MarkdownDescription: "Initiate a scrub of a pool `name` if last scrub was performed more than `threshold` days before.",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the pool to run scrub on.",
-			},
-			"threshold": schema.Int64Attribute{
-				Optional:            true,
-				MarkdownDescription: "Days before a scrub is due when the scrub should start.",
-			},
+			"name":      schema.StringAttribute{Required: true, MarkdownDescription: "Name of the pool to run scrub on."},
+			"threshold": schema.Int64Attribute{Optional: true, MarkdownDescription: "Days before a scrub is due when the scrub should start."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolScrubRunResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Name.ValueString())
 	if !data.Threshold.IsNull() {

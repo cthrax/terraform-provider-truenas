@@ -14,8 +14,8 @@ Create a Static Route.
 
 ```terraform
 resource "truenas_staticroute" "example" {
-  destination = "example-value"
-  gateway = "example-value"
+  destination = "example"
+  gateway = "example"
 }
 ```
 

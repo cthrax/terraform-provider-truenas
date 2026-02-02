@@ -36,12 +36,9 @@ func (r *ActionAlertRestoreResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionAlertRestoreResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Restore `id` alert which had been dismissed",
+		MarkdownDescription: "Restore `id` alert which had been dismissed.",
 		Attributes: map[string]schema.Attribute{
-			"uuid": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "UUID of the dismissed alert to restore.",
-			},
+			"uuid": schema.StringAttribute{Required: true, MarkdownDescription: "UUID of the dismissed alert to restore."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAlertRestoreResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Uuid.ValueString())
 

@@ -36,12 +36,9 @@ func (r *ActionDockerDelete_BackupResource) Metadata(ctx context.Context, req re
 
 func (r *ActionDockerDelete_BackupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Delete `backup_name` app backup",
+		MarkdownDescription: "Delete `backup_name` app backup.",
 		Attributes: map[string]schema.Attribute{
-			"backup_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the backup to delete.",
-			},
+			"backup_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the backup to delete."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionDockerDelete_BackupResource) Create(ctx context.Context, req reso
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.BackupName.ValueString())
 

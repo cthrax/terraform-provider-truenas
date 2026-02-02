@@ -2,20 +2,20 @@
 page_title: "truenas_sharing_smb Resource - terraform-provider-truenas"
 subcategory: ""
 description: |-
-  Manages TrueNAS sharing.smb resources
+  Manages sharing.smb
 ---
 
 # truenas_sharing_smb (Resource)
 
-Manages TrueNAS sharing.smb resources
+Manages sharing.smb
 
 
 ## Example Usage
 
 ```terraform
 resource "truenas_sharing_smb" "example" {
-  name = "example-value"
-  path = "example-value"
+  name = "example"
+  path = "example"
 }
 ```
 
@@ -30,12 +30,12 @@ resource "truenas_sharing_smb" "example" {
 
 - `access_based_share_enumeration` (Bool) - If set, the share is only included when an SMB client requests a list of shares on the SMB server if     the share (not filesystem) access control list (see `sharing.smb.getacl`) grants access to the  Default: `False`
 - `audit` (String) - Audit configuration for monitoring SMB share access and operations. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({enable = true})`
-- `browsable` (Bool) - If set, the share is included when an SMB client requests a list of SMB shares on the TrueNAS server. Default: `True`
-- `comment` (String) - Text field that is seen next to a share when an SMB client requests a list of SMB shares on the TrueNAS     server. Default: ``
-- `enabled` (Bool) - If unset, the SMB share is not available over the SMB protocol. Default: `True`
-- `options` (String) - Additional configuration related to the configured SMB share purpose. If null, then the default     options related to the share purpose will be applied. Default: `None`
+- `browsable` (Bool) - If set, the share is included when an SMB client requests a list of SMB shares on the TrueNAS server.  Default: `True`
+- `comment` (String) - Text field that is seen next to a share when an SMB client requests a list of SMB shares on the TrueNAS     server.  Default: ``
+- `enabled` (Bool) - If unset, the SMB share is not available over the SMB protocol.  Default: `True`
+- `options` (String) - Additional configuration related to the configured SMB share purpose. If null, then the default     options related to the share purpose will be applied.  Default: `None`
 - `purpose` (String) - This parameter sets the purpose of the SMB share. It controls how the SMB share behaves and what features are     available through options. The DEFAULT_SHARE setting is best for most applications, an Default: `DEFAULT_SHARE` Valid values: `DEFAULT_SHARE`, `LEGACY_SHARE`, `TIMEMACHINE_SHARE`, `MULTIPROTOCOL_SHARE`, `TIME_LOCKED_SHARE`, `PRIVATE_DATASETS_SHARE`, `EXTERNAL_SHARE`, `VEEAM_REPOSITORY_SHARE`, `FCP_SHARE`
-- `readonly` (Bool) - If set, SMB clients cannot create or change files and directories in the SMB share.  NOTE: If set, the share path is still writeable by local processes or other file sharing protocols. Default: `False`
+- `readonly` (Bool) - If set, SMB clients cannot create or change files and directories in the SMB share.  NOTE: If set, the share path is still writeable by local processes or other file sharing protocols.  Default: `False`
 
 ### Read-Only
 

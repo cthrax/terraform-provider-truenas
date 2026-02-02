@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
+
 	"fmt"
 	"time"
 
@@ -17,6 +19,8 @@ type ActionSupportAttach_TicketResource struct {
 
 type ActionSupportAttach_TicketResourceModel struct {
 	Data types.String `tfsdk:"data"`
+	// File upload (optional)
+	FileContent types.String `tfsdk:"file_content"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -36,11 +40,13 @@ func (r *ActionSupportAttach_TicketResource) Metadata(ctx context.Context, req r
 
 func (r *ActionSupportAttach_TicketResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Method to attach a file to an existing ticket",
+		MarkdownDescription: "Method to attach a file to an existing ticket.",
 		Attributes: map[string]schema.Attribute{
-			"data": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "SupportAttachTicketArgs parameters.",
+			"data": schema.StringAttribute{Required: true, MarkdownDescription: "SupportAttachTicketArgs parameters."},
+			"file_content": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Base64-encoded file content for upload (optional)",
 			},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
@@ -90,44 +96,38 @@ func (r *ActionSupportAttach_TicketResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
-	params := []interface{}{}
-	params = append(params, data.Data.ValueString())
+	params := make(map[string]interface{})
+	params["data"] = data.Data.ValueString()
 
-	// Execute action
-	result, err := r.client.Call("support.attach_ticket", params)
+	// Prepare file content if provided
+	var fileContent []byte
+	var err error
+	if !data.FileContent.IsNull() {
+		fileContent, err = base64.StdEncoding.DecodeString(data.FileContent.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid File Content", fmt.Sprintf("Failed to decode base64: %s", err.Error()))
+			return
+		}
+	}
+
+	// Execute via HTTP multipart upload
+	endpoint := "/api/v2.0/support/attach_ticket"
+	result, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
 	if err != nil {
 		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute support.attach_ticket: %s", err.Error()))
 		return
 	}
 
-	// Check if result is a job ID
-	if jobID, ok := result.(float64); ok && true {
-		// Background job - wait for completion
+	// Store job ID if returned
+	if jobID, ok := result.(float64); ok {
 		data.JobID = types.Int64Value(int64(jobID))
-
-		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
-		if err != nil {
-			data.State = types.StringValue("FAILED")
-			data.Error = types.StringValue(err.Error())
-			resp.Diagnostics.AddError("Job Failed", err.Error())
-		} else {
-			data.State = types.StringValue(jobResult.State)
-			data.Progress = types.Float64Value(jobResult.Progress)
-			data.Result = types.StringValue(fmt.Sprintf("%v", jobResult.Result))
-			if jobResult.Error != "" {
-				data.Error = types.StringValue(jobResult.Error)
-			} else {
-				data.Error = types.StringValue("")
-			}
-		}
-	} else {
-		// Immediate result
-		data.State = types.StringValue("SUCCESS")
-		data.Progress = types.Float64Value(100.0)
-		data.Result = types.StringValue(fmt.Sprintf("%v", result))
-		data.Error = types.StringValue("")
 	}
+
+	// Actions are fire-and-forget - mark as success immediately
+	data.State = types.StringValue("SUBMITTED")
+	data.Progress = types.Float64Value(0.0)
+	data.Result = types.StringValue(fmt.Sprintf("%v", result))
+	data.Error = types.StringValue("")
 
 	// Generate ID from timestamp
 	data.ActionID = types.StringValue(fmt.Sprintf("support.attach_ticket-%d", time.Now().Unix()))
@@ -141,9 +141,10 @@ func (r *ActionSupportAttach_TicketResource) Read(ctx context.Context, req resou
 }
 
 func (r *ActionSupportAttach_TicketResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
+	// Actions cannot be updated - force recreation
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated. Please destroy and recreate the resource.")
 }
 
 func (r *ActionSupportAttach_TicketResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// No-op - actions cannot be undone
+	// Actions cannot be undone - just remove from state
 }

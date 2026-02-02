@@ -14,7 +14,7 @@ Create an NVMe target `host`.
 
 ```terraform
 resource "truenas_nvmet_host" "example" {
-  hostnqn = "example-value"
+  hostnqn = "example"
 }
 ```
 

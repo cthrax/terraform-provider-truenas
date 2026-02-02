@@ -37,16 +37,10 @@ func (r *ActionUpdateManualResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionUpdateManualResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Update the system using a manual update file",
+		MarkdownDescription: "Update the system using a manual update file.",
 		Attributes: map[string]schema.Attribute{
-			"path": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The absolute path to the update file.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the manual update process.",
-			},
+			"path":    schema.StringAttribute{Required: true, MarkdownDescription: "The absolute path to the update file."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the manual update process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionUpdateManualResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Path.ValueString())
 	if !data.Options.IsNull() {

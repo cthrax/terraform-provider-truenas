@@ -14,11 +14,11 @@ Create a new cloud backup task
 
 ```terraform
 resource "truenas_cloud_backup" "example" {
-  attributes = "example-value"
+  attributes = "example"
   credentials = 1
   keep_last = 1
-  password = "example-value"
-  path = "example-value"
+  password = "example"
+  path = "example"
 }
 ```
 

@@ -2,12 +2,12 @@
 page_title: "truenas_action_virt_instance_restart Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Restart an instance.
+  Restart an instance.  Timeout is how long it should wait for the instance to shutdown cleanly.
 ---
 
 # truenas_action_virt_instance_restart (Resource)
 
-Restart an instance.
+Restart an instance.  Timeout is how long it should wait for the instance to shutdown cleanly.
 
 This is an action resource that executes the `virt.instance.restart` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

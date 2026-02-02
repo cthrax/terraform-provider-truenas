@@ -36,12 +36,9 @@ func (r *ActionReplicationRun_OnetimeResource) Metadata(ctx context.Context, req
 
 func (r *ActionReplicationRun_OnetimeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Run replication task without creating it",
+		MarkdownDescription: "Run replication task without creating it.",
 		Attributes: map[string]schema.Attribute{
-			"replication_run_onetime": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "ReplicationRunOnetimeArgs parameters.",
-			},
+			"replication_run_onetime": schema.StringAttribute{Required: true, MarkdownDescription: "ReplicationRunOnetimeArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionReplicationRun_OnetimeResource) Create(ctx context.Context, req r
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.ReplicationRunOnetime.ValueString())
 

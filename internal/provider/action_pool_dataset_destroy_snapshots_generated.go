@@ -37,16 +37,10 @@ func (r *ActionPoolDatasetDestroy_SnapshotsResource) Metadata(ctx context.Contex
 
 func (r *ActionPoolDatasetDestroy_SnapshotsResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Destroy specified snapshots of a given dataset",
+		MarkdownDescription: "Destroy specified snapshots of a given dataset.",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The dataset name to destroy snapshots for.",
-			},
-			"snapshots": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Specification of which snapshots to destroy (all, specific ones, or ranges).",
-			},
+			"name":      schema.StringAttribute{Required: true, MarkdownDescription: "The dataset name to destroy snapshots for."},
+			"snapshots": schema.StringAttribute{Required: true, MarkdownDescription: "Specification of which snapshots to destroy (all, specific ones, or ranges)."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolDatasetDestroy_SnapshotsResource) Create(ctx context.Context,
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Name.ValueString())
 	params = append(params, data.Snapshots.ValueString())

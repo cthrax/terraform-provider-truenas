@@ -66,7 +66,7 @@ func (d *VmsDataSource) Metadata(ctx context.Context, req datasource.MetadataReq
 
 func (d *VmsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Query vms resources",
+		Description: "Query vms",
 		Attributes: map[string]schema.Attribute{
 			"items": schema.ListNestedAttribute{
 				Computed:    true,

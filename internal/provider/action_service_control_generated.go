@@ -38,20 +38,11 @@ func (r *ActionServiceControlResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionServiceControlResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Execute service",
+		MarkdownDescription: "Execute service.control",
 		Attributes: map[string]schema.Attribute{
-			"verb": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The service operation to perform.",
-			},
-			"service": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the service to control.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the service operation behavior.",
-			},
+			"verb":    schema.StringAttribute{Required: true, MarkdownDescription: "The service operation to perform."},
+			"service": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the service to control."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the service operation behavior."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -100,7 +91,6 @@ func (r *ActionServiceControlResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Verb.ValueString())
 	params = append(params, data.Service.ValueString())

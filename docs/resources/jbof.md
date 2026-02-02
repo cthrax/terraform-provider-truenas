@@ -14,9 +14,9 @@ Create a new JBOF.
 
 ```terraform
 resource "truenas_jbof" "example" {
-  mgmt_ip1 = "example-value"
-  mgmt_password = "example-value"
-  mgmt_username = "example-value"
+  mgmt_ip1 = "example"
+  mgmt_password = "example"
+  mgmt_username = "example"
 }
 ```
 

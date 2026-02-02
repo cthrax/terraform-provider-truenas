@@ -2,12 +2,12 @@
 page_title: "truenas_action_config_reset Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Reset database to configuration defaults.
+  Reset database to configuration defaults.  If `reboot` is true this job will reboot the system after its completed with a delay of 10 seconds.
 ---
 
 # truenas_action_config_reset (Resource)
 
-Reset database to configuration defaults.
+Reset database to configuration defaults.  If `reboot` is true this job will reboot the system after its completed with a delay of 10 seconds.
 
 This is an action resource that executes the `config.reset` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

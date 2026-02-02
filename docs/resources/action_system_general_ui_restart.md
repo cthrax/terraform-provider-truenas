@@ -2,12 +2,12 @@
 page_title: "truenas_action_system_general_ui_restart Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Restart HTTP server to use latest UI settings.
+  Restart HTTP server to use latest UI settings.  HTTP server will be restarted after `delay` seconds.
 ---
 
 # truenas_action_system_general_ui_restart (Resource)
 
-Restart HTTP server to use latest UI settings.
+Restart HTTP server to use latest UI settings.  HTTP server will be restarted after `delay` seconds.
 
 This is an action resource that executes the `system.general.ui_restart` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

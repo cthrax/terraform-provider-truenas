@@ -36,12 +36,9 @@ func (r *ActionConfigResetResource) Metadata(ctx context.Context, req resource.M
 
 func (r *ActionConfigResetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Reset database to configuration defaults",
+		MarkdownDescription: "Reset database to configuration defaults.  If `reboot` is true this job will reboot the system after its completed with a delay of 10 seconds.",
 		Attributes: map[string]schema.Attribute{
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options controlling the configuration reset behavior.",
-			},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options controlling the configuration reset behavior."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionConfigResetResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Options.IsNull() {
 		params = append(params, data.Options.ValueString())

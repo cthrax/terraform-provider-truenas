@@ -36,12 +36,9 @@ func (r *ActionCoreJob_WaitResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionCoreJob_WaitResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Execute core",
+		MarkdownDescription: "Execute core.job_wait",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the job to wait for completion.",
-			},
+			"id": schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the job to wait for completion."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionCoreJob_WaitResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 

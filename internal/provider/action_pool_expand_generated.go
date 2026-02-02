@@ -36,12 +36,9 @@ func (r *ActionPoolExpandResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionPoolExpandResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Expand pool to fit all available disk space",
+		MarkdownDescription: "Expand pool to fit all available disk space.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the pool to expand.",
-			},
+			"id": schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the pool to expand."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionPoolExpandResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 

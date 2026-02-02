@@ -37,16 +37,10 @@ func (r *ActionPoolAttachResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionPoolAttachResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "`target_vdev` is the GUID of the vdev where the disk needs to be attached",
+		MarkdownDescription: "`target_vdev` is the GUID of the vdev where the disk needs to be attached. In case of STRIPED vdev, this is the STRIPED disk GUID which will be converted to mirror. If `target_vdev` is mirror, it will",
 		Attributes: map[string]schema.Attribute{
-			"oid": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the pool to attach a disk to.",
-			},
-			"options": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Configuration for the disk attachment operation.",
-			},
+			"oid":     schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the pool to attach a disk to."},
+			"options": schema.StringAttribute{Required: true, MarkdownDescription: "Configuration for the disk attachment operation."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolAttachResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Oid.ValueInt64())
 	params = append(params, data.Options.ValueString())

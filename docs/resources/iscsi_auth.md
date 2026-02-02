@@ -14,9 +14,9 @@ Create an iSCSI Authorized Access.
 
 ```terraform
 resource "truenas_iscsi_auth" "example" {
-  secret = "example-value"
+  secret = "example"
   tag = 1
-  user = "example-value"
+  user = "example"
 }
 ```
 

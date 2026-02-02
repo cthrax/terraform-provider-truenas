@@ -36,12 +36,9 @@ func (r *ActionAuditDownload_ReportResource) Metadata(ctx context.Context, req r
 
 func (r *ActionAuditDownload_ReportResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Download the audit report with the specified name from the server",
+		MarkdownDescription: "Download the audit report with the specified name from the server. Note that users will only be able to download reports that they personally generated.",
 		Attributes: map[string]schema.Attribute{
-			"data": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "AuditDownloadReportArgs parameters.",
-			},
+			"data": schema.StringAttribute{Required: true, MarkdownDescription: "AuditDownloadReportArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAuditDownload_ReportResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Data.ValueString())
 

@@ -14,7 +14,7 @@ Creates a privilege.
 
 ```terraform
 resource "truenas_privilege" "example" {
-  name = "example-value"
+  name = "example"
   web_shell = true
 }
 ```

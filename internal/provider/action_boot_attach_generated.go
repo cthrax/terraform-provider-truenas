@@ -37,16 +37,10 @@ func (r *ActionBootAttachResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionBootAttachResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Attach a disk to the boot pool, turning a stripe into a mirror",
+		MarkdownDescription: "Attach a disk to the boot pool, turning a stripe into a mirror.  `expand` option will determine whether the new disk partition will be          the maximum available or the same size as the current di",
 		Attributes: map[string]schema.Attribute{
-			"dev": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Device name or path to attach to the boot pool.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for the attach operation.",
-			},
+			"dev":     schema.StringAttribute{Required: true, MarkdownDescription: "Device name or path to attach to the boot pool."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for the attach operation."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionBootAttachResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Dev.ValueString())
 	if !data.Options.IsNull() {

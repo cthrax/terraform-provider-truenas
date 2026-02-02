@@ -2,12 +2,12 @@
 page_title: "truenas_action_audit_download_report Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Download the audit report with the specified name from the server.
+  Download the audit report with the specified name from the server. Note that users will only be able to download reports that they personally generated.
 ---
 
 # truenas_action_audit_download_report (Resource)
 
-Download the audit report with the specified name from the server.
+Download the audit report with the specified name from the server. Note that users will only be able to download reports that they personally generated.
 
 This is an action resource that executes the `audit.download_report` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

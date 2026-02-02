@@ -36,12 +36,9 @@ func (r *ActionSystemGeneralUi_RestartResource) Metadata(ctx context.Context, re
 
 func (r *ActionSystemGeneralUi_RestartResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Restart HTTP server to use latest UI settings",
+		MarkdownDescription: "Restart HTTP server to use latest UI settings.  HTTP server will be restarted after `delay` seconds.",
 		Attributes: map[string]schema.Attribute{
-			"delay": schema.Int64Attribute{
-				Optional:            true,
-				MarkdownDescription: "How long to wait before the UI is restarted.",
-			},
+			"delay": schema.Int64Attribute{Optional: true, MarkdownDescription: "How long to wait before the UI is restarted."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionSystemGeneralUi_RestartResource) Create(ctx context.Context, req 
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Delay.IsNull() {
 		params = append(params, data.Delay.ValueInt64())

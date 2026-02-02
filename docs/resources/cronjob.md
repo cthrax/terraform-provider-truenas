@@ -14,8 +14,8 @@ Create a new cron job.
 
 ```terraform
 resource "truenas_cronjob" "example" {
-  command = "example-value"
-  user = "example-value"
+  command = "example"
+  user = "example"
 }
 ```
 

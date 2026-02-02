@@ -37,16 +37,10 @@ func (r *ActionPoolReplaceResource) Metadata(ctx context.Context, req resource.M
 
 func (r *ActionPoolReplaceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Replace a disk on a pool",
+		MarkdownDescription: "Replace a disk on a pool.  `label` is the ZFS guid or a device name `disk` is the identifier of a disk If `preserve_settings` is true, then settings (power management, S.M.A.R.T., etc.) of a disk bein",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the pool to replace a disk in.",
-			},
-			"options": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Configuration for the disk replacement operation.",
-			},
+			"id":      schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the pool to replace a disk in."},
+			"options": schema.StringAttribute{Required: true, MarkdownDescription: "Configuration for the disk replacement operation."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolReplaceResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	params = append(params, data.Options.ValueString())

@@ -14,8 +14,8 @@ Create an initshutdown script task.
 
 ```terraform
 resource "truenas_initshutdownscript" "example" {
-  type = "example-value"
-  when = "example-value"
+  type = "example"
+  when = "example"
 }
 ```
 

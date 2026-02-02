@@ -15,7 +15,7 @@ Create a Virtual Machine (VM).
 ```terraform
 resource "truenas_vm" "example" {
   memory = 1
-  name = "example-value"
+  name = "example"
   start_on_create = true
 }
 ```
@@ -29,7 +29,7 @@ resource "truenas_vm" "example" {
 
 ### Optional
 
-- `start_on_create` (Bool) - Start the resource immediately after creation. Default: `true`
+- `start_on_create` (Bool) - Start immediately after creation. Default: `true`
 - `arch_type` (String) - Guest architecture type. `null` to use hypervisor default. Default: `None`
 - `autostart` (Bool) - Whether to automatically start the VM when the host system boots. Default: `True`
 - `bootloader` (String) - Boot firmware type. `UEFI` for modern UEFI, `UEFI_CSM` for legacy BIOS compatibility. Default: `UEFI` Valid values: `UEFI_CSM`, `UEFI`

@@ -37,16 +37,10 @@ func (r *ActionCloud_BackupSyncResource) Metadata(ctx context.Context, req resou
 
 func (r *ActionCloud_BackupSyncResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Run the cloud backup job `id`",
+		MarkdownDescription: "Run the cloud backup job `id`.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "The cloud backup task ID.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Sync options.",
-			},
+			"id":      schema.Int64Attribute{Required: true, MarkdownDescription: "The cloud backup task ID."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Sync options."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionCloud_BackupSyncResource) Create(ctx context.Context, req resourc
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	if !data.Options.IsNull() {

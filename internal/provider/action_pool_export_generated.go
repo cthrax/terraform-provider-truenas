@@ -37,16 +37,10 @@ func (r *ActionPoolExportResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionPoolExportResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Export pool of `id`",
+		MarkdownDescription: "Export pool of `id`.  `cascade` will delete all attachments of the given pool (`pool.attachments`). `restart_services` will restart services that have open files on given pool. `destroy` will also PER",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the pool to export.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the pool export process.",
-			},
+			"id":      schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the pool to export."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the pool export process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolExportResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	if !data.Options.IsNull() {

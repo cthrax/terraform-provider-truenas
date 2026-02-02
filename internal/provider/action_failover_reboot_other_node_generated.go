@@ -36,12 +36,9 @@ func (r *ActionFailoverRebootOther_NodeResource) Metadata(ctx context.Context, r
 
 func (r *ActionFailoverRebootOther_NodeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Reboot the other node and wait for it to come back online",
+		MarkdownDescription: "Reboot the other node and wait for it to come back online.  NOTE: This makes very few checks on HA systems. You need to     know what you're doing before calling this.",
 		Attributes: map[string]schema.Attribute{
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for rebooting the other node.",
-			},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for rebooting the other node."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionFailoverRebootOther_NodeResource) Create(ctx context.Context, req
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Options.IsNull() {
 		params = append(params, data.Options.ValueString())

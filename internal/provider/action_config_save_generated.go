@@ -36,12 +36,9 @@ func (r *ActionConfigSaveResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionConfigSaveResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Create a tar file of security-sensitive information",
+		MarkdownDescription: "Create a tar file of security-sensitive information. These options select which information is included in the tar file:  `secretseed` bool: When true, include password secret seed. `pool_keys` bool:",
 		Attributes: map[string]schema.Attribute{
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options controlling what data to include in the configuration backup.",
-			},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options controlling what data to include in the configuration backup."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionConfigSaveResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Options.IsNull() {
 		params = append(params, data.Options.ValueString())

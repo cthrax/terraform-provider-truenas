@@ -37,16 +37,10 @@ func (r *ActionCloud_BackupDelete_SnapshotResource) Metadata(ctx context.Context
 
 func (r *ActionCloud_BackupDelete_SnapshotResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Delete snapshot `snapshot_id` created by the cloud backup job `id`",
+		MarkdownDescription: "Delete snapshot `snapshot_id` created by the cloud backup job `id`.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "The cloud backup task ID.",
-			},
-			"snapshot_id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "ID of the snapshot to delete.",
-			},
+			"id":          schema.Int64Attribute{Required: true, MarkdownDescription: "The cloud backup task ID."},
+			"snapshot_id": schema.StringAttribute{Required: true, MarkdownDescription: "ID of the snapshot to delete."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionCloud_BackupDelete_SnapshotResource) Create(ctx context.Context, 
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	params = append(params, data.SnapshotId.ValueString())

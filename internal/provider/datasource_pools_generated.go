@@ -60,7 +60,7 @@ func (d *PoolsDataSource) Metadata(ctx context.Context, req datasource.MetadataR
 
 func (d *PoolsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Query pools resources",
+		Description: "Query pools",
 		Attributes: map[string]schema.Attribute{
 			"items": schema.ListNestedAttribute{
 				Computed:    true,

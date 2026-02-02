@@ -341,18 +341,12 @@ func (r *VmResource) Create(ctx context.Context, req resource.CreateRequest, res
 		return
 	}
 
-	// Handle lifecycle action - start on create if requested
-	startOnCreate := true // default when not specified
+	startOnCreate := true
 	if !data.StartOnCreate.IsNull() {
 		startOnCreate = data.StartOnCreate.ValueBool()
 	}
 	if startOnCreate {
-		vmID, err := strconv.Atoi(data.ID.ValueString())
-		if err != nil {
-			resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
-			return
-		}
-		_, err = r.client.Call("vm.start", vmID)
+		_, err = r.client.Call("vm.start", func() int { id, _ := strconv.Atoi(data.ID.ValueString()); return id }())
 		if err != nil {
 			resp.Diagnostics.AddWarning("Start Failed", fmt.Sprintf("Resource created but failed to start: %s", err.Error()))
 		}
@@ -371,10 +365,8 @@ func (r *VmResource) Read(ctx context.Context, req resource.ReadRequest, resp *r
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	result, err := r.client.Call("vm.get_instance", id)
@@ -443,10 +435,8 @@ func (r *VmResource) Update(ctx context.Context, req resource.UpdateRequest, res
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	params := map[string]interface{}{}
@@ -555,14 +545,8 @@ func (r *VmResource) Delete(ctx context.Context, req resource.DeleteRequest, res
 	}
 	id = []interface{}{id, map[string]interface{}{}}
 
-	// Stop VM before deletion if running
-	vmID, err := strconv.Atoi(data.ID.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError("ID Conversion Error", fmt.Sprintf("Failed to convert ID to integer: %s", err.Error()))
-		return
-	}
-	_, _ = r.client.Call("vm.stop", vmID) // Ignore errors - VM might already be stopped
-	time.Sleep(2 * time.Second)           // Wait for VM to stop
+	_, _ = r.client.Call("vm.stop", func() int { id, _ := strconv.Atoi(data.ID.ValueString()); return id }())
+	time.Sleep(2 * time.Second)
 
 	_, err = r.client.Call("vm.delete", id)
 	if err != nil {

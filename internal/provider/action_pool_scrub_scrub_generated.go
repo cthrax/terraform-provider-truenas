@@ -37,16 +37,10 @@ func (r *ActionPoolScrubScrubResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionPoolScrubScrubResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Start/Stop/Pause a scrub on pool `name`",
+		MarkdownDescription: "Start/Stop/Pause a scrub on pool `name`.",
 		Attributes: map[string]schema.Attribute{
-			"name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the pool to perform scrub action on.",
-			},
-			"action": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "The scrub action to perform on the pool.",
-			},
+			"name":   schema.StringAttribute{Required: true, MarkdownDescription: "Name of the pool to perform scrub action on."},
+			"action": schema.StringAttribute{Optional: true, MarkdownDescription: "The scrub action to perform on the pool."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolScrubScrubResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Name.ValueString())
 	if !data.Action.IsNull() {

@@ -36,12 +36,9 @@ func (r *ActionAppRedeployResource) Metadata(ctx context.Context, req resource.M
 
 func (r *ActionAppRedeployResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Redeploy `app_name` app",
+		MarkdownDescription: "Redeploy `app_name` app.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the application to redeploy (stop, pull latest images, and restart).",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the application to redeploy (stop, pull latest images, and restart)."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAppRedeployResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 

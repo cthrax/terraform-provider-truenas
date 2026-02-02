@@ -14,8 +14,8 @@ Create a DNS Authenticator
 
 ```terraform
 resource "truenas_acme_dns_authenticator" "example" {
-  attributes = "example-value"
-  name = "example-value"
+  attributes = "example"
+  name = "example"
 }
 ```
 

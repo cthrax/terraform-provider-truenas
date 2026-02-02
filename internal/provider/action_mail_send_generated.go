@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
+
 	"fmt"
 	"time"
 
@@ -18,6 +20,8 @@ type ActionMailSendResource struct {
 type ActionMailSendResourceModel struct {
 	Message types.String `tfsdk:"message"`
 	Config  types.String `tfsdk:"config"`
+	// File upload (optional)
+	FileContent types.String `tfsdk:"file_content"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -37,15 +41,14 @@ func (r *ActionMailSendResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *ActionMailSendResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Sends mail using configured mail settings",
+		MarkdownDescription: "Sends mail using configured mail settings.",
 		Attributes: map[string]schema.Attribute{
-			"message": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Email message content and configuration.",
-			},
-			"config": schema.StringAttribute{
+			"message": schema.StringAttribute{Required: true, MarkdownDescription: "Email message content and configuration."},
+			"config":  schema.StringAttribute{Optional: true, MarkdownDescription: "Optional mail configuration overrides for this message."},
+			"file_content": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Optional mail configuration overrides for this message.",
+				Sensitive:           true,
+				MarkdownDescription: "Base64-encoded file content for upload (optional)",
 			},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
@@ -95,47 +98,41 @@ func (r *ActionMailSendResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
-	params := []interface{}{}
-	params = append(params, data.Message.ValueString())
+	params := make(map[string]interface{})
+	params["message"] = data.Message.ValueString()
 	if !data.Config.IsNull() {
-		params = append(params, data.Config.ValueString())
+		params["config"] = data.Config.ValueString()
 	}
 
-	// Execute action
-	result, err := r.client.Call("mail.send", params)
+	// Prepare file content if provided
+	var fileContent []byte
+	var err error
+	if !data.FileContent.IsNull() {
+		fileContent, err = base64.StdEncoding.DecodeString(data.FileContent.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid File Content", fmt.Sprintf("Failed to decode base64: %s", err.Error()))
+			return
+		}
+	}
+
+	// Execute via HTTP multipart upload
+	endpoint := "/api/v2.0/mail/send"
+	result, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
 	if err != nil {
 		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute mail.send: %s", err.Error()))
 		return
 	}
 
-	// Check if result is a job ID
-	if jobID, ok := result.(float64); ok && true {
-		// Background job - wait for completion
+	// Store job ID if returned
+	if jobID, ok := result.(float64); ok {
 		data.JobID = types.Int64Value(int64(jobID))
-
-		jobResult, err := r.client.WaitForJob(int(jobID), 30*time.Minute)
-		if err != nil {
-			data.State = types.StringValue("FAILED")
-			data.Error = types.StringValue(err.Error())
-			resp.Diagnostics.AddError("Job Failed", err.Error())
-		} else {
-			data.State = types.StringValue(jobResult.State)
-			data.Progress = types.Float64Value(jobResult.Progress)
-			data.Result = types.StringValue(fmt.Sprintf("%v", jobResult.Result))
-			if jobResult.Error != "" {
-				data.Error = types.StringValue(jobResult.Error)
-			} else {
-				data.Error = types.StringValue("")
-			}
-		}
-	} else {
-		// Immediate result
-		data.State = types.StringValue("SUCCESS")
-		data.Progress = types.Float64Value(100.0)
-		data.Result = types.StringValue(fmt.Sprintf("%v", result))
-		data.Error = types.StringValue("")
 	}
+
+	// Actions are fire-and-forget - mark as success immediately
+	data.State = types.StringValue("SUBMITTED")
+	data.Progress = types.Float64Value(0.0)
+	data.Result = types.StringValue(fmt.Sprintf("%v", result))
+	data.Error = types.StringValue("")
 
 	// Generate ID from timestamp
 	data.ActionID = types.StringValue(fmt.Sprintf("mail.send-%d", time.Now().Unix()))
@@ -149,9 +146,10 @@ func (r *ActionMailSendResource) Read(ctx context.Context, req resource.ReadRequ
 }
 
 func (r *ActionMailSendResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
+	// Actions cannot be updated - force recreation
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated. Please destroy and recreate the resource.")
 }
 
 func (r *ActionMailSendResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// No-op - actions cannot be undone
+	// Actions cannot be undone - just remove from state
 }

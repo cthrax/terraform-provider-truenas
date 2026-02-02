@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
+
 	"fmt"
 	"time"
 
@@ -18,6 +20,8 @@ type ActionPoolDatasetEncryption_SummaryResource struct {
 type ActionPoolDatasetEncryption_SummaryResourceModel struct {
 	Id      types.String `tfsdk:"id"`
 	Options types.String `tfsdk:"options"`
+	// File upload (optional)
+	FileContent types.String `tfsdk:"file_content"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -46,6 +50,11 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Schema(ctx context.Context
 			"options": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Options for generating the encryption summary including force settings and datasets.",
+			},
+			"file_content": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Base64-encoded file content for upload (optional)",
 			},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
@@ -95,15 +104,27 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Create(ctx context.Context
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
-	params := []interface{}{}
-	params = append(params, data.Id.ValueString())
+	// Build parameters map
+	params := make(map[string]interface{})
+	params["id"] = data.Id.ValueString()
 	if !data.Options.IsNull() {
-		params = append(params, data.Options.ValueString())
+		params["options"] = data.Options.ValueString()
 	}
 
-	// Execute action
-	result, err := r.client.Call("pool.dataset.encryption_summary", params)
+	// Prepare file content if provided
+	var fileContent []byte
+	var err error
+	if !data.FileContent.IsNull() {
+		fileContent, err = base64.StdEncoding.DecodeString(data.FileContent.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid File Content", fmt.Sprintf("Failed to decode base64: %s", err.Error()))
+			return
+		}
+	}
+
+	// Execute via HTTP multipart upload
+	endpoint := "/api/v2.0/pool/dataset/encryption_summary"
+	result, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
 	if err != nil {
 		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute pool.dataset.encryption_summary: %s", err.Error()))
 		return
@@ -149,9 +170,10 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Read(ctx context.Context, 
 }
 
 func (r *ActionPoolDatasetEncryption_SummaryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
+	// Actions cannot be updated - force recreation
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated. Please destroy and recreate the resource.")
 }
 
 func (r *ActionPoolDatasetEncryption_SummaryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// No-op - actions cannot be undone
+	// Actions cannot be undone - just remove from state
 }

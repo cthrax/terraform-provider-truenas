@@ -14,7 +14,7 @@ Create an app with `app_name` using `catalog_app` with `train` and `version`.
 
 ```terraform
 resource "truenas_app" "example" {
-  app_name = "example-value"
+  app_name = "example"
   start_on_create = true
 }
 ```
@@ -27,13 +27,13 @@ resource "truenas_app" "example" {
 
 ### Optional
 
-- `start_on_create` (Bool) - Start the resource immediately after creation. Default: `true`
+- `start_on_create` (Bool) - Start immediately after creation. Default: `true`
 - `catalog_app` (String) - Name of the catalog application to install. Required when `custom_app` is `false`. Default: `None`
 - `custom_app` (Bool) - Whether to create a custom application (`true`) or install from catalog (`false`). Default: `False`
-- `custom_compose_config` (String) - Docker Compose configuration as a structured object for custom applications.
+- `custom_compose_config` (String) - Docker Compose configuration as a structured object for custom applications. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data.
 - `custom_compose_config_string` (String) - Docker Compose configuration as a YAML string for custom applications. Default: ``
 - `train` (String) - The catalog train to install from. Default: `stable`
-- `values` (String) - Configuration values for the application installation.
+- `values` (String) - Configuration values for the application installation. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data.
 - `version` (String) - The version of the application to install. Default: `latest`
 
 ### Read-Only

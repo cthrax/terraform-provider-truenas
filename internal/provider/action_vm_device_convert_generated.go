@@ -36,12 +36,9 @@ func (r *ActionVmDeviceConvertResource) Metadata(ctx context.Context, req resour
 
 func (r *ActionVmDeviceConvertResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Convert between disk images and ZFS volumes",
+		MarkdownDescription: "Convert between disk images and ZFS volumes. Supported disk image formats         are qcow2, qed, raw, vdi, vhdx, and vmdk. The conversion direction is determined         automatically based on file e",
 		Attributes: map[string]schema.Attribute{
-			"vm_convert": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "VMDeviceConvertArgs parameters.",
-			},
+			"vm_convert": schema.StringAttribute{Required: true, MarkdownDescription: "VMDeviceConvertArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionVmDeviceConvertResource) Create(ctx context.Context, req resource
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.VmConvert.ValueString())
 

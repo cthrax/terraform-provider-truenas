@@ -14,8 +14,8 @@ Create a tunable.
 
 ```terraform
 resource "truenas_tunable" "example" {
-  value = "example-value"
-  var = "example-value"
+  value = "example"
+  var = "example"
 }
 ```
 

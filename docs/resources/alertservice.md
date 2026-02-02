@@ -14,9 +14,9 @@ Create an Alert Service of specified `type`.
 
 ```terraform
 resource "truenas_alertservice" "example" {
-  attributes = "example-value"
-  level = "example-value"
-  name = "example-value"
+  attributes = "example"
+  level = "example"
+  name = "example"
 }
 ```
 

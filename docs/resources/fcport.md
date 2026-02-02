@@ -14,7 +14,7 @@ Creates mapping between a FC port and a target.
 
 ```terraform
 resource "truenas_fcport" "example" {
-  port = "example-value"
+  port = "example"
   target_id = 1
 }
 ```

@@ -40,14 +40,8 @@ func (r *ActionIpmiSelElistResource) Schema(ctx context.Context, req resource.Sc
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "Query IPMI System Event Log (SEL) extended list",
 		Attributes: map[string]schema.Attribute{
-			"filters": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "List of filters for query results. See API documentation for \"Query Methods\" for more guidance.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Query options including pagination, ordering, and additional parameters.",
-			},
+			"filters": schema.StringAttribute{Optional: true, MarkdownDescription: "List of filters for query results. See API documentation for \"Query Methods\" for more guidance."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Query options including pagination, ordering, and additional parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -96,7 +90,6 @@ func (r *ActionIpmiSelElistResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Filters.IsNull() {
 		var filtersVal interface{}

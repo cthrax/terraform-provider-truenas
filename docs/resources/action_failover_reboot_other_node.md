@@ -2,12 +2,12 @@
 page_title: "truenas_action_failover_reboot_other_node Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Reboot the other node and wait for it to come back online.
+  Reboot the other node and wait for it to come back online.  NOTE: This makes very few checks on HA systems. You need to     know what you're doing before calling this.
 ---
 
 # truenas_action_failover_reboot_other_node (Resource)
 
-Reboot the other node and wait for it to come back online.
+Reboot the other node and wait for it to come back online.  NOTE: This makes very few checks on HA systems. You need to     know what you're doing before calling this.
 
 This is an action resource that executes the `failover.reboot.other_node` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

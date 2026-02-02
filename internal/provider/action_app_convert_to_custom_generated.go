@@ -36,12 +36,9 @@ func (r *ActionAppConvert_To_CustomResource) Metadata(ctx context.Context, req r
 
 func (r *ActionAppConvert_To_CustomResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Convert `app_name` to a custom app",
+		MarkdownDescription: "Convert `app_name` to a custom app.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the catalog application to convert to a custom application.",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the catalog application to convert to a custom application."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAppConvert_To_CustomResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 

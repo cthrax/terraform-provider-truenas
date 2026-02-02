@@ -2,12 +2,12 @@
 page_title: "truenas_action_docker_backup_to_pool Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Create a backup of existing apps on `target_pool`.
+  Create a backup of existing apps on `target_pool`.  This creates a backup of existing apps on the `target_pool` specified. If this is executed multiple times, in the next iteration it will incrementally backup the apps that have changed since the last backup.  Note: This will stop the docker service (which means current active apps will be stopped) and then start it again after snapshot has been taken of the current apps dataset.
 ---
 
 # truenas_action_docker_backup_to_pool (Resource)
 
-Create a backup of existing apps on `target_pool`.
+Create a backup of existing apps on `target_pool`.  This creates a backup of existing apps on the `target_pool` specified. If this is executed multiple times, in the next iteration it will incrementally backup the apps that have changed since the last backup.  Note: This will stop the docker service (which means current active apps will be stopped) and then start it again after snapshot has been taken of the current apps dataset.
 
 This is an action resource that executes the `docker.backup_to_pool` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

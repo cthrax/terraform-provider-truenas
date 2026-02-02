@@ -37,16 +37,10 @@ func (r *ActionServiceRestartResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionServiceRestartResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Restart the service specified by `service`",
+		MarkdownDescription: "Restart the service specified by `service`.",
 		Attributes: map[string]schema.Attribute{
-			"service": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the service to restart.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the restart operation behavior.",
-			},
+			"service": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the service to restart."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the restart operation behavior."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionServiceRestartResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Service.ValueString())
 	if !data.Options.IsNull() {

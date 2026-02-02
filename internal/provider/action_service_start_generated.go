@@ -37,16 +37,10 @@ func (r *ActionServiceStartResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionServiceStartResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Start the service specified by `service`",
+		MarkdownDescription: "Start the service specified by `service`.",
 		Attributes: map[string]schema.Attribute{
-			"service": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the service to start.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the start operation behavior.",
-			},
+			"service": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the service to start."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the start operation behavior."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionServiceStartResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Service.ValueString())
 	if !data.Options.IsNull() {

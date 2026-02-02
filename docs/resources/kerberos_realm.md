@@ -14,7 +14,7 @@ Create a new kerberos realm. This will be automatically populated during the
 
 ```terraform
 resource "truenas_kerberos_realm" "example" {
-  realm = "example-value"
+  realm = "example"
 }
 ```
 

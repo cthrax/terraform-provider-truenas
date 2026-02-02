@@ -14,11 +14,11 @@ Create VMWare snapshot.
 
 ```terraform
 resource "truenas_vmware" "example" {
-  datastore = "example-value"
-  filesystem = "example-value"
-  hostname = "example-value"
-  password = "example-value"
-  username = "example-value"
+  datastore = "example"
+  filesystem = "example"
+  hostname = "example"
+  password = "example"
+  username = "example"
 }
 ```
 
