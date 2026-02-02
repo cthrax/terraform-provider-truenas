@@ -13,13 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type ActionPoolDatasetEncryption_SummaryResource struct {
+type ActionConfigUploadResource struct {
 	client *client.Client
 }
 
-type ActionPoolDatasetEncryption_SummaryResourceModel struct {
-	Id      types.String `tfsdk:"id"`
-	Options types.String `tfsdk:"options"`
+type ActionConfigUploadResourceModel struct {
+
 	// File upload (optional)
 	FileContent types.String `tfsdk:"file_content"`
 	// Computed outputs
@@ -31,26 +30,19 @@ type ActionPoolDatasetEncryption_SummaryResourceModel struct {
 	Error    types.String  `tfsdk:"error"`
 }
 
-func NewActionPoolDatasetEncryption_SummaryResource() resource.Resource {
-	return &ActionPoolDatasetEncryption_SummaryResource{}
+func NewActionConfigUploadResource() resource.Resource {
+	return &ActionConfigUploadResource{}
 }
 
-func (r *ActionPoolDatasetEncryption_SummaryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_action_pool_dataset_encryption_summary"
+func (r *ActionConfigUploadResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_action_config_upload"
 }
 
-func (r *ActionPoolDatasetEncryption_SummaryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ActionConfigUploadResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieve summary of all encrypted roots under `id`",
+		MarkdownDescription: "Accepts a configuration file via job pipe",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The dataset ID (full path) to generate an encryption summary for.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for generating the encryption summary including force settings and datasets.",
-			},
+
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -84,7 +76,7 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Schema(ctx context.Context
 	}
 }
 
-func (r *ActionPoolDatasetEncryption_SummaryResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ActionConfigUploadResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -96,8 +88,8 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Configure(ctx context.Cont
 	r.client = client
 }
 
-func (r *ActionPoolDatasetEncryption_SummaryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data ActionPoolDatasetEncryption_SummaryResourceModel
+func (r *ActionConfigUploadResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data ActionConfigUploadResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -106,10 +98,6 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Create(ctx context.Context
 	// Build parameters
 	// Build parameters map
 	params := make(map[string]interface{})
-	params["id"] = data.Id.ValueString()
-	if !data.Options.IsNull() {
-		params["options"] = data.Options.ValueString()
-	}
 
 	// Prepare file content if provided
 	var fileContent []byte
@@ -123,10 +111,10 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Create(ctx context.Context
 	}
 
 	// Execute via HTTP multipart upload
-	endpoint := "/api/v2.0/pool/dataset/encryption_summary"
+	endpoint := "/api/v2.0/config/upload"
 	result, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
 	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute pool.dataset.encryption_summary: %s", err.Error()))
+		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute config.upload: %s", err.Error()))
 		return
 	}
 
@@ -159,21 +147,21 @@ func (r *ActionPoolDatasetEncryption_SummaryResource) Create(ctx context.Context
 	}
 
 	// Generate ID from timestamp
-	data.ActionID = types.StringValue(fmt.Sprintf("pool.dataset.encryption_summary-%d", time.Now().Unix()))
+	data.ActionID = types.StringValue(fmt.Sprintf("config.upload-%d", time.Now().Unix()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ActionPoolDatasetEncryption_SummaryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *ActionConfigUploadResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Actions are immutable - just return current state
-	var data ActionPoolDatasetEncryption_SummaryResourceModel
+	var data ActionConfigUploadResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 }
 
-func (r *ActionPoolDatasetEncryption_SummaryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ActionConfigUploadResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Actions cannot be updated - force recreation
 	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated. Please destroy and recreate the resource.")
 }
 
-func (r *ActionPoolDatasetEncryption_SummaryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ActionConfigUploadResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Actions cannot be undone - just remove from state
 }

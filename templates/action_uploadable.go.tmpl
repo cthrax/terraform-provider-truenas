@@ -3,7 +3,7 @@ package provider
 import (
 	"context"
 	"encoding/base64"
-
+{extra_imports}
 	"fmt"
 	"time"
 
@@ -13,12 +13,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type ActionSupportAttach_TicketResource struct {
+type {resource_name}Resource struct {
 	client *client.Client
 }
 
-type ActionSupportAttach_TicketResourceModel struct {
-	Data types.String `tfsdk:"data"`
+type {resource_name}ResourceModel struct {
+{fields}
 	// File upload (optional)
 	FileContent types.String `tfsdk:"file_content"`
 	// Computed outputs
@@ -30,22 +30,19 @@ type ActionSupportAttach_TicketResourceModel struct {
 	Error    types.String  `tfsdk:"error"`
 }
 
-func NewActionSupportAttach_TicketResource() resource.Resource {
-	return &ActionSupportAttach_TicketResource{}
+func New{resource_name}Resource() resource.Resource {
+	return &{resource_name}Resource{}
 }
 
-func (r *ActionSupportAttach_TicketResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_action_support_attach_ticket"
+func (r *{resource_name}Resource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_{resource_type_name}"
 }
 
-func (r *ActionSupportAttach_TicketResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *{resource_name}Resource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Method to attach a file to an existing ticket",
+		MarkdownDescription: "{description}",
 		Attributes: map[string]schema.Attribute{
-			"data": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "SupportAttachTicketArgs parameters.",
-			},
+{schema_attrs}
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -79,7 +76,7 @@ func (r *ActionSupportAttach_TicketResource) Schema(ctx context.Context, req res
 	}
 }
 
-func (r *ActionSupportAttach_TicketResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *{resource_name}Resource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -91,17 +88,15 @@ func (r *ActionSupportAttach_TicketResource) Configure(ctx context.Context, req 
 	r.client = client
 }
 
-func (r *ActionSupportAttach_TicketResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data ActionSupportAttach_TicketResourceModel
+func (r *{resource_name}Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data {resource_name}ResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Build parameters
-	// Build parameters map
-	params := make(map[string]interface{})
-	params["data"] = data.Data.ValueString()
+{param_building}
 
 	// Prepare file content if provided
 	var fileContent []byte
@@ -115,10 +110,10 @@ func (r *ActionSupportAttach_TicketResource) Create(ctx context.Context, req res
 	}
 
 	// Execute via HTTP multipart upload
-	endpoint := "/api/v2.0/support/attach_ticket"
+	endpoint := "/api/v2.0/{endpoint_path}"
 	result, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
 	if err != nil {
-		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute support.attach_ticket: %s", err.Error()))
+		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute {method_name}: %s", err.Error()))
 		return
 	}
 
@@ -126,7 +121,7 @@ func (r *ActionSupportAttach_TicketResource) Create(ctx context.Context, req res
 	if jobID, ok := result.(float64); ok {
 		data.JobID = types.Int64Value(int64(jobID))
 	}
-
+	
 	// Actions are fire-and-forget - mark as success immediately
 	data.State = types.StringValue("SUBMITTED")
 	data.Progress = types.Float64Value(0.0)
@@ -134,21 +129,21 @@ func (r *ActionSupportAttach_TicketResource) Create(ctx context.Context, req res
 	data.Error = types.StringValue("")
 
 	// Generate ID from timestamp
-	data.ActionID = types.StringValue(fmt.Sprintf("support.attach_ticket-%d", time.Now().Unix()))
+	data.ActionID = types.StringValue(fmt.Sprintf("{method_name}-%d", time.Now().Unix()))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *ActionSupportAttach_TicketResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *{resource_name}Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// Actions are immutable - just return current state
-	var data ActionSupportAttach_TicketResourceModel
+	var data {resource_name}ResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 }
 
-func (r *ActionSupportAttach_TicketResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *{resource_name}Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// Actions cannot be updated - force recreation
 	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated. Please destroy and recreate the resource.")
 }
 
-func (r *ActionSupportAttach_TicketResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *{resource_name}Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Actions cannot be undone - just remove from state
 }

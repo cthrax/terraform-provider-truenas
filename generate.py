@@ -15,7 +15,9 @@ RESOURCE_UPDATE_ONLY_TEMPLATE = (
 ).read_text()
 RESOURCE_WITH_JSON_TEMPLATE = (TEMPLATE_DIR / "resource_with_json.go.tmpl").read_text()
 RESOURCE_VM_DEVICE_TEMPLATE = (TEMPLATE_DIR / "resource_vm_device.go.tmpl").read_text()
+RESOURCE_UPLOADABLE_TEMPLATE = (TEMPLATE_DIR / "resource_uploadable.go.tmpl").read_text()
 ACTION_RESOURCE_TEMPLATE = (TEMPLATE_DIR / "action_resource.go.tmpl").read_text()
+ACTION_UPLOADABLE_TEMPLATE = (TEMPLATE_DIR / "action_uploadable.go.tmpl").read_text()
 RESOURCE_DOC_TEMPLATE = (TEMPLATE_DIR / "resource_doc.md.tmpl").read_text()
 DATASOURCE_TEMPLATE = (TEMPLATE_DIR / "datasource.go.tmpl").read_text()
 DATASOURCE_DOC_TEMPLATE = (TEMPLATE_DIR / "datasource_doc.md.tmpl").read_text()
@@ -930,6 +932,360 @@ def generate_action_resource(method_name, method_spec):
     return code
 
 
+def generate_uploadable_resource(method_name, method_spec):
+    """Generate HTTP-based resource for uploadable methods (idempotent operations)."""
+    template = RESOURCE_UPLOADABLE_TEMPLATE
+    
+    # Parse method name
+    parts = method_name.split(".")
+    if len(parts) < 2:
+        return None
+
+    # Build resource name
+    resource_name = "".join(p.title() for p in parts)
+    resource_type_name = method_name.replace('.', '_')
+    endpoint_path = method_name.replace('.', '/')
+
+    # Get parameters (rename 'id' to avoid conflict with resource ID)
+    accepts = method_spec.get("accepts", [])
+    properties = {}
+    for param in accepts:
+        param_name = param.get("_name_", "")
+        
+        # Rename 'id' to 'dataset_id' to avoid conflict with resource ID field
+        if param_name == "id":
+            param_name = "dataset_id"
+        
+        if param_name:
+            properties[param_name] = param
+
+    # Generate input fields
+    input_fields = []
+    for prop_name, prop_schema in properties.items():
+        field_name = "".join(p.title() for p in prop_name.split("_"))
+        tf_type = get_tf_type(prop_schema)
+        if tf_type in ["List", "Object"]:
+            tf_type = "String"
+        input_fields.append(f'\t{field_name} types.{tf_type} `tfsdk:"{prop_name}"`')
+
+    fields = "\n".join(input_fields)
+
+    # Generate schema attributes
+    schema_lines = []
+    for prop_name, prop_schema in properties.items():
+        field_name = "".join(p.title() for p in prop_name.split("_"))
+        tf_type = get_tf_type(prop_schema)
+        required = prop_schema.get("_required_", False)
+        description = (
+            prop_schema.get("description", "")
+            .replace('"', '\\"')
+            .replace("\n", " ")[:200]
+        )
+
+        if tf_type in ["List", "Object"]:
+            tf_type = "String"
+
+        if required:
+            schema_lines.append(f'\t\t\t"{prop_name}": schema.{tf_type}Attribute{{')
+            schema_lines.append(f"\t\t\t\tRequired: true,")
+            schema_lines.append(f'\t\t\t\tMarkdownDescription: "{description}",')
+            schema_lines.append("\t\t\t},")
+        else:
+            schema_lines.append(f'\t\t\t"{prop_name}": schema.{tf_type}Attribute{{')
+            schema_lines.append(f"\t\t\t\tOptional: true,")
+            schema_lines.append(f'\t\t\t\tMarkdownDescription: "{description}",')
+            schema_lines.append("\t\t\t},")
+
+    schema_attrs = "\n".join(schema_lines)
+
+    # Generate parameter building code
+    param_lines = []
+    param_lines.append("\t// Build parameters map")
+    param_lines.append("\tparams := make(map[string]interface{})")
+    needs_json = False
+
+    for prop_name, prop_schema in properties.items():
+        field_name = "".join(p.title() for p in prop_name.split("_"))
+        tf_type = get_tf_type(prop_schema)
+        required = prop_schema.get("_required_", False)
+        
+        # Map dataset_id back to id for API call
+        api_param_name = "id" if prop_name == "dataset_id" else prop_name
+
+        if tf_type in ["List", "Object"]:
+            needs_json = True
+            if required:
+                param_lines.append(f"\tvar {prop_name}Val interface{{}}")
+                param_lines.append(
+                    f"\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{"
+                )
+                param_lines.append(f'\t\tparams["{api_param_name}"] = {prop_name}Val')
+                param_lines.append("\t}")
+            else:
+                param_lines.append(f"\tif !data.{field_name}.IsNull() {{")
+                param_lines.append(f"\t\tvar {prop_name}Val interface{{}}")
+                param_lines.append(
+                    f"\t\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{"
+                )
+                param_lines.append(f'\t\t\tparams["{api_param_name}"] = {prop_name}Val')
+                param_lines.append("\t\t}")
+                param_lines.append("\t}")
+        else:
+            if required:
+                if tf_type == "String":
+                    param_lines.append(
+                        f'\tparams["{api_param_name}"] = data.{field_name}.ValueString()'
+                    )
+                elif tf_type == "Int64":
+                    param_lines.append(
+                        f'\tparams["{api_param_name}"] = data.{field_name}.ValueInt64()'
+                    )
+                elif tf_type == "Bool":
+                    param_lines.append(
+                        f'\tparams["{api_param_name}"] = data.{field_name}.ValueBool()'
+                    )
+                elif tf_type == "Float64":
+                    param_lines.append(
+                        f'\tparams["{api_param_name}"] = data.{field_name}.ValueFloat64()'
+                    )
+            else:
+                param_lines.append(f"\tif !data.{field_name}.IsNull() {{")
+                if tf_type == "String":
+                    param_lines.append(
+                        f'\t\tparams["{api_param_name}"] = data.{field_name}.ValueString()'
+                    )
+                elif tf_type == "Int64":
+                    param_lines.append(
+                        f'\t\tparams["{api_param_name}"] = data.{field_name}.ValueInt64()'
+                    )
+                elif tf_type == "Bool":
+                    param_lines.append(
+                        f'\t\tparams["{api_param_name}"] = data.{field_name}.ValueBool()'
+                    )
+                elif tf_type == "Float64":
+                    param_lines.append(
+                        f'\t\tparams["{api_param_name}"] = data.{field_name}.ValueFloat64()'
+                    )
+                param_lines.append("\t}")
+
+    param_building = "\n".join(param_lines)
+
+    # ID generation logic
+    if properties:
+        # Use first parameter as ID (convert to string if needed)
+        first_param = list(properties.keys())[0]
+        first_field = "".join(p.title() for p in first_param.split("_"))
+        first_type = get_tf_type(properties[first_param])
+        
+        if first_type == "String":
+            id_generation = f'\tdata.ID = data.{first_field}'
+        elif first_type == "Int64":
+            id_generation = f'\tdata.ID = types.StringValue(fmt.Sprintf("%d", data.{first_field}.ValueInt64()))'
+        elif first_type == "Bool":
+            id_generation = f'\tdata.ID = types.StringValue(fmt.Sprintf("%t", data.{first_field}.ValueBool()))'
+        else:
+            # Fallback to string conversion
+            id_generation = f'\tdata.ID = types.StringValue(data.{first_field}.String())'
+        needs_time = False
+    else:
+        # Use method name as static ID (no timestamp needed - resource is idempotent)
+        id_generation = f'\tdata.ID = types.StringValue("{method_name}")'
+        needs_time = False
+
+    # Check if this is a job
+    is_job = method_spec.get("job", False)
+
+    # Get description
+    description = method_spec.get("description") or f"Upload file via {method_name}"
+    description = description.replace('"', '\\"').replace("\n", " ").split(".")[0][:200]
+
+    # Build extra imports
+    extra_imports = ""
+    if needs_json:
+        extra_imports = '\n\t"encoding/json"'
+
+    # Generate code from template
+    code = template
+    code = code.replace("{resource_name}", resource_name)
+    code = code.replace("{resource_type_name}", resource_type_name)
+    code = code.replace("{fields}", fields)
+    code = code.replace("{schema_attrs}", schema_attrs)
+    code = code.replace("{param_building}", param_building)
+    code = code.replace("{method_name}", method_name)
+    code = code.replace("{endpoint_path}", endpoint_path)
+    code = code.replace("{description}", description)
+    code = code.replace("{is_job}", "true" if is_job else "false")
+    code = code.replace("{id_generation}", id_generation)
+    code = code.replace("{extra_imports}", extra_imports)
+
+    return code
+
+
+def generate_uploadable_action(method_name, method_spec):
+    """Generate HTTP-based action resource for uploadable methods."""
+    # Load template
+    template_path = TEMPLATE_DIR / "action_uploadable.go.tmpl"
+    if not template_path.exists():
+        return None
+    
+    template = template_path.read_text()
+    
+    # Parse method name
+    parts = method_name.split(".")
+    if len(parts) < 2:
+        return None
+
+    # Build resource name
+    resource_name = "Action" + "".join(p.title() for p in parts)
+    resource_type_name = f"action_{method_name.replace('.', '_')}"
+    
+    # Build endpoint path
+    endpoint_path = method_name.replace('.', '/')
+
+    # Get parameters
+    accepts = method_spec.get("accepts", [])
+    properties = {}
+    for param in accepts:
+        param_name = param.get("_name_", "")
+        if param_name:
+            properties[param_name] = param
+
+    # Generate input fields
+    input_fields = []
+    for prop_name, prop_schema in properties.items():
+        field_name = "".join(p.title() for p in prop_name.split("_"))
+        tf_type = get_tf_type(prop_schema)
+        if tf_type in ["List", "Object"]:
+            tf_type = "String"
+        input_fields.append(f'\t{field_name} types.{tf_type} `tfsdk:"{prop_name}"`')
+
+    fields = "\n".join(input_fields)
+
+    # Generate schema attributes
+    schema_lines = []
+    for prop_name, prop_schema in properties.items():
+        field_name = "".join(p.title() for p in prop_name.split("_"))
+        tf_type = get_tf_type(prop_schema)
+        required = prop_schema.get("_required_", False)
+        description = (
+            prop_schema.get("description", "")
+            .replace('"', '\\"')
+            .replace("\n", " ")[:200]
+        )
+
+        if tf_type in ["List", "Object"]:
+            tf_type = "String"
+
+        if required:
+            schema_lines.append(f'\t\t\t"{prop_name}": schema.{tf_type}Attribute{{')
+            schema_lines.append(f"\t\t\t\tRequired: true,")
+            schema_lines.append(f'\t\t\t\tMarkdownDescription: "{description}",')
+            schema_lines.append("\t\t\t},")
+        else:
+            schema_lines.append(f'\t\t\t"{prop_name}": schema.{tf_type}Attribute{{')
+            schema_lines.append(f"\t\t\t\tOptional: true,")
+            schema_lines.append(f'\t\t\t\tMarkdownDescription: "{description}",')
+            schema_lines.append("\t\t\t},")
+
+    schema_attrs = "\n".join(schema_lines)
+
+    # Generate parameter building code
+    param_lines = []
+    param_lines.append("\t// Build parameters map")
+    param_lines.append("\tparams := make(map[string]interface{})")
+    needs_json = False
+
+    for prop_name, prop_schema in properties.items():
+        field_name = "".join(p.title() for p in prop_name.split("_"))
+        tf_type = get_tf_type(prop_schema)
+        required = prop_schema.get("_required_", False)
+
+        if tf_type in ["List", "Object"]:
+            needs_json = True
+            if required:
+                param_lines.append(f"\tvar {prop_name}Val interface{{}}")
+                param_lines.append(
+                    f"\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{"
+                )
+                param_lines.append(f'\t\tparams["{prop_name}"] = {prop_name}Val')
+                param_lines.append("\t}")
+            else:
+                param_lines.append(f"\tif !data.{field_name}.IsNull() {{")
+                param_lines.append(f"\t\tvar {prop_name}Val interface{{}}")
+                param_lines.append(
+                    f"\t\tif err := json.Unmarshal([]byte(data.{field_name}.ValueString()), &{prop_name}Val); err == nil {{"
+                )
+                param_lines.append(f'\t\t\tparams["{prop_name}"] = {prop_name}Val')
+                param_lines.append("\t\t}")
+                param_lines.append("\t}")
+        else:
+            if required:
+                if tf_type == "String":
+                    param_lines.append(
+                        f'\tparams["{prop_name}"] = data.{field_name}.ValueString()'
+                    )
+                elif tf_type == "Int64":
+                    param_lines.append(
+                        f'\tparams["{prop_name}"] = data.{field_name}.ValueInt64()'
+                    )
+                elif tf_type == "Bool":
+                    param_lines.append(
+                        f'\tparams["{prop_name}"] = data.{field_name}.ValueBool()'
+                    )
+                elif tf_type == "Float64":
+                    param_lines.append(
+                        f'\tparams["{prop_name}"] = data.{field_name}.ValueFloat64()'
+                    )
+            else:
+                param_lines.append(f"\tif !data.{field_name}.IsNull() {{")
+                if tf_type == "String":
+                    param_lines.append(
+                        f'\t\tparams["{prop_name}"] = data.{field_name}.ValueString()'
+                    )
+                elif tf_type == "Int64":
+                    param_lines.append(
+                        f'\t\tparams["{prop_name}"] = data.{field_name}.ValueInt64()'
+                    )
+                elif tf_type == "Bool":
+                    param_lines.append(
+                        f'\t\tparams["{prop_name}"] = data.{field_name}.ValueBool()'
+                    )
+                elif tf_type == "Float64":
+                    param_lines.append(
+                        f'\t\tparams["{prop_name}"] = data.{field_name}.ValueFloat64()'
+                    )
+                param_lines.append("\t}")
+
+    param_building = "\n".join(param_lines)
+
+    # Check if this is a job
+    is_job = method_spec.get("job", False)
+
+    # Get description
+    description = method_spec.get("description") or f"Execute {method_name} action"
+    description = description.replace('"', '\\"').replace("\n", " ").split(".")[0][:200]
+
+    # Build extra imports
+    extra_imports = ""
+    if needs_json:
+        extra_imports = '\n\t"encoding/json"'
+
+    # Generate code from template
+    code = template
+    code = code.replace("{resource_name}", resource_name)
+    code = code.replace("{resource_type_name}", resource_type_name)
+    code = code.replace("{fields}", fields)
+    code = code.replace("{schema_attrs}", schema_attrs)
+    code = code.replace("{param_building}", param_building)
+    code = code.replace("{method_name}", method_name)
+    code = code.replace("{endpoint_path}", endpoint_path)
+    code = code.replace("{description}", description)
+    code = code.replace("{is_job}", "true" if is_job else "false")
+    code = code.replace("{extra_imports}", extra_imports)
+
+    return code
+
+
 def generate_attr_types(properties):
     """Generate AttrTypes map for ListValueFrom"""
     lines = []
@@ -1463,10 +1819,6 @@ def generate_resource_docs(
     (docs_dir / f"{tf_name}.md").write_text(doc)
 
 
-def generate_provider(resources, datasources, actions):
-    """Generate provider.go from template"""
-
-
 def generate_action_docs(method_name, properties, description):
     """Generate documentation for action resources"""
     resource_name = f"action_{method_name.replace('.', '_')}"
@@ -1551,7 +1903,7 @@ This is an action resource that executes the `{method_name}` operation. Actions 
     (docs_dir / f"{resource_name}.md").write_text(doc)
 
 
-def generate_provider(resources, datasources, actions):
+def generate_provider(resources, datasources, actions, uploadable_resources):
     """Generate provider.go from template"""
     with open("templates/provider.go.tmpl", "r") as f:
         template = f.read()
@@ -1560,11 +1912,13 @@ def generate_provider(resources, datasources, actions):
     resource_funcs = [
         f"New{r.replace('.', '_').title().replace('_', '')}Resource" for r in resources
     ]
-
-    # Add manual resources (special cases)
-    manual_resources = [
-        "NewFilesystemPutResource",  # HTTP multipart upload
+    
+    # Add uploadable resources (use same naming as actions for consistency)
+    uploadable_funcs = [
+        f"New{''.join(p.title() for p in u.split('.'))}Resource" for u in uploadable_resources
     ]
+
+    # No manual resources needed - all generated
 
     # Build action resource list (with Action prefix)
     action_funcs = [
@@ -1572,7 +1926,7 @@ def generate_provider(resources, datasources, actions):
     ]
 
     # Combine all resources
-    all_resource_funcs = resource_funcs + manual_resources + action_funcs
+    all_resource_funcs = resource_funcs + uploadable_funcs + action_funcs
     resource_list = ",\n\t\t".join(all_resource_funcs)
 
     # Build datasource list
@@ -1687,15 +2041,18 @@ def main():
         "redeploy",
     ]
     action_count = 0
+    uploadable_resource_count = 0
+    uploadable_action_count = 0
     generated_actions = []
+    generated_uploadable_resources = []
 
-    # Skip filesystem.put - it needs special HTTP multipart handling
-    skip_actions = {"filesystem.put"}
+    # Uploadable methods that are non-idempotent (should be actions)
+    uploadable_actions = {"mail.send", "support.attach_ticket"}
+    
+    # Uploadable methods that are read-only (skip for now, should be data sources)
+    skip_uploadable = {"pool.dataset.encryption_summary"}
 
     for method_name, method_spec in methods.items():
-        if method_name in skip_actions:
-            continue
-
         # Skip CRUD methods
         if any(
             method_name.endswith(suffix)
@@ -1703,7 +2060,64 @@ def main():
         ):
             continue
 
-        # Check if it's an action (has job flag or action-like name)
+        # Check if uploadable
+        is_uploadable = method_spec.get("uploadable", False)
+        
+        if is_uploadable:
+            if method_name in skip_uploadable:
+                continue
+                
+            # Determine if it's an action or resource
+            if method_name in uploadable_actions:
+                # Non-idempotent: generate as action
+                code = generate_uploadable_action(method_name, method_spec)
+                if code:
+                    filename = f"action_{method_name.replace('.', '_')}_generated.go"
+                    (output_dir / filename).write_text(code)
+                    generated_actions.append(method_name)
+                    uploadable_action_count += 1
+                    action_count += 1
+
+                    # Generate documentation
+                    accepts = method_spec.get("accepts", [])
+                    properties = {}
+                    for param in accepts:
+                        param_name = param.get("_name_", "")
+                        if param_name:
+                            properties[param_name] = param
+
+                    description = (
+                        method_spec.get("description")
+                        or f"Execute {method_name} action"
+                    )
+                    description = description.split("\n")[0][:200]
+                    generate_action_docs(method_name, properties, description)
+            else:
+                # Idempotent: generate as resource
+                code = generate_uploadable_resource(method_name, method_spec)
+                if code:
+                    filename = f"resource_{method_name.replace('.', '_')}_generated.go"
+                    (output_dir / filename).write_text(code)
+                    generated_uploadable_resources.append(method_name)
+                    uploadable_resource_count += 1
+                    
+                    # Generate documentation (reuse resource doc generator)
+                    accepts = method_spec.get("accepts", [])
+                    properties = {}
+                    for param in accepts:
+                        param_name = param.get("_name_", "")
+                        if param_name:
+                            properties[param_name] = param
+
+                    description = (
+                        method_spec.get("description")
+                        or f"Upload file via {method_name}"
+                    )
+                    description = description.split("\n")[0][:200]
+                    # TODO: Generate proper resource docs
+            continue
+
+        # Check if it's a regular action (has job flag or action-like name)
         is_job = method_spec.get("job", False)
         has_action_name = any(
             keyword in method_name.split(".")[-1] for keyword in action_keywords
@@ -1733,7 +2147,8 @@ def main():
                     description = description.split("\n")[0][:200]
                     generate_action_docs(method_name, properties, description)
 
-    print(f"✅ Generated {action_count} action resources", file=sys.stderr)
+    print(f"✅ Generated {action_count} action resources ({uploadable_action_count} uploadable via HTTP)", file=sys.stderr)
+    print(f"✅ Generated {uploadable_resource_count} uploadable resources (idempotent file uploads)", file=sys.stderr)
 
     # Generate data sources
     datasource_candidates = [
@@ -1827,6 +2242,7 @@ def main():
         generated_resources,
         generated_datasources + generated_query_datasources,
         generated_actions,
+        generated_uploadable_resources,
     )
 
 

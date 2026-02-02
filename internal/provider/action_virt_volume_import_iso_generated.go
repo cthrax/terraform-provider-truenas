@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"encoding/base64"
+
 	"fmt"
 	"time"
 
@@ -17,6 +19,8 @@ type ActionVirtVolumeImport_IsoResource struct {
 
 type ActionVirtVolumeImport_IsoResourceModel struct {
 	VirtVolumeImportIso types.String `tfsdk:"virt_volume_import_iso"`
+	// File upload (optional)
+	FileContent types.String `tfsdk:"file_content"`
 	// Computed outputs
 	ActionID types.String  `tfsdk:"action_id"`
 	JobID    types.Int64   `tfsdk:"job_id"`
@@ -41,6 +45,11 @@ func (r *ActionVirtVolumeImport_IsoResource) Schema(ctx context.Context, req res
 			"virt_volume_import_iso": schema.StringAttribute{
 				Required:            true,
 				MarkdownDescription: "VirtVolumeImportIsoArgs parameters.",
+			},
+			"file_content": schema.StringAttribute{
+				Optional:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Base64-encoded file content for upload (optional)",
 			},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
@@ -90,12 +99,24 @@ func (r *ActionVirtVolumeImport_IsoResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
-	params := []interface{}{}
-	params = append(params, data.VirtVolumeImportIso.ValueString())
+	// Build parameters map
+	params := make(map[string]interface{})
+	params["virt_volume_import_iso"] = data.VirtVolumeImportIso.ValueString()
 
-	// Execute action
-	result, err := r.client.Call("virt.volume.import_iso", params)
+	// Prepare file content if provided
+	var fileContent []byte
+	var err error
+	if !data.FileContent.IsNull() {
+		fileContent, err = base64.StdEncoding.DecodeString(data.FileContent.ValueString())
+		if err != nil {
+			resp.Diagnostics.AddError("Invalid File Content", fmt.Sprintf("Failed to decode base64: %s", err.Error()))
+			return
+		}
+	}
+
+	// Execute via HTTP multipart upload
+	endpoint := "/api/v2.0/virt/volume/import_iso"
+	result, err := r.client.UploadFile(endpoint, params, fileContent, "upload")
 	if err != nil {
 		resp.Diagnostics.AddError("Action Failed", fmt.Sprintf("Failed to execute virt.volume.import_iso: %s", err.Error()))
 		return
@@ -141,9 +162,10 @@ func (r *ActionVirtVolumeImport_IsoResource) Read(ctx context.Context, req resou
 }
 
 func (r *ActionVirtVolumeImport_IsoResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated, only recreated")
+	// Actions cannot be updated - force recreation
+	resp.Diagnostics.AddError("Update Not Supported", "Actions cannot be updated. Please destroy and recreate the resource.")
 }
 
 func (r *ActionVirtVolumeImport_IsoResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// No-op - actions cannot be undone
+	// Actions cannot be undone - just remove from state
 }
