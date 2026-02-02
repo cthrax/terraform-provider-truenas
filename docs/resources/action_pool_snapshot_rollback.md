@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_snapshot_rollback Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Execute pool.snapshot.rollback action
+  Execute pool.snapshot.rollback
 ---
 
 # truenas_action_pool_snapshot_rollback (Resource)
 
-Execute pool.snapshot.rollback action
+Execute pool.snapshot.rollback
 
 This is an action resource that executes the `pool.snapshot.rollback` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

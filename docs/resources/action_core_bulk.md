@@ -2,12 +2,12 @@
 page_title: "truenas_action_core_bulk Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Will sequentially call `method` with arguments from the `params` list. For example, running
+  Will sequentially call `method` with arguments from the `params` list. For example, running      call("core.bulk", "zfs.snapshot.delete", [["tank@snap-1", true], ["tank@snap-2", false]])  will call      call("zfs.snapshot.delete", "tank@snap-1", true)     call("zfs.snapshot.delete", "tank@snap-2", false)  If the first call fails and the seconds succeeds (returning `true`), the result of the overall call will be:      [         {"result": null, "error": "Error deleting snapshot"},         {"result": true, "error": null}     ]  Important note: the execution status of `core.bulk` will always be a `SUCCESS` (unless an unlikely internal error occurs). Caller must check for individual call results to ensure the absence of any call errors.
 ---
 
 # truenas_action_core_bulk (Resource)
 
-Will sequentially call `method` with arguments from the `params` list. For example, running
+Will sequentially call `method` with arguments from the `params` list. For example, running      call("core.bulk", "zfs.snapshot.delete", [["tank@snap-1", true], ["tank@snap-2", false]])  will call      call("zfs.snapshot.delete", "tank@snap-1", true)     call("zfs.snapshot.delete", "tank@snap-2", false)  If the first call fails and the seconds succeeds (returning `true`), the result of the overall call will be:      [         {"result": null, "error": "Error deleting snapshot"},         {"result": true, "error": null}     ]  Important note: the execution status of `core.bulk` will always be a `SUCCESS` (unless an unlikely internal error occurs). Caller must check for individual call results to ensure the absence of any call errors.
 
 This is an action resource that executes the `core.bulk` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 
@@ -16,6 +16,7 @@ This is an action resource that executes the `core.bulk` operation. Actions are 
 ```terraform
 resource "truenas_action_core_bulk" "example" {
   method = "value"
+  params = "value"
 }
 ```
 

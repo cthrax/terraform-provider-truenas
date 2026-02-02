@@ -37,16 +37,10 @@ func (r *ActionVmStopResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *ActionVmStopResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stops a VM",
+		MarkdownDescription: "Stops a VM.  For unresponsive guests who have exceeded the `shutdown_timeout` defined by the user and have become unresponsive, they required to be powered down using `vm.poweroff`. `vm.stop` is only",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the virtual machine to stop.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options controlling the VM stop process.",
-			},
+			"id":      schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the virtual machine to stop."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options controlling the VM stop process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionVmStopResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	if !data.Options.IsNull() {

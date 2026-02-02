@@ -2,19 +2,19 @@
 page_title: "truenas_virt_volume Resource - terraform-provider-truenas"
 subcategory: ""
 description: |-
-  Manages TrueNAS virt.volume resources
+  Manages virt.volume
 ---
 
 # truenas_virt_volume (Resource)
 
-Manages TrueNAS virt.volume resources
+Manages virt.volume
 
 
 ## Example Usage
 
 ```terraform
 resource "truenas_virt_volume" "example" {
-  name = "example-value"
+  name = "example"
 }
 ```
 

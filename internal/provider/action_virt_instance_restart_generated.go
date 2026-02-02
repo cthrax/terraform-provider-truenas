@@ -37,16 +37,10 @@ func (r *ActionVirtInstanceRestartResource) Metadata(ctx context.Context, req re
 
 func (r *ActionVirtInstanceRestartResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Restart an instance",
+		MarkdownDescription: "Restart an instance.  Timeout is how long it should wait for the instance to shutdown cleanly.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "ID of the virtual instance to stop.",
-			},
-			"stop_args": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Arguments controlling how the instance is stopped.",
-			},
+			"id":        schema.StringAttribute{Required: true, MarkdownDescription: "ID of the virtual instance to stop."},
+			"stop_args": schema.StringAttribute{Optional: true, MarkdownDescription: "Arguments controlling how the instance is stopped."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionVirtInstanceRestartResource) Create(ctx context.Context, req reso
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueString())
 	if !data.StopArgs.IsNull() {

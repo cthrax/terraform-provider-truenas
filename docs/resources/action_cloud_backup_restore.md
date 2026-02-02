@@ -2,12 +2,12 @@
 page_title: "truenas_action_cloud_backup_restore Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Restore files to the directory `destination_path` from the `snapshot_id` subfolder `subfolder`
+  Restore files to the directory `destination_path` from the `snapshot_id` subfolder `subfolder` created by the cloud backup job `id`.
 ---
 
 # truenas_action_cloud_backup_restore (Resource)
 
-Restore files to the directory `destination_path` from the `snapshot_id` subfolder `subfolder`
+Restore files to the directory `destination_path` from the `snapshot_id` subfolder `subfolder` created by the cloud backup job `id`.
 
 This is an action resource that executes the `cloud_backup.restore` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

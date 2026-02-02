@@ -14,8 +14,8 @@ Create a new Certificate
 
 ```terraform
 resource "truenas_certificate" "example" {
-  create_type = "example-value"
-  name = "example-value"
+  create_type = "example"
+  name = "example"
 }
 ```
 
@@ -31,14 +31,14 @@ resource "truenas_certificate" "example" {
 - `CSR` (String) - PEM-encoded certificate signing request to import or `null`. Default: `None`
 - `acme_directory_uri` (String) - ACME directory URI to be used for ACME certificate creation. Default: `None`
 - `add_to_trusted_store` (Bool) - Whether to add this certificate to the trusted certificate store. Default: `False`
-- `cert_extensions` (String) - Certificate extensions configuration. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({})`
+- `cert_extensions` (String) - Certificate extensions configuration. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data.
 - `certificate` (String) - PEM-encoded certificate to import or `null`. Default: `None`
 - `city` (String) - City or locality name for certificate subject or `null`. Default: `None`
 - `common` (String) - Common name for certificate subject or `null`. Default: `None`
 - `country` (String) - Country name for certificate subject or `null`. Default: `None`
 - `csr_id` (Int64) - CSR to be used for ACME certificate creation. Default: `None`
 - `digest_algorithm` (String) - Hash algorithm for certificate signing. Default: `SHA256` Valid values: `SHA224`, `SHA256`, `SHA384`, `SHA512`
-- `dns_mapping` (String) - A mapping of domain to ACME DNS Authenticator ID for each domain listed in SAN or common name of the CSR.
+- `dns_mapping` (String) - A mapping of domain to ACME DNS Authenticator ID for each domain listed in SAN or common name of the CSR. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data.
 - `ec_curve` (String) - Elliptic curve to use for EC keys. Default: `SECP384R1` Valid values: `SECP256R1`, `SECP384R1`, `SECP521R1`, `ed25519`
 - `email` (String) - Email address for certificate subject or `null`. Default: `None`
 - `key_length` (Int64) - RSA key length in bits or `null`. Default: `None`

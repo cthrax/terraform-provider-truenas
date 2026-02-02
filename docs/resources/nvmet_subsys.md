@@ -14,7 +14,7 @@ Create a NVMe target subsystem (`subsys`).
 
 ```terraform
 resource "truenas_nvmet_subsys" "example" {
-  name = "example-value"
+  name = "example"
 }
 ```
 

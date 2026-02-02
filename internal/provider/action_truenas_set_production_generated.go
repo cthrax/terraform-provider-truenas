@@ -37,16 +37,10 @@ func (r *ActionTruenasSet_ProductionResource) Metadata(ctx context.Context, req 
 
 func (r *ActionTruenasSet_ProductionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Sets system production state and optionally sends initial debug",
+		MarkdownDescription: "Sets system production state and optionally sends initial debug.",
 		Attributes: map[string]schema.Attribute{
-			"production": schema.BoolAttribute{
-				Required:            true,
-				MarkdownDescription: "Whether to configure the system for production use.",
-			},
-			"attach_debug": schema.BoolAttribute{
-				Optional:            true,
-				MarkdownDescription: "Whether to attach debug information when transitioning to production mode.",
-			},
+			"production":   schema.BoolAttribute{Required: true, MarkdownDescription: "Whether to configure the system for production use."},
+			"attach_debug": schema.BoolAttribute{Optional: true, MarkdownDescription: "Whether to attach debug information when transitioning to production mode."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionTruenasSet_ProductionResource) Create(ctx context.Context, req re
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Production.ValueBool())
 	if !data.AttachDebug.IsNull() {

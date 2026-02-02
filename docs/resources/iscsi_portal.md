@@ -14,11 +14,7 @@ Create a new iSCSI Portal.
 
 ```terraform
 resource "truenas_iscsi_portal" "example" {
-  listen = [
-    jsonencode({
-      # Configure object fields
-    })
-  ]
+  listen = ["item"]
 }
 ```
 
@@ -26,7 +22,7 @@ resource "truenas_iscsi_portal" "example" {
 
 ### Required
 
-- `listen` (List) - Array of IP addresses for the portal to listen on. **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({ip = "..."})]`
+- `listen` (List) - Array of IP addresses for the portal to listen on.
 
 ### Optional
 

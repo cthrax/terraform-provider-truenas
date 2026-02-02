@@ -2,10 +2,8 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"strings"
-
 	"encoding/json"
+	"fmt"
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -14,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"strings"
 	"time"
 )
 
@@ -271,9 +270,8 @@ func (r *AppResource) Delete(ctx context.Context, req resource.DeleteRequest, re
 	var err error
 	id = []interface{}{data.ID.ValueString(), map[string]interface{}{}}
 
-	// Stop app before deletion if running
-	_, _ = r.client.Call("app.stop", data.ID.ValueString()) // Ignore errors - app might already be stopped
-	time.Sleep(2 * time.Second)                             // Wait for app to stop
+	_, _ = r.client.Call("app.stop", data.ID.ValueString())
+	time.Sleep(2 * time.Second)
 
 	_, err = r.client.CallWithJob("app.delete", id)
 	if err != nil {

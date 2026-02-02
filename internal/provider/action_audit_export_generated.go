@@ -36,12 +36,9 @@ func (r *ActionAuditExportResource) Metadata(ctx context.Context, req resource.M
 
 func (r *ActionAuditExportResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Generate an audit report based on the specified `query-filters` and `query-options` for the specified `services` in the specified `export_format`",
+		MarkdownDescription: "Generate an audit report based on the specified `query-filters` and `query-options` for the specified `services` in the specified `export_format`.  Supported export_formats are CSV, JSON, and YAML. Th",
 		Attributes: map[string]schema.Attribute{
-			"data": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Audit export configuration specifying services, filters, and format.",
-			},
+			"data": schema.StringAttribute{Optional: true, MarkdownDescription: "Audit export configuration specifying services, filters, and format."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAuditExportResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Data.IsNull() {
 		params = append(params, data.Data.ValueString())

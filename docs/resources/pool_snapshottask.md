@@ -14,7 +14,7 @@ Create a Periodic Snapshot Task
 
 ```terraform
 resource "truenas_pool_snapshottask" "example" {
-  dataset = "example-value"
+  dataset = "example"
 }
 ```
 

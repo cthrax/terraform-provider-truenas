@@ -37,16 +37,10 @@ func (r *ActionCloudsyncSyncResource) Metadata(ctx context.Context, req resource
 
 func (r *ActionCloudsyncSyncResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Run the cloud_sync job `id`, syncing the local data to remote",
+		MarkdownDescription: "Run the cloud_sync job `id`, syncing the local data to remote.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the cloud sync task to run.",
-			},
-			"cloud_sync_sync_options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for the sync operation.",
-			},
+			"id":                      schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the cloud sync task to run."},
+			"cloud_sync_sync_options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for the sync operation."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionCloudsyncSyncResource) Create(ctx context.Context, req resource.C
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	if !data.CloudSyncSyncOptions.IsNull() {

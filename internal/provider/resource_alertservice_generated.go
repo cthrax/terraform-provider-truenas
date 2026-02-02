@@ -137,10 +137,8 @@ func (r *AlertserviceResource) Read(ctx context.Context, req resource.ReadReques
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	result, err := r.client.Call("alertservice.get_instance", id)
@@ -221,10 +219,8 @@ func (r *AlertserviceResource) Update(ctx context.Context, req resource.UpdateRe
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	params := map[string]interface{}{}
@@ -267,10 +263,8 @@ func (r *AlertserviceResource) Delete(ctx context.Context, req resource.DeleteRe
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	_, err = r.client.Call("alertservice.delete", id)

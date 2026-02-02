@@ -36,12 +36,9 @@ func (r *ActionRsynctaskRunResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionRsynctaskRunResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Job to run rsync task of `id`",
+		MarkdownDescription: "Job to run rsync task of `id`.  Output is saved to job log excerpt (not syslog).",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the rsync task to run immediately.",
-			},
+			"id": schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the rsync task to run immediately."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionRsynctaskRunResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 

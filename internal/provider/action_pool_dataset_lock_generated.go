@@ -37,16 +37,10 @@ func (r *ActionPoolDatasetLockResource) Metadata(ctx context.Context, req resour
 
 func (r *ActionPoolDatasetLockResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Locks `id` dataset",
+		MarkdownDescription: "Locks `id` dataset. It will unmount the dataset and its children before locking.  After the dataset has been unmounted, system will set immutable flag on the dataset's mountpoint where the dataset was",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The dataset ID (full path) to lock.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for locking the dataset, such as force unmount settings.",
-			},
+			"id":      schema.StringAttribute{Required: true, MarkdownDescription: "The dataset ID (full path) to lock."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for locking the dataset, such as force unmount settings."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolDatasetLockResource) Create(ctx context.Context, req resource
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueString())
 	if !data.Options.IsNull() {

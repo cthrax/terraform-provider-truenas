@@ -2,12 +2,12 @@
 page_title: "truenas_action_boot_attach Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Attach a disk to the boot pool, turning a stripe into a mirror.
+  Attach a disk to the boot pool, turning a stripe into a mirror.  `expand` option will determine whether the new disk partition will be          the maximum available or the same size as the current disk.
 ---
 
 # truenas_action_boot_attach (Resource)
 
-Attach a disk to the boot pool, turning a stripe into a mirror.
+Attach a disk to the boot pool, turning a stripe into a mirror.  `expand` option will determine whether the new disk partition will be          the maximum available or the same size as the current disk.
 
 This is an action resource that executes the `boot.attach` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

@@ -36,12 +36,9 @@ func (r *ActionPoolSnapshottaskRunResource) Metadata(ctx context.Context, req re
 
 func (r *ActionPoolSnapshottaskRunResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Execute a Periodic Snapshot Task of `id`",
+		MarkdownDescription: "Execute a Periodic Snapshot Task of `id`.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the periodic snapshot task to run immediately.",
-			},
+			"id": schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the periodic snapshot task to run immediately."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionPoolSnapshottaskRunResource) Create(ctx context.Context, req reso
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 

@@ -14,7 +14,7 @@ Creates FC host (pairing).
 
 ```terraform
 resource "truenas_fc_fc_host" "example" {
-  alias = "example-value"
+  alias = "example"
 }
 ```
 

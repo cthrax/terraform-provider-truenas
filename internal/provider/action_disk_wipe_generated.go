@@ -38,20 +38,11 @@ func (r *ActionDiskWipeResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *ActionDiskWipeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Performs a wipe of a disk `dev`",
+		MarkdownDescription: "Performs a wipe of a disk `dev`.",
 		Attributes: map[string]schema.Attribute{
-			"dev": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The device to perform the disk wipe operation on. May be passed as /dev/sda or just sda.",
-			},
-			"mode": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "* QUICK: Write zeros to the first and last 32MB of device. * FULL: Write whole disk with zeros. * FULL_RANDOM: Write whole disk with random bytes.",
-			},
-			"synccache": schema.BoolAttribute{
-				Optional:            true,
-				MarkdownDescription: "Synchronize the device with the database.",
-			},
+			"dev":       schema.StringAttribute{Required: true, MarkdownDescription: "The device to perform the disk wipe operation on. May be passed as /dev/sda or just sda."},
+			"mode":      schema.StringAttribute{Required: true, MarkdownDescription: "* QUICK: Write zeros to the first and last 32MB of device. * FULL: Write whole disk with zeros. * FULL_RANDOM: Write whole disk with random bytes."},
+			"synccache": schema.BoolAttribute{Optional: true, MarkdownDescription: "Synchronize the device with the database."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -100,7 +91,6 @@ func (r *ActionDiskWipeResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Dev.ValueString())
 	params = append(params, data.Mode.ValueString())

@@ -14,8 +14,8 @@ Create a new ZFS Pool.
 
 ```terraform
 resource "truenas_pool" "example" {
-  name = "example-value"
-  topology = "example-value"
+  name = "example"
+  topology = "example"
 }
 ```
 
@@ -24,7 +24,7 @@ resource "truenas_pool" "example" {
 ### Required
 
 - `name` (String) - Name for the new storage pool.
-- `topology` (String) - Physical layout and configuration of vdevs in the pool. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({, ...})`
+- `topology` (String) - Physical layout and configuration of vdevs in the pool. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data.
 
 ### Optional
 

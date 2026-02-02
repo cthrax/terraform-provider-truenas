@@ -37,16 +37,10 @@ func (r *ActionCloudsyncSync_OnetimeResource) Metadata(ctx context.Context, req 
 
 func (r *ActionCloudsyncSync_OnetimeResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Run cloud sync task without creating it",
+		MarkdownDescription: "Run cloud sync task without creating it.",
 		Attributes: map[string]schema.Attribute{
-			"cloud_sync_sync_onetime": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Cloud sync task configuration for one-time execution.",
-			},
-			"cloud_sync_sync_onetime_options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for the one-time sync operation.",
-			},
+			"cloud_sync_sync_onetime":         schema.StringAttribute{Required: true, MarkdownDescription: "Cloud sync task configuration for one-time execution."},
+			"cloud_sync_sync_onetime_options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for the one-time sync operation."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionCloudsyncSync_OnetimeResource) Create(ctx context.Context, req re
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.CloudSyncSyncOnetime.ValueString())
 	if !data.CloudSyncSyncOnetimeOptions.IsNull() {

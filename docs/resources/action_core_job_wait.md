@@ -2,12 +2,12 @@
 page_title: "truenas_action_core_job_wait Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Execute core.job_wait action
+  Execute core.job_wait
 ---
 
 # truenas_action_core_job_wait (Resource)
 
-Execute core.job_wait action
+Execute core.job_wait
 
 This is an action resource that executes the `core.job_wait` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

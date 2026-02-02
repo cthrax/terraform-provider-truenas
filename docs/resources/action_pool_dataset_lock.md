@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_dataset_lock Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Locks `id` dataset. It will unmount the dataset and its children before locking.
+  Locks `id` dataset. It will unmount the dataset and its children before locking.  After the dataset has been unmounted, system will set immutable flag on the dataset's mountpoint where the dataset was mounted before it was locked making sure that the path cannot be modified. Once the dataset is unlocked, it will not be affected by this change and consumers can continue consuming it.
 ---
 
 # truenas_action_pool_dataset_lock (Resource)
 
-Locks `id` dataset. It will unmount the dataset and its children before locking.
+Locks `id` dataset. It will unmount the dataset and its children before locking.  After the dataset has been unmounted, system will set immutable flag on the dataset's mountpoint where the dataset was mounted before it was locked making sure that the path cannot be modified. Once the dataset is unlocked, it will not be affected by this change and consumers can continue consuming it.
 
 This is an action resource that executes the `pool.dataset.lock` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

@@ -14,9 +14,9 @@ Create a specific reporting exporter configuration containing required details f
 
 ```terraform
 resource "truenas_reporting_exporters" "example" {
-  attributes = "example-value"
+  attributes = "example"
   enabled = true
-  name = "example-value"
+  name = "example"
 }
 ```
 

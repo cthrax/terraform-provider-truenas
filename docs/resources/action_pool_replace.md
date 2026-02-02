@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_replace Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Replace a disk on a pool.
+  Replace a disk on a pool.  `label` is the ZFS guid or a device name `disk` is the identifier of a disk If `preserve_settings` is true, then settings (power management, S.M.A.R.T., etc.) of a disk being replaced will be applied to a new disk.
 ---
 
 # truenas_action_pool_replace (Resource)
 
-Replace a disk on a pool.
+Replace a disk on a pool.  `label` is the ZFS guid or a device name `disk` is the identifier of a disk If `preserve_settings` is true, then settings (power management, S.M.A.R.T., etc.) of a disk being replaced will be applied to a new disk.
 
 This is an action resource that executes the `pool.replace` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

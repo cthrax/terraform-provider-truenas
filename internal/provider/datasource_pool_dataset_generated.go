@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -347,6 +348,570 @@ func (d *PoolDatasetDataSource) Read(ctx context.Context, req datasource.ReadReq
 			}
 		default:
 			data.Name = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["pool"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Pool = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Pool = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Pool = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["encrypted"]; ok && v != nil {
+		if bv, ok := v.(bool); ok {
+			data.Encrypted = types.BoolValue(bv)
+		}
+	}
+	if v, ok := resultMap["encryption_root"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.EncryptionRoot = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.EncryptionRoot = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.EncryptionRoot = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["key_loaded"]; ok && v != nil {
+		if bv, ok := v.(bool); ok {
+			data.KeyLoaded = types.BoolValue(bv)
+		}
+	}
+	if v, ok := resultMap["children"]; ok && v != nil {
+		if arr, ok := v.([]interface{}); ok {
+			strVals := make([]attr.Value, len(arr))
+			for i, item := range arr {
+				strVals[i] = types.StringValue(fmt.Sprintf("%v", item))
+			}
+			data.Children, _ = types.ListValue(types.StringType, strVals)
+		}
+	}
+	if v, ok := resultMap["user_properties"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.UserProperties = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.UserProperties = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.UserProperties = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["locked"]; ok && v != nil {
+		if bv, ok := v.(bool); ok {
+			data.Locked = types.BoolValue(bv)
+		}
+	}
+	if v, ok := resultMap["comments"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Comments = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Comments = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Comments = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["quota_warning"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.QuotaWarning = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.QuotaWarning = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.QuotaWarning = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["quota_critical"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.QuotaCritical = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.QuotaCritical = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.QuotaCritical = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["refquota_warning"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.RefquotaWarning = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.RefquotaWarning = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.RefquotaWarning = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["refquota_critical"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.RefquotaCritical = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.RefquotaCritical = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.RefquotaCritical = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["managedby"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Managedby = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Managedby = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Managedby = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["deduplication"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Deduplication = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Deduplication = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Deduplication = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["aclmode"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Aclmode = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Aclmode = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Aclmode = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["acltype"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Acltype = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Acltype = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Acltype = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["xattr"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Xattr = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Xattr = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Xattr = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["atime"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Atime = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Atime = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Atime = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["casesensitivity"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Casesensitivity = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Casesensitivity = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Casesensitivity = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["checksum"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Checksum = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Checksum = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Checksum = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["exec"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Exec = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Exec = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Exec = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["sync"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Sync = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Sync = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Sync = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["compression"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Compression = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Compression = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Compression = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["compressratio"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Compressratio = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Compressratio = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Compressratio = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["origin"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Origin = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Origin = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Origin = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["quota"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Quota = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Quota = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Quota = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["refquota"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Refquota = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Refquota = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Refquota = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["reservation"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Reservation = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Reservation = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Reservation = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["refreservation"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Refreservation = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Refreservation = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Refreservation = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["copies"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Copies = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Copies = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Copies = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["snapdir"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Snapdir = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Snapdir = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Snapdir = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["readonly"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Readonly = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Readonly = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Readonly = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["recordsize"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Recordsize = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Recordsize = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Recordsize = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["sparse"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Sparse = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Sparse = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Sparse = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["volsize"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Volsize = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Volsize = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Volsize = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["volblocksize"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Volblocksize = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Volblocksize = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Volblocksize = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["key_format"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.KeyFormat = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.KeyFormat = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.KeyFormat = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["encryption_algorithm"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.EncryptionAlgorithm = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.EncryptionAlgorithm = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.EncryptionAlgorithm = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["used"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Used = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Used = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Used = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["usedbychildren"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Usedbychildren = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Usedbychildren = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Usedbychildren = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["usedbydataset"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Usedbydataset = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Usedbydataset = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Usedbydataset = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["usedbyrefreservation"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Usedbyrefreservation = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Usedbyrefreservation = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Usedbyrefreservation = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["usedbysnapshots"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Usedbysnapshots = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Usedbysnapshots = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Usedbysnapshots = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["available"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Available = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Available = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Available = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["special_small_block_size"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.SpecialSmallBlockSize = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.SpecialSmallBlockSize = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.SpecialSmallBlockSize = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["pbkdf2iters"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Pbkdf2Iters = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Pbkdf2Iters = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Pbkdf2Iters = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["creation"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Creation = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Creation = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Creation = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["snapdev"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Snapdev = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Snapdev = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Snapdev = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["mountpoint"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Mountpoint = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Mountpoint = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Mountpoint = types.StringValue(fmt.Sprintf("%v", v))
 		}
 	}
 

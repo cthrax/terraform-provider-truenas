@@ -14,8 +14,8 @@ Create Cloud Sync Credentials.
 
 ```terraform
 resource "truenas_cloudsync_credentials" "example" {
-  name = "example-value"
-  provider = "example-value"
+  name = "example"
+  provider = "example"
 }
 ```
 

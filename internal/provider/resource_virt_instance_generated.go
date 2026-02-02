@@ -2,10 +2,8 @@ package provider
 
 import (
 	"context"
-	"fmt"
-	"strings"
-
 	"encoding/json"
+	"fmt"
 	"github.com/bmanojlovic/terraform-provider-truenas/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -13,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"strings"
 	"time"
 )
 
@@ -271,8 +270,7 @@ func (r *VirtInstanceResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	// Handle lifecycle action - start on create if requested
-	startOnCreate := true // default when not specified
+	startOnCreate := true
 	if !data.StartOnCreate.IsNull() {
 		startOnCreate = data.StartOnCreate.ValueBool()
 	}
@@ -414,9 +412,8 @@ func (r *VirtInstanceResource) Delete(ctx context.Context, req resource.DeleteRe
 	var err error
 	id = data.ID.ValueString()
 
-	// Stop app before deletion if running
-	_, _ = r.client.Call("virt.instance.stop", data.ID.ValueString()) // Ignore errors - app might already be stopped
-	time.Sleep(2 * time.Second)                                       // Wait for app to stop
+	_, _ = r.client.Call("virt.instance.stop", data.ID.ValueString())
+	time.Sleep(2 * time.Second)
 
 	_, err = r.client.CallWithJob("virt.instance.delete", id)
 	if err != nil {

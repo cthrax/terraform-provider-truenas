@@ -14,7 +14,7 @@ Create an iSCSI Extent.
 
 ```terraform
 resource "truenas_iscsi_extent" "example" {
-  name = "example-value"
+  name = "example"
 }
 ```
 

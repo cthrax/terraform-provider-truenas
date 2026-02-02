@@ -2,12 +2,12 @@
 page_title: "truenas_action_virt_instance_stop Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Stop an instance.
+  Stop an instance.  Timeout is how long it should wait for the instance to shutdown cleanly.
 ---
 
 # truenas_action_virt_instance_stop (Resource)
 
-Stop an instance.
+Stop an instance.  Timeout is how long it should wait for the instance to shutdown cleanly.
 
 This is an action resource that executes the `virt.instance.stop` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

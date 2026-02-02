@@ -33,20 +33,14 @@ func (r *FilesystemPutResource) Metadata(ctx context.Context, req resource.Metad
 
 func (r *FilesystemPutResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Job to put contents to `path`",
+		MarkdownDescription: "Job to put contents to `path`.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Resource identifier",
 			},
-			"path": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Path where the file should be written.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options controlling file writing behavior.",
-			},
+			"path":    schema.StringAttribute{Required: true, MarkdownDescription: "Path where the file should be written."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options controlling file writing behavior."},
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -76,7 +70,6 @@ func (r *FilesystemPutResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["path"] = data.Path.ValueString()
 	if !data.Options.IsNull() {
@@ -131,7 +124,6 @@ func (r *FilesystemPutResource) Update(ctx context.Context, req resource.UpdateR
 	data.ID = state.ID
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["path"] = data.Path.ValueString()
 	if !data.Options.IsNull() {

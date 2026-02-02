@@ -37,16 +37,10 @@ func (r *ActionBootReplaceResource) Metadata(ctx context.Context, req resource.M
 
 func (r *ActionBootReplaceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Replace device `label` on boot pool with `dev`",
+		MarkdownDescription: "Replace device `label` on boot pool with `dev`.",
 		Attributes: map[string]schema.Attribute{
-			"label": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Label of the disk in the boot pool to replace.",
-			},
-			"dev": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Device name or path of the replacement disk.",
-			},
+			"label": schema.StringAttribute{Required: true, MarkdownDescription: "Label of the disk in the boot pool to replace."},
+			"dev":   schema.StringAttribute{Required: true, MarkdownDescription: "Device name or path of the replacement disk."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionBootReplaceResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Label.ValueString())
 	params = append(params, data.Dev.ValueString())

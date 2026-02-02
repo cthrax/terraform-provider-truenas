@@ -37,16 +37,10 @@ func (r *ActionSystemRebootResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionSystemRebootResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Reboots the operating system",
+		MarkdownDescription: "Reboots the operating system.  Emits an \"added\" event of name \"system\" and id \"reboot\".",
 		Attributes: map[string]schema.Attribute{
-			"reason": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Reason for the system reboot.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the reboot process.",
-			},
+			"reason":  schema.StringAttribute{Required: true, MarkdownDescription: "Reason for the system reboot."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the reboot process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionSystemRebootResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Reason.ValueString())
 	if !data.Options.IsNull() {

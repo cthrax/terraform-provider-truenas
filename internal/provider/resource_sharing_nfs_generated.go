@@ -224,10 +224,8 @@ func (r *SharingNfsResource) Read(ctx context.Context, req resource.ReadRequest,
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	result, err := r.client.Call("sharing.nfs.get_instance", id)
@@ -284,10 +282,8 @@ func (r *SharingNfsResource) Update(ctx context.Context, req resource.UpdateRequ
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	params := map[string]interface{}{}
@@ -360,10 +356,8 @@ func (r *SharingNfsResource) Delete(ctx context.Context, req resource.DeleteRequ
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	_, err = r.client.Call("sharing.nfs.delete", id)

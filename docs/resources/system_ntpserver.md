@@ -14,7 +14,7 @@ Add an NTP Server.
 
 ```terraform
 resource "truenas_system_ntpserver" "example" {
-  address = "example-value"
+  address = "example"
 }
 ```
 

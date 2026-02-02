@@ -36,12 +36,9 @@ func (r *ActionPoolDdt_PrefetchResource) Metadata(ctx context.Context, req resou
 
 func (r *ActionPoolDdt_PrefetchResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Prefetch DDT entries in pool `pool_name`",
+		MarkdownDescription: "Prefetch DDT entries in pool `pool_name`.",
 		Attributes: map[string]schema.Attribute{
-			"pool_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the pool to prefetch deduplication table entries for.",
-			},
+			"pool_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the pool to prefetch deduplication table entries for."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionPoolDdt_PrefetchResource) Create(ctx context.Context, req resourc
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.PoolName.ValueString())
 

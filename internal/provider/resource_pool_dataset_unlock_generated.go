@@ -33,20 +33,14 @@ func (r *PoolDatasetUnlockResource) Metadata(ctx context.Context, req resource.M
 
 func (r *PoolDatasetUnlockResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Unlock dataset `id` (and its children if `unlock_options",
+		MarkdownDescription: "Unlock dataset `id` (and its children if `unlock_options.recursive` is `true`).  If `id` dataset is not encrypted an exception will be raised. There is one exception: when `id` is a root dataset and `",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Resource identifier",
 			},
-			"dataset_id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The dataset ID (full path) to unlock.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for unlocking including force settings, recursion, and dataset-specific keys.",
-			},
+			"dataset_id": schema.StringAttribute{Required: true, MarkdownDescription: "The dataset ID (full path) to unlock."},
+			"options":    schema.StringAttribute{Optional: true, MarkdownDescription: "Options for unlocking including force settings, recursion, and dataset-specific keys."},
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -76,7 +70,6 @@ func (r *PoolDatasetUnlockResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["id"] = data.DatasetId.ValueString()
 	if !data.Options.IsNull() {
@@ -131,7 +124,6 @@ func (r *PoolDatasetUnlockResource) Update(ctx context.Context, req resource.Upd
 	data.ID = state.ID
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["id"] = data.DatasetId.ValueString()
 	if !data.Options.IsNull() {

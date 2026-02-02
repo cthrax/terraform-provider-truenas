@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_scrub Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Performs a scrub action to pool of `id`.
+  Performs a scrub action to pool of `id`.  `action` can be either of "START", "STOP" or "PAUSE".
 ---
 
 # truenas_action_pool_scrub (Resource)
 
-Performs a scrub action to pool of `id`.
+Performs a scrub action to pool of `id`.  `action` can be either of "START", "STOP" or "PAUSE".
 
 This is an action resource that executes the `pool.scrub` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

@@ -2,12 +2,12 @@
 page_title: "truenas_action_virt_volume_import_zvol Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Execute virt.volume.import_zvol action
+  Execute virt.volume.import_zvol
 ---
 
 # truenas_action_virt_volume_import_zvol (Resource)
 
-Execute virt.volume.import_zvol action
+Execute virt.volume.import_zvol
 
 This is an action resource that executes the `virt.volume.import_zvol` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

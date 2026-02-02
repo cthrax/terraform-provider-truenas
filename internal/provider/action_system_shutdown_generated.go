@@ -37,16 +37,10 @@ func (r *ActionSystemShutdownResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionSystemShutdownResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Shuts down the operating system",
+		MarkdownDescription: "Shuts down the operating system.  An \"added\" event of name \"system\" and id \"shutdown\" is emitted when shutdown is initiated.",
 		Attributes: map[string]schema.Attribute{
-			"reason": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Reason for the system shutdown.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the shutdown process.",
-			},
+			"reason":  schema.StringAttribute{Required: true, MarkdownDescription: "Reason for the system shutdown."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the shutdown process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionSystemShutdownResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Reason.ValueString())
 	if !data.Options.IsNull() {

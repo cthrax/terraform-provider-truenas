@@ -36,12 +36,9 @@ func (r *ActionVirtVolumeImport_ZvolResource) Metadata(ctx context.Context, req 
 
 func (r *ActionVirtVolumeImport_ZvolResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Execute virt",
+		MarkdownDescription: "Execute virt.volume.import_zvol",
 		Attributes: map[string]schema.Attribute{
-			"virt_volume_import_iso": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "VirtVolumeImportZvolArgs parameters.",
-			},
+			"virt_volume_import_iso": schema.StringAttribute{Required: true, MarkdownDescription: "VirtVolumeImportZvolArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionVirtVolumeImport_ZvolResource) Create(ctx context.Context, req re
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.VirtVolumeImportIso.ValueString())
 

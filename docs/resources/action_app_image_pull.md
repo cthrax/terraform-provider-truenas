@@ -2,12 +2,12 @@
 page_title: "truenas_action_app_image_pull Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  `image` is the name of the image to pull. Format for the name is "registry/repo/image:v1.2.3" where
+  `image` is the name of the image to pull. Format for the name is "registry/repo/image:v1.2.3" where registry may be omitted and it will default to docker registry in this case. It can or cannot contain the tag - this will be passed as is to docker so this should be analogous to what `docker pull` expects.  `auth_config` should be specified if image to be retrieved is under a private repository.
 ---
 
 # truenas_action_app_image_pull (Resource)
 
-`image` is the name of the image to pull. Format for the name is "registry/repo/image:v1.2.3" where
+`image` is the name of the image to pull. Format for the name is "registry/repo/image:v1.2.3" where registry may be omitted and it will default to docker registry in this case. It can or cannot contain the tag - this will be passed as is to docker so this should be analogous to what `docker pull` expects.  `auth_config` should be specified if image to be retrieved is under a private repository.
 
 This is an action resource that executes the `app.image.pull` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

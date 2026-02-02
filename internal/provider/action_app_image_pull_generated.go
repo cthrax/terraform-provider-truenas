@@ -36,12 +36,9 @@ func (r *ActionAppImagePullResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionAppImagePullResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "`image` is the name of the image to pull",
+		MarkdownDescription: "`image` is the name of the image to pull. Format for the name is \"registry/repo/image:v1.2.3\" where registry may be omitted and it will default to docker registry in this case. It can or cannot cont",
 		Attributes: map[string]schema.Attribute{
-			"image_pull": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "AppImagePullArgs parameters.",
-			},
+			"image_pull": schema.StringAttribute{Required: true, MarkdownDescription: "AppImagePullArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAppImagePullResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.ImagePull.ValueString())
 

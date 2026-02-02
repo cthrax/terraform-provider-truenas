@@ -36,12 +36,9 @@ func (r *ActionPoolDatasetExport_KeysResource) Metadata(ctx context.Context, req
 
 func (r *ActionPoolDatasetExport_KeysResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Export keys for `id` and its children which are stored in the system",
+		MarkdownDescription: "Export keys for `id` and its children which are stored in the system. The exported file is a JSON file which has a dictionary containing dataset names as keys and their keys as the value.  Please refe",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The dataset ID (full path) to export keys from recursively.",
-			},
+			"id": schema.StringAttribute{Required: true, MarkdownDescription: "The dataset ID (full path) to export keys from recursively."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionPoolDatasetExport_KeysResource) Create(ctx context.Context, req r
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueString())
 

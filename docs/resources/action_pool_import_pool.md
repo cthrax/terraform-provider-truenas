@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_import_pool Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Import a pool found with `pool.import_find`.
+  Import a pool found with `pool.import_find`.  Errors:     ENOENT - Pool not found
 ---
 
 # truenas_action_pool_import_pool (Resource)
 
-Import a pool found with `pool.import_find`.
+Import a pool found with `pool.import_find`.  Errors:     ENOENT - Pool not found
 
 This is an action resource that executes the `pool.import_pool` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

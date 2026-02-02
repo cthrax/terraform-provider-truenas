@@ -40,12 +40,9 @@ func (r *ActionSupportAttach_TicketResource) Metadata(ctx context.Context, req r
 
 func (r *ActionSupportAttach_TicketResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Method to attach a file to an existing ticket",
+		MarkdownDescription: "Method to attach a file to an existing ticket.",
 		Attributes: map[string]schema.Attribute{
-			"data": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "SupportAttachTicketArgs parameters.",
-			},
+			"data": schema.StringAttribute{Required: true, MarkdownDescription: "SupportAttachTicketArgs parameters."},
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -99,7 +96,6 @@ func (r *ActionSupportAttach_TicketResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["data"] = data.Data.ValueString()
 

@@ -36,12 +36,9 @@ func (r *ActionVmLog_File_DownloadResource) Metadata(ctx context.Context, req re
 
 func (r *ActionVmLog_File_DownloadResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieve log file contents of `id` VM",
+		MarkdownDescription: "Retrieve log file contents of `id` VM.  It will download empty file if log file does not exist.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the virtual machine to download log file for.",
-			},
+			"id": schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the virtual machine to download log file for."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionVmLog_File_DownloadResource) Create(ctx context.Context, req reso
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 

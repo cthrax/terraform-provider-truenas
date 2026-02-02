@@ -36,12 +36,9 @@ func (r *ActionReplicationRunResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionReplicationRunResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Run Replication Task of `id`",
+		MarkdownDescription: "Run Replication Task of `id`.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the replication task to run.",
-			},
+			"id": schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the replication task to run."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionReplicationRunResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 

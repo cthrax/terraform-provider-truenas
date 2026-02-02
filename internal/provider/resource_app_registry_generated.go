@@ -140,10 +140,8 @@ func (r *AppRegistryResource) Read(ctx context.Context, req resource.ReadRequest
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	result, err := r.client.Call("app.registry.get_instance", id)
@@ -224,10 +222,8 @@ func (r *AppRegistryResource) Update(ctx context.Context, req resource.UpdateReq
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	params := map[string]interface{}{}
@@ -268,10 +264,8 @@ func (r *AppRegistryResource) Delete(ctx context.Context, req resource.DeleteReq
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	_, err = r.client.Call("app.registry.delete", id)

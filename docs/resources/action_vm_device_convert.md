@@ -2,12 +2,12 @@
 page_title: "truenas_action_vm_device_convert Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Convert between disk images and ZFS volumes. Supported disk image formats         are qcow2, qed, raw, vdi, vhdx, and vmdk. The conversion direction is determined         automatically based on file e
+  Convert between disk images and ZFS volumes. Supported disk image formats         are qcow2, qed, raw, vdi, vhdx, and vmdk. The conversion direction is determined         automatically based on file extension.
 ---
 
 # truenas_action_vm_device_convert (Resource)
 
-Convert between disk images and ZFS volumes. Supported disk image formats         are qcow2, qed, raw, vdi, vhdx, and vmdk. The conversion direction is determined         automatically based on file e
+Convert between disk images and ZFS volumes. Supported disk image formats         are qcow2, qed, raw, vdi, vhdx, and vmdk. The conversion direction is determined         automatically based on file extension.
 
 This is an action resource that executes the `vm.device.convert` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

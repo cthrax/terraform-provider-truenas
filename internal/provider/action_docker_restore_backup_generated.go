@@ -36,12 +36,9 @@ func (r *ActionDockerRestore_BackupResource) Metadata(ctx context.Context, req r
 
 func (r *ActionDockerRestore_BackupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Restore a backup of existing apps",
+		MarkdownDescription: "Restore a backup of existing apps.",
 		Attributes: map[string]schema.Attribute{
-			"backup_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the backup to restore.",
-			},
+			"backup_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the backup to restore."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionDockerRestore_BackupResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.BackupName.ValueString())
 

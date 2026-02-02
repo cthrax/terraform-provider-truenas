@@ -2,12 +2,12 @@
 page_title: "truenas_action_virt_device_import_disk_image Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Imports a specified disk image.
+  Imports a specified disk image.  Utilized qemu-img with the auto-detect functionality to auto-convert any supported disk image format to RAW -> ZVOL  As of this implementation it supports:  - QCOW2 - QED - RAW - VDI - VPC - VMDK  `diskimg` is a required parameter for the incoming disk image `zvol` is the required target for the imported disk image
 ---
 
 # truenas_action_virt_device_import_disk_image (Resource)
 
-Imports a specified disk image.
+Imports a specified disk image.  Utilized qemu-img with the auto-detect functionality to auto-convert any supported disk image format to RAW -> ZVOL  As of this implementation it supports:  - QCOW2 - QED - RAW - VDI - VPC - VMDK  `diskimg` is a required parameter for the incoming disk image `zvol` is the required target for the imported disk image
 
 This is an action resource that executes the `virt.device.import_disk_image` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

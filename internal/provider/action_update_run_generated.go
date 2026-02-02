@@ -36,12 +36,9 @@ func (r *ActionUpdateRunResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *ActionUpdateRunResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Downloads (if not already in cache) and apply an update",
+		MarkdownDescription: "Downloads (if not already in cache) and apply an update.",
 		Attributes: map[string]schema.Attribute{
-			"attrs": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Attributes controlling the system update execution process.",
-			},
+			"attrs": schema.StringAttribute{Optional: true, MarkdownDescription: "Attributes controlling the system update execution process."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionUpdateRunResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Attrs.IsNull() {
 		params = append(params, data.Attrs.ValueString())

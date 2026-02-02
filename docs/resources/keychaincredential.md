@@ -9,16 +9,15 @@ description: |-
 
 Create a Keychain Credential.
 
-
 ## Variants
 
-This resource has **2 variants** controlled by the `type` field. Choose the appropriate variant for your use case:
+This resource has **2 variants** controlled by the `type` field.
 
-### SSH_CREDENTIALS
+### SSH_KEY_PAIR
 
 ```terraform
 resource "truenas_keychaincredential" "example" {
-  type = "SSH_CREDENTIALS"
+  type = "SSH_KEY_PAIR"
   attributes = "value"
   name = "value"
 }
@@ -26,11 +25,11 @@ resource "truenas_keychaincredential" "example" {
 
 **Required fields:** `attributes`, `name`, `type`
 
-### SSH_KEY_PAIR
+### SSH_CREDENTIALS
 
 ```terraform
 resource "truenas_keychaincredential" "example" {
-  type = "SSH_KEY_PAIR"
+  type = "SSH_CREDENTIALS"
   attributes = "value"
   name = "value"
 }
@@ -46,7 +45,7 @@ resource "truenas_keychaincredential" "example" {
 
 - `attributes` (String) - SSH connection attributes including host, authentication, and connection settings. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({host = "value", port = 0, username = "value", ...})`
 - `name` (String) - Distinguishes this Keychain Credential from others.
-- `type` (String) - Keychain credential type identifier for SSH connection credentials. Valid values: `SSH_CREDENTIALS`, `SSH_KEY_PAIR`
+- `type` (String) - Keychain credential type identifier for SSH connection credentials. Valid values: `SSH_KEY_PAIR`, `SSH_CREDENTIALS`
 
 ### Optional
 

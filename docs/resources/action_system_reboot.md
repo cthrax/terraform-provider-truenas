@@ -2,12 +2,12 @@
 page_title: "truenas_action_system_reboot Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Reboots the operating system.
+  Reboots the operating system.  Emits an "added" event of name "system" and id "reboot".
 ---
 
 # truenas_action_system_reboot (Resource)
 
-Reboots the operating system.
+Reboots the operating system.  Emits an "added" event of name "system" and id "reboot".
 
 This is an action resource that executes the `system.reboot` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

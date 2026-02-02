@@ -36,12 +36,9 @@ func (r *ActionServiceStartedResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionServiceStartedResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Test if service specified by `service` has been started",
+		MarkdownDescription: "Test if service specified by `service` has been started.",
 		Attributes: map[string]schema.Attribute{
-			"service": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the service to check if running.",
-			},
+			"service": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the service to check if running."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionServiceStartedResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Service.ValueString())
 

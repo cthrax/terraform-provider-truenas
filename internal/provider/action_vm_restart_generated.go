@@ -36,12 +36,9 @@ func (r *ActionVmRestartResource) Metadata(ctx context.Context, req resource.Met
 
 func (r *ActionVmRestartResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Restart a VM",
+		MarkdownDescription: "Restart a VM.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the virtual machine to restart.",
-			},
+			"id": schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the virtual machine to restart."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionVmRestartResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 

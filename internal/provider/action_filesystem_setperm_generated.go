@@ -36,12 +36,9 @@ func (r *ActionFilesystemSetpermResource) Metadata(ctx context.Context, req reso
 
 func (r *ActionFilesystemSetpermResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Set unix permissions on given `path`",
+		MarkdownDescription: "Set unix permissions on given `path`.  If `mode` is specified then the mode will be applied to the path and files and subdirectories depending on which `options` are selected. Mode should be formatted",
 		Attributes: map[string]schema.Attribute{
-			"filesystem_setperm": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "FilesystemSetpermArgs parameters.",
-			},
+			"filesystem_setperm": schema.StringAttribute{Required: true, MarkdownDescription: "FilesystemSetpermArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionFilesystemSetpermResource) Create(ctx context.Context, req resour
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.FilesystemSetperm.ValueString())
 

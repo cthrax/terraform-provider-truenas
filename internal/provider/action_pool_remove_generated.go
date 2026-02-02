@@ -37,16 +37,10 @@ func (r *ActionPoolRemoveResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionPoolRemoveResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Remove a disk from pool of id `id`",
+		MarkdownDescription: "Remove a disk from pool of id `id`.  `label` is the vdev guid or device name.  Error codes:      EZFS_NOSPC(2032): out of space to remove a device     EZFS_NODEVICE(2017): no such device in pool     E",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the pool to remove a disk from.",
-			},
-			"options": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Disk identifier to remove from the pool.",
-			},
+			"id":      schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the pool to remove a disk from."},
+			"options": schema.StringAttribute{Required: true, MarkdownDescription: "Disk identifier to remove from the pool."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionPoolRemoveResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	params = append(params, data.Options.ValueString())

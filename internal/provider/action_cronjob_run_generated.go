@@ -37,16 +37,10 @@ func (r *ActionCronjobRunResource) Metadata(ctx context.Context, req resource.Me
 
 func (r *ActionCronjobRunResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Job to run cronjob task of `id`",
+		MarkdownDescription: "Job to run cronjob task of `id`.",
 		Attributes: map[string]schema.Attribute{
-			"id": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "ID of the cron job to run immediately.",
-			},
-			"skip_disabled": schema.BoolAttribute{
-				Optional:            true,
-				MarkdownDescription: "Whether to skip execution if the cron job is disabled.",
-			},
+			"id":            schema.Int64Attribute{Required: true, MarkdownDescription: "ID of the cron job to run immediately."},
+			"skip_disabled": schema.BoolAttribute{Optional: true, MarkdownDescription: "Whether to skip execution if the cron job is disabled."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionCronjobRunResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Id.ValueInt64())
 	if !data.SkipDisabled.IsNull() {

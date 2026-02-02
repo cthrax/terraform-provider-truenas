@@ -36,12 +36,9 @@ func (r *ActionAppRollback_VersionsResource) Metadata(ctx context.Context, req r
 
 func (r *ActionAppRollback_VersionsResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Retrieve versions available for rollback for `app_name` app",
+		MarkdownDescription: "Retrieve versions available for rollback for `app_name` app.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the application to get rollback versions for.",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the application to get rollback versions for."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAppRollback_VersionsResource) Create(ctx context.Context, req res
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 

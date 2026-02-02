@@ -37,16 +37,10 @@ func (r *ActionServiceStopResource) Metadata(ctx context.Context, req resource.M
 
 func (r *ActionServiceStopResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Stop the service specified by `service`",
+		MarkdownDescription: "Stop the service specified by `service`.",
 		Attributes: map[string]schema.Attribute{
-			"service": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the service to stop.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for controlling the stop operation behavior.",
-			},
+			"service": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the service to stop."},
+			"options": schema.StringAttribute{Optional: true, MarkdownDescription: "Options for controlling the stop operation behavior."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionServiceStopResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Service.ValueString())
 	if !data.Options.IsNull() {

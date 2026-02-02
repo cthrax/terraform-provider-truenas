@@ -14,9 +14,9 @@ Create an app registry entry.
 
 ```terraform
 resource "truenas_app_registry" "example" {
-  name = "example-value"
-  password = "example-value"
-  username = "example-value"
+  name = "example"
+  password = "example"
+  username = "example"
 }
 ```
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -85,7 +86,50 @@ func (d *ServiceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	_ = result // No fields to read
+	resultMap, ok := result.(map[string]interface{})
+	if !ok {
+		resp.Diagnostics.AddError("Parse Error", "Failed to parse API response")
+		return
+	}
+
+	if v, ok := resultMap["service"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Service = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Service = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Service = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["enable"]; ok && v != nil {
+		if bv, ok := v.(bool); ok {
+			data.Enable = types.BoolValue(bv)
+		}
+	}
+	if v, ok := resultMap["state"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.State = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.State = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.State = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["pids"]; ok && v != nil {
+		if arr, ok := v.([]interface{}); ok {
+			strVals := make([]attr.Value, len(arr))
+			for i, item := range arr {
+				strVals[i] = types.StringValue(fmt.Sprintf("%v", item))
+			}
+			data.Pids, _ = types.ListValue(types.StringType, strVals)
+		}
+	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

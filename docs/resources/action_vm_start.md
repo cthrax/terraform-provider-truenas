@@ -2,12 +2,12 @@
 page_title: "truenas_action_vm_start Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Start a VM.
+  Start a VM.  options.overcommit defaults to false, meaning VMs are not allowed to start if there is not enough available memory to hold all configured VMs. If true, VM starts even if there is not enough memory for all configured VMs.  Error codes:      ENOMEM(12): not enough free memory to run the VM without overcommit
 ---
 
 # truenas_action_vm_start (Resource)
 
-Start a VM.
+Start a VM.  options.overcommit defaults to false, meaning VMs are not allowed to start if there is not enough available memory to hold all configured VMs. If true, VM starts even if there is not enough memory for all configured VMs.  Error codes:      ENOMEM(12): not enough free memory to run the VM without overcommit
 
 This is an action resource that executes the `vm.start` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

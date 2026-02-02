@@ -131,10 +131,8 @@ func (r *KeychaincredentialResource) Read(ctx context.Context, req resource.Read
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	result, err := r.client.Call("keychaincredential.get_instance", id)
@@ -215,10 +213,8 @@ func (r *KeychaincredentialResource) Update(ctx context.Context, req resource.Up
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	params := map[string]interface{}{}

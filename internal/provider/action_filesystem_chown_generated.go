@@ -36,12 +36,9 @@ func (r *ActionFilesystemChownResource) Metadata(ctx context.Context, req resour
 
 func (r *ActionFilesystemChownResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Change owner or group of file at `path`",
+		MarkdownDescription: "Change owner or group of file at `path`.  `uid` and `gid` specify new owner of the file. If either key is absent or None, then existing value on the file is not changed.  `user` and `group` alternativ",
 		Attributes: map[string]schema.Attribute{
-			"filesystem_chown": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "FilesystemChownArgs parameters.",
-			},
+			"filesystem_chown": schema.StringAttribute{Required: true, MarkdownDescription: "FilesystemChownArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionFilesystemChownResource) Create(ctx context.Context, req resource
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.FilesystemChown.ValueString())
 

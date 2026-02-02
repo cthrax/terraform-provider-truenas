@@ -146,10 +146,8 @@ func (r *PoolScrubResource) Read(ctx context.Context, req resource.ReadRequest, 
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	result, err := r.client.Call("pool.scrub.get_instance", id)
@@ -206,10 +204,8 @@ func (r *PoolScrubResource) Update(ctx context.Context, req resource.UpdateReque
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	params := map[string]interface{}{}
@@ -255,10 +251,8 @@ func (r *PoolScrubResource) Delete(ctx context.Context, req resource.DeleteReque
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	_, err = r.client.Call("pool.scrub.delete", id)

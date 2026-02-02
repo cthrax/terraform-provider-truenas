@@ -37,16 +37,10 @@ func (r *ActionUpdateDownloadResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionUpdateDownloadResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Download updates",
+		MarkdownDescription: "Download updates.",
 		Attributes: map[string]schema.Attribute{
-			"train": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Specifies the train from which to download the update. If both `train` and `version` are `null``, the most     recent version that matches the currently selected update profile is used.",
-			},
-			"version": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Specific version to download. `null` to download the latest version from the specified train.",
-			},
+			"train":   schema.StringAttribute{Optional: true, MarkdownDescription: "Specifies the train from which to download the update. If both `train` and `version` are `null``, the most     recent version that matches the currently selected update profile is used."},
+			"version": schema.StringAttribute{Optional: true, MarkdownDescription: "Specific version to download. `null` to download the latest version from the specified train."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionUpdateDownloadResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.Train.IsNull() {
 		params = append(params, data.Train.ValueString())

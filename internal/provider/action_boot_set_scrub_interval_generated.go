@@ -36,12 +36,9 @@ func (r *ActionBootSet_Scrub_IntervalResource) Metadata(ctx context.Context, req
 
 func (r *ActionBootSet_Scrub_IntervalResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Set Automatic Scrub Interval value in days",
+		MarkdownDescription: "Set Automatic Scrub Interval value in days.",
 		Attributes: map[string]schema.Attribute{
-			"interval": schema.Int64Attribute{
-				Required:            true,
-				MarkdownDescription: "Scrub interval in days (must be a positive integer).",
-			},
+			"interval": schema.Int64Attribute{Required: true, MarkdownDescription: "Scrub interval in days (must be a positive integer)."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionBootSet_Scrub_IntervalResource) Create(ctx context.Context, req r
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Interval.ValueInt64())
 

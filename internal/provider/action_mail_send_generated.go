@@ -41,16 +41,10 @@ func (r *ActionMailSendResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *ActionMailSendResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Sends mail using configured mail settings",
+		MarkdownDescription: "Sends mail using configured mail settings.",
 		Attributes: map[string]schema.Attribute{
-			"message": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Email message content and configuration.",
-			},
-			"config": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Optional mail configuration overrides for this message.",
-			},
+			"message": schema.StringAttribute{Required: true, MarkdownDescription: "Email message content and configuration."},
+			"config":  schema.StringAttribute{Optional: true, MarkdownDescription: "Optional mail configuration overrides for this message."},
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -104,7 +98,6 @@ func (r *ActionMailSendResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["message"] = data.Message.ValueString()
 	if !data.Config.IsNull() {

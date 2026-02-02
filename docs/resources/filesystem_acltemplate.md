@@ -14,9 +14,9 @@ Create a new filesystem ACL template.
 
 ```terraform
 resource "truenas_filesystem_acltemplate" "example" {
-  acl = ["item1"]
-  acltype = "example-value"
-  name = "example-value"
+  acl = ["item"]
+  acltype = "example"
+  name = "example"
 }
 ```
 

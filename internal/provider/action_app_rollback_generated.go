@@ -37,16 +37,10 @@ func (r *ActionAppRollbackResource) Metadata(ctx context.Context, req resource.M
 
 func (r *ActionAppRollbackResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Rollback `app_name` app to previous version",
+		MarkdownDescription: "Rollback `app_name` app to previous version.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the application to rollback.",
-			},
-			"options": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Rollback options.",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the application to rollback."},
+			"options":  schema.StringAttribute{Required: true, MarkdownDescription: "Rollback options."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionAppRollbackResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 	params = append(params, data.Options.ValueString())

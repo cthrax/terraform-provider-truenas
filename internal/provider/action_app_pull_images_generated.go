@@ -37,16 +37,10 @@ func (r *ActionAppPull_ImagesResource) Metadata(ctx context.Context, req resourc
 
 func (r *ActionAppPull_ImagesResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Pulls docker images for the specified app `name`",
+		MarkdownDescription: "Pulls docker images for the specified app `name`.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the application to pull images for.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Options for pulling images including whether to redeploy.",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the application to pull images for."},
+			"options":  schema.StringAttribute{Optional: true, MarkdownDescription: "Options for pulling images including whether to redeploy."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -95,7 +89,6 @@ func (r *ActionAppPull_ImagesResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 	if !data.Options.IsNull() {

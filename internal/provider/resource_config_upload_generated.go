@@ -32,7 +32,7 @@ func (r *ConfigUploadResource) Metadata(ctx context.Context, req resource.Metada
 
 func (r *ConfigUploadResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Accepts a configuration file via job pipe",
+		MarkdownDescription: "Accepts a configuration file via job pipe.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -68,7 +68,6 @@ func (r *ConfigUploadResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 
 	// Decode file content if provided
@@ -119,7 +118,6 @@ func (r *ConfigUploadResource) Update(ctx context.Context, req resource.UpdateRe
 	data.ID = state.ID
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 
 	// Decode file content if provided

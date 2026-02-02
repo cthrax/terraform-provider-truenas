@@ -2,12 +2,12 @@
 page_title: "truenas_action_service_control Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Execute service.control action
+  Execute service.control
 ---
 
 # truenas_action_service_control (Resource)
 
-Execute service.control action
+Execute service.control
 
 This is an action resource that executes the `service.control` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

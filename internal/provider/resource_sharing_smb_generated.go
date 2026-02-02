@@ -45,7 +45,7 @@ func (r *SharingSmbResource) ImportState(ctx context.Context, req resource.Impor
 
 func (r *SharingSmbResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "None",
+		MarkdownDescription: "TrueNAS sharing_smb resource",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{Computed: true, Description: "Resource ID"},
 			"purpose": schema.StringAttribute{
@@ -191,10 +191,8 @@ func (r *SharingSmbResource) Read(ctx context.Context, req resource.ReadRequest,
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	result, err := r.client.Call("sharing.smb.get_instance", id)
@@ -263,10 +261,8 @@ func (r *SharingSmbResource) Update(ctx context.Context, req resource.UpdateRequ
 	var err error
 	id, err = strconv.Atoi(state.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	params := map[string]interface{}{}
@@ -327,10 +323,8 @@ func (r *SharingSmbResource) Delete(ctx context.Context, req resource.DeleteRequ
 	var err error
 	id, err = strconv.Atoi(data.ID.ValueString())
 	if err != nil {
-		{
-			resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
-			return
-		}
+		resp.Diagnostics.AddError("Invalid ID", fmt.Sprintf("Cannot parse ID: %s", err))
+		return
 	}
 
 	_, err = r.client.Call("sharing.smb.delete", id)

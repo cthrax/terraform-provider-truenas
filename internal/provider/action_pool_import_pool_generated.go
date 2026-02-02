@@ -36,12 +36,9 @@ func (r *ActionPoolImport_PoolResource) Metadata(ctx context.Context, req resour
 
 func (r *ActionPoolImport_PoolResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Import a pool found with `pool",
+		MarkdownDescription: "Import a pool found with `pool.import_find`.  Errors:     ENOENT - Pool not found",
 		Attributes: map[string]schema.Attribute{
-			"pool_import": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "PoolImportPoolArgs parameters.",
-			},
+			"pool_import": schema.StringAttribute{Required: true, MarkdownDescription: "PoolImportPoolArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionPoolImport_PoolResource) Create(ctx context.Context, req resource
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.PoolImport.ValueString())
 

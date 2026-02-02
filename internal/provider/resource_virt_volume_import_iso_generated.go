@@ -32,16 +32,13 @@ func (r *VirtVolumeImport_IsoResource) Metadata(ctx context.Context, req resourc
 
 func (r *VirtVolumeImport_IsoResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Upload file via virt",
+		MarkdownDescription: "Upload via virt.volume.import_iso",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Resource identifier",
 			},
-			"virt_volume_import_iso": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "VirtVolumeImportIsoArgs parameters.",
-			},
+			"virt_volume_import_iso": schema.StringAttribute{Required: true, MarkdownDescription: "VirtVolumeImportIsoArgs parameters."},
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -71,7 +68,6 @@ func (r *VirtVolumeImport_IsoResource) Create(ctx context.Context, req resource.
 	}
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["virt_volume_import_iso"] = data.VirtVolumeImportIso.ValueString()
 
@@ -123,7 +119,6 @@ func (r *VirtVolumeImport_IsoResource) Update(ctx context.Context, req resource.
 	data.ID = state.ID
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["virt_volume_import_iso"] = data.VirtVolumeImportIso.ValueString()
 

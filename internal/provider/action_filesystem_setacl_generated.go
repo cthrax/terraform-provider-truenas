@@ -36,12 +36,9 @@ func (r *ActionFilesystemSetaclResource) Metadata(ctx context.Context, req resou
 
 func (r *ActionFilesystemSetaclResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Set ACL of a given path",
+		MarkdownDescription: "Set ACL of a given path. Takes the following parameters: `path` full path to directory or file.  `dacl` ACL entries. Formatting depends on the underlying `acltype`. NFS4ACL requires NFSv4 entries. POS",
 		Attributes: map[string]schema.Attribute{
-			"filesystem_acl": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "FilesystemSetaclArgs parameters.",
-			},
+			"filesystem_acl": schema.StringAttribute{Required: true, MarkdownDescription: "FilesystemSetaclArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionFilesystemSetaclResource) Create(ctx context.Context, req resourc
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.FilesystemAcl.ValueString())
 

@@ -10,14 +10,6 @@ description: |-
 Take a snapshot from a given dataset.
 
 
-## Example Usage
-
-```terraform
-resource "truenas_pool_snapshot" "example" {
-  dataset = "example-value"
-}
-```
-
 ## Schema
 
 ### Required
@@ -29,7 +21,7 @@ resource "truenas_pool_snapshot" "example" {
 - `exclude` (List) - Array of dataset patterns to exclude from recursive snapshots. Default: `[]`
 - `name` (String) - Explicit name for the snapshot.
 - `naming_schema` (String) - Naming schema pattern to generate the snapshot name automatically.
-- `properties` (String) - Object mapping ZFS property names to values to set on the snapshot. Default: `{}`
+- `properties` (String) - Object mapping ZFS property names to values to set on the snapshot. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Default: `{}`
 - `recursive` (Bool) - Whether to recursively snapshot child datasets. Default: `False`
 - `vmware_sync` (Bool) - Whether to sync VMware VMs before taking the snapshot. Default: `False`
 

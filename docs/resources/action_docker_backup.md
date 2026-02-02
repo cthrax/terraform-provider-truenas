@@ -2,12 +2,12 @@
 page_title: "truenas_action_docker_backup Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Create a backup of existing apps.
+  Create a backup of existing apps.  This creates a backup of existing apps on the same pool in which docker is initialized.
 ---
 
 # truenas_action_docker_backup (Resource)
 
-Create a backup of existing apps.
+Create a backup of existing apps.  This creates a backup of existing apps on the same pool in which docker is initialized.
 
 This is an action resource that executes the `docker.backup` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

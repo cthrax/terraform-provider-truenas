@@ -179,6 +179,18 @@ func (d *DiskDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
+	if v, ok := resultMap["identifier"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Identifier = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Identifier = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Identifier = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
 	if v, ok := resultMap["name"]; ok && v != nil {
 		switch val := v.(type) {
 		case string:
@@ -191,6 +203,150 @@ func (d *DiskDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 			data.Name = types.StringValue(fmt.Sprintf("%v", v))
 		}
 	}
+	if v, ok := resultMap["subsystem"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Subsystem = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Subsystem = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Subsystem = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["number"]; ok && v != nil {
+		switch val := v.(type) {
+		case float64:
+			data.Number = types.Int64Value(int64(val))
+		case map[string]interface{}:
+			if parsed, ok := val["parsed"]; ok && parsed != nil {
+				if fv, ok := parsed.(float64); ok {
+					data.Number = types.Int64Value(int64(fv))
+				}
+			}
+		}
+	}
+	if v, ok := resultMap["serial"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Serial = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Serial = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Serial = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["lunid"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Lunid = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Lunid = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Lunid = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["size"]; ok && v != nil {
+		switch val := v.(type) {
+		case float64:
+			data.Size = types.Int64Value(int64(val))
+		case map[string]interface{}:
+			if parsed, ok := val["parsed"]; ok && parsed != nil {
+				if fv, ok := parsed.(float64); ok {
+					data.Size = types.Int64Value(int64(fv))
+				}
+			}
+		}
+	}
+	if v, ok := resultMap["description"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Description = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Description = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Description = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["transfermode"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Transfermode = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Transfermode = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Transfermode = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["hddstandby"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Hddstandby = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Hddstandby = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Hddstandby = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["advpowermgmt"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Advpowermgmt = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Advpowermgmt = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Advpowermgmt = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["expiretime"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Expiretime = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Expiretime = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Expiretime = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["model"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Model = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Model = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Model = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["rotationrate"]; ok && v != nil {
+		switch val := v.(type) {
+		case float64:
+			data.Rotationrate = types.Int64Value(int64(val))
+		case map[string]interface{}:
+			if parsed, ok := val["parsed"]; ok && parsed != nil {
+				if fv, ok := parsed.(float64); ok {
+					data.Rotationrate = types.Int64Value(int64(fv))
+				}
+			}
+		}
+	}
 	if v, ok := resultMap["type"]; ok && v != nil {
 		switch val := v.(type) {
 		case string:
@@ -201,6 +357,90 @@ func (d *DiskDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 			}
 		default:
 			data.Type = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["zfs_guid"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.ZfsGuid = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.ZfsGuid = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.ZfsGuid = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["bus"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Bus = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Bus = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Bus = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["devname"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Devname = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Devname = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Devname = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["enclosure"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Enclosure = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Enclosure = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Enclosure = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["pool"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Pool = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Pool = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Pool = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["passwd"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.Passwd = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.Passwd = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.Passwd = types.StringValue(fmt.Sprintf("%v", v))
+		}
+	}
+	if v, ok := resultMap["kmip_uid"]; ok && v != nil {
+		switch val := v.(type) {
+		case string:
+			data.KmipUid = types.StringValue(val)
+		case map[string]interface{}:
+			if strVal, ok := val["value"]; ok && strVal != nil {
+				data.KmipUid = types.StringValue(fmt.Sprintf("%v", strVal))
+			}
+		default:
+			data.KmipUid = types.StringValue(fmt.Sprintf("%v", v))
 		}
 	}
 

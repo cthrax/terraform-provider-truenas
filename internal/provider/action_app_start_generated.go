@@ -36,12 +36,9 @@ func (r *ActionAppStartResource) Metadata(ctx context.Context, req resource.Meta
 
 func (r *ActionAppStartResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Start `app_name` app",
+		MarkdownDescription: "Start `app_name` app.",
 		Attributes: map[string]schema.Attribute{
-			"app_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Name of the application to start.",
-			},
+			"app_name": schema.StringAttribute{Required: true, MarkdownDescription: "Name of the application to start."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionAppStartResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.AppName.ValueString())
 

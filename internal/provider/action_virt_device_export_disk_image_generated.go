@@ -36,12 +36,9 @@ func (r *ActionVirtDeviceExport_Disk_ImageResource) Metadata(ctx context.Context
 
 func (r *ActionVirtDeviceExport_Disk_ImageResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Exports a zvol to a formatted VM disk image",
+		MarkdownDescription: "Exports a zvol to a formatted VM disk image.  Utilized qemu-img with the conversion functionality to export a zvol to any supported disk image format, from RAW -> ${OTHER}. The resulting file will be",
 		Attributes: map[string]schema.Attribute{
-			"virt_device_export_disk_image": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "VirtDeviceExportDiskImageArgs parameters.",
-			},
+			"virt_device_export_disk_image": schema.StringAttribute{Required: true, MarkdownDescription: "VirtDeviceExportDiskImageArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionVirtDeviceExport_Disk_ImageResource) Create(ctx context.Context, 
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.VirtDeviceExportDiskImage.ValueString())
 

@@ -15,13 +15,13 @@ Create a Replication Task that will push or pull ZFS snapshots to or from remote
 ```terraform
 resource "truenas_replication" "example" {
   auto = true
-  direction = "example-value"
-  name = "example-value"
+  direction = "example"
+  name = "example"
   recursive = true
-  retention_policy = "example-value"
-  source_datasets = ["item1"]
-  target_dataset = "example-value"
-  transport = "example-value"
+  retention_policy = "example"
+  source_datasets = ["item"]
+  target_dataset = "example"
+  transport = "example"
 }
 ```
 
@@ -56,7 +56,7 @@ resource "truenas_replication" "example" {
 - `large_block` (Bool) - Enable large block support for ZFS send streams. Default: `True`
 - `lifetime_unit` (String) - Time unit for snapshot retention for custom retention policy. Only applies when `retention_policy` is CUSTOM. Default: `None`
 - `lifetime_value` (Int64) - Number of time units to retain snapshots for custom retention policy. Only applies when `retention_policy` is     CUSTOM. Default: `None`
-- `lifetimes` (List) - Array of different retention schedules with their own cron schedules and lifetime settings. Default: `[]` **Note:** Each element must be a JSON-encoded object. Example: `[jsonencode({lifetime_value = 0, lifetime_unit = "..."})]`
+- `lifetimes` (List) - Array of different retention schedules with their own cron schedules and lifetime settings. Default: `[]`
 - `logging_level` (String) - Log level for replication task execution. Controls verbosity of replication logs. Default: `None`
 - `name_regex` (String) - Replicate all snapshots which names match specified regular expression. Default: `None`
 - `naming_schema` (List) - List of naming schemas for pull replication. Default: `[]`
@@ -69,7 +69,7 @@ resource "truenas_replication" "example" {
 - `periodic_snapshot_tasks` (List) - List of periodic snapshot task IDs that are sources of snapshots for this replication task. Only push     replication tasks can be bound to periodic snapshot tasks. Default: `[]`
 - `properties` (Bool) - Send dataset properties along with snapshots. Default: `True`
 - `properties_exclude` (List) - Array of dataset property names to exclude from replication. Default: `[]`
-- `properties_override` (String) - Object mapping dataset property names to override values during replication. Default: `{}`
+- `properties_override` (String) - Object mapping dataset property names to override values during replication. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Default: `{}`
 - `readonly` (String) - Controls destination datasets readonly property.  * `SET`: Set all destination datasets to readonly=on after finishing the replication. * `REQUIRE`: Require all existing destination datasets to have r Default: `SET` Valid values: `SET`, `REQUIRE`, `IGNORE`
 - `replicate` (Bool) - Whether to use full ZFS replication. Default: `False`
 - `restrict_schedule` (String) - Restricts when replication task with bound periodic snapshot tasks runs. For example, you can have periodic     snapshot tasks that run every 15 minutes, but only run replication task every hour. **Note:** This is a JSON object. Use `jsonencode()` to pass structured data. Example: `jsonencode({minute = "value", hour = "value", dom = "value", ...})` Default: `None`

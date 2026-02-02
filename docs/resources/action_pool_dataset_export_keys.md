@@ -2,12 +2,12 @@
 page_title: "truenas_action_pool_dataset_export_keys Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Export keys for `id` and its children which are stored in the system. The exported file is a JSON file
+  Export keys for `id` and its children which are stored in the system. The exported file is a JSON file which has a dictionary containing dataset names as keys and their keys as the value.  Please refer to websocket documentation for downloading the file.
 ---
 
 # truenas_action_pool_dataset_export_keys (Resource)
 
-Export keys for `id` and its children which are stored in the system. The exported file is a JSON file
+Export keys for `id` and its children which are stored in the system. The exported file is a JSON file which has a dictionary containing dataset names as keys and their keys as the value.  Please refer to websocket documentation for downloading the file.
 
 This is an action resource that executes the `pool.dataset.export_keys` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

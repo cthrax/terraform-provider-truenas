@@ -2,12 +2,12 @@
 page_title: "truenas_action_vm_log_file_download Resource - terraform-provider-truenas"
 subcategory: "Actions"
 description: |-
-  Retrieve log file contents of `id` VM.
+  Retrieve log file contents of `id` VM.  It will download empty file if log file does not exist.
 ---
 
 # truenas_action_vm_log_file_download (Resource)
 
-Retrieve log file contents of `id` VM.
+Retrieve log file contents of `id` VM.  It will download empty file if log file does not exist.
 
 This is an action resource that executes the `vm.log_file_download` operation. Actions are triggered on resource creation and cannot be undone on destroy.
 

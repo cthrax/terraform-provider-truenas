@@ -36,12 +36,9 @@ func (r *ActionDirectoryservicesLeaveResource) Metadata(ctx context.Context, req
 
 func (r *ActionDirectoryservicesLeaveResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Leave an Active Directory or IPA domain",
+		MarkdownDescription: "Leave an Active Directory or IPA domain. Calling this endpoint when the directory services status is `HEALTHY` will cause TrueNAS to remove its account from the domain and then reset the local directo",
 		Attributes: map[string]schema.Attribute{
-			"credential": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "DirectoryServicesLeaveArgs parameters.",
-			},
+			"credential": schema.StringAttribute{Required: true, MarkdownDescription: "DirectoryServicesLeaveArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionDirectoryservicesLeaveResource) Create(ctx context.Context, req r
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.Credential.ValueString())
 

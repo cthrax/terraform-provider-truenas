@@ -36,12 +36,9 @@ func (r *ActionDockerBackupResource) Metadata(ctx context.Context, req resource.
 
 func (r *ActionDockerBackupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Create a backup of existing apps",
+		MarkdownDescription: "Create a backup of existing apps.  This creates a backup of existing apps on the same pool in which docker is initialized.",
 		Attributes: map[string]schema.Attribute{
-			"backup_name": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Name for the backup or `null` to generate a timestamp-based name.",
-			},
+			"backup_name": schema.StringAttribute{Optional: true, MarkdownDescription: "Name for the backup or `null` to generate a timestamp-based name."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionDockerBackupResource) Create(ctx context.Context, req resource.Cr
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	if !data.BackupName.IsNull() {
 		params = append(params, data.BackupName.ValueString())

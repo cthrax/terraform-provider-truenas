@@ -14,7 +14,7 @@ Creates API Key.
 
 ```terraform
 resource "truenas_api_key" "example" {
-  username = "example-value"
+  username = "example"
 }
 ```
 

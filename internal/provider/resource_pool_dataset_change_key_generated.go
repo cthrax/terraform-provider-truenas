@@ -33,20 +33,14 @@ func (r *PoolDatasetChange_KeyResource) Metadata(ctx context.Context, req resour
 
 func (r *PoolDatasetChange_KeyResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Change encryption properties for `id` encrypted dataset",
+		MarkdownDescription: "Change encryption properties for `id` encrypted dataset.  Changing dataset encryption to use passphrase instead of a key is not allowed if:  1) It has encrypted roots as children which are encrypted w",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Resource identifier",
 			},
-			"dataset_id": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "The dataset ID (full path) to change the encryption key for.",
-			},
-			"options": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Configuration options for changing the encryption key.",
-			},
+			"dataset_id": schema.StringAttribute{Required: true, MarkdownDescription: "The dataset ID (full path) to change the encryption key for."},
+			"options":    schema.StringAttribute{Optional: true, MarkdownDescription: "Configuration options for changing the encryption key."},
 			"file_content": schema.StringAttribute{
 				Optional:            true,
 				Sensitive:           true,
@@ -76,7 +70,6 @@ func (r *PoolDatasetChange_KeyResource) Create(ctx context.Context, req resource
 	}
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["id"] = data.DatasetId.ValueString()
 	if !data.Options.IsNull() {
@@ -131,7 +124,6 @@ func (r *PoolDatasetChange_KeyResource) Update(ctx context.Context, req resource
 	data.ID = state.ID
 
 	// Build parameters
-	// Build parameters map
 	params := make(map[string]interface{})
 	params["id"] = data.DatasetId.ValueString()
 	if !data.Options.IsNull() {

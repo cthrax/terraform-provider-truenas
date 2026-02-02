@@ -36,12 +36,9 @@ func (r *ActionVmImport_Disk_ImageResource) Metadata(ctx context.Context, req re
 
 func (r *ActionVmImport_Disk_ImageResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Imports a specified disk image",
+		MarkdownDescription: "Imports a specified disk image.  Utilized qemu-img with the auto-detect functionality to auto-convert any supported disk image format to RAW -> ZVOL  As of this implementation it supports:  - QCOW2 -",
 		Attributes: map[string]schema.Attribute{
-			"vm_import_disk_image": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "VMImportDiskImageArgs parameters.",
-			},
+			"vm_import_disk_image": schema.StringAttribute{Required: true, MarkdownDescription: "VMImportDiskImageArgs parameters."},
 			"action_id": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Action execution identifier",
@@ -90,7 +87,6 @@ func (r *ActionVmImport_Disk_ImageResource) Create(ctx context.Context, req reso
 	}
 
 	// Build parameters
-	// Build parameters as array (positional)
 	params := []interface{}{}
 	params = append(params, data.VmImportDiskImage.ValueString())
 
